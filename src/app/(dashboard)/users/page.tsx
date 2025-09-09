@@ -12,16 +12,16 @@ import {
 import { type BaseRecord, useMany } from "@refinedev/core";
 import { Space, Table } from "antd";
 
-export default function BlogPostList() {
+export default function Users() {
   const { result, tableProps } = useTable({
     syncWithLocation: true,
   });
 
   const {
-    result: { data: categories },
-    query: { isLoading: categoryIsLoading },
+    result: { data: user },
+    query: { isLoading: userIsLoading },
   } = useMany({
-    resource: "categories",
+    resource: "users",
     ids: result?.data?.map((item) => item?.category?.id).filter(Boolean) ?? [],
     queryOptions: {
       enabled: !!result?.data,
@@ -31,31 +31,25 @@ export default function BlogPostList() {
   return (
     <List>
       <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="id" title={"ID"} />
-        <Table.Column dataIndex="title" title={"Title"} />
+        <Table.Column dataIndex="name" title={"Name"} />
+        <Table.Column dataIndex="email" title={"Email"} />
         <Table.Column
-          dataIndex="content"
-          title={"Content"}
+          dataIndex="password"
+          title={"Password"}
           render={(value: any) => {
             if (!value) return "-";
             return <MarkdownField value={value.slice(0, 80) + "..."} />;
           }}
         />
-        <Table.Column
-          dataIndex={"category"}
-          title={"Category"}
-          render={(value) =>
-            categoryIsLoading ? (
-              <>Loading...</>
-            ) : (
-              categories?.find((item) => item.id === value?.id)?.title
-            )
-          }
-        />
-        <Table.Column dataIndex="status" title={"Status"} />
+        <Table.Column dataIndex="role" title={"Roles"} />
         <Table.Column
           dataIndex={["createdAt"]}
           title={"Created at"}
+          render={(value: any) => <DateField value={value} />}
+        />
+        <Table.Column
+          dataIndex={["updatedAt"]}
+          title={"Update at"}
           render={(value: any) => <DateField value={value} />}
         />
         <Table.Column

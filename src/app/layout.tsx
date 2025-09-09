@@ -1,17 +1,8 @@
-import { DevtoolsProvider } from "@providers/devtools";
-import { useNotificationProvider } from "@refinedev/antd";
-import { GitHubBanner, Refine } from "@refinedev/core";
-import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
-import routerProvider from "@refinedev/nextjs-router";
-import { Metadata } from "next";
-import { cookies } from "next/headers";
+import type { Metadata } from "next";
 import React, { Suspense } from "react";
-
+import { RefineContext } from "./_refine_context";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { ColorModeContextProvider } from "@contexts/color-mode";
-import { authProviderClient } from "@providers/auth-provider/auth-provider.client";
-import { dataProvider } from "@providers/data-provider";
-import "@refinedev/antd/dist/reset.css";
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Refine",
@@ -28,57 +19,14 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme");
-  const defaultMode = theme?.value === "dark" ? "dark" : "light";
 
   return (
     <html lang="en">
       <body>
         <Suspense>
-          <GitHubBanner />
-          <RefineKbarProvider>
-            <AntdRegistry>
-              <ColorModeContextProvider defaultMode={defaultMode}>
-                <DevtoolsProvider>
-                  <Refine
-                    routerProvider={routerProvider}
-                    dataProvider={dataProvider}
-                    notificationProvider={useNotificationProvider}
-                    authProvider={authProviderClient}
-                    resources={[
-                      {
-                        name: "blog_posts",
-                        list: "/blog-posts",
-                        create: "/blog-posts/create",
-                        edit: "/blog-posts/edit/:id",
-                        show: "/blog-posts/show/:id",
-                        meta: {
-                          canDelete: true,
-                        },
-                      },
-                      {
-                        name: "categories",
-                        list: "/categories",
-                        create: "/categories/create",
-                        edit: "/categories/edit/:id",
-                        show: "/categories/show/:id",
-                        meta: {
-                          canDelete: true,
-                        },
-                      },
-                    ]}
-                    options={{
-                      syncWithLocation: true,
-                      warnWhenUnsavedChanges: true,
-                      projectId: "CYXko4-NlaL9e-Hd4Oml",
-                    }}
-                  >
-                    {children}
-                    <RefineKbar />
-                  </Refine>
-                </DevtoolsProvider>
-              </ColorModeContextProvider>
-            </AntdRegistry>
-          </RefineKbarProvider>
+          <AntdRegistry>
+            <RefineContext defaultMode={theme?.value}>{children}</RefineContext>
+          </AntdRegistry>
         </Suspense>
       </body>
     </html>
