@@ -1,7 +1,7 @@
 import { AccessControlProvider } from "@refinedev/core";
 import { jwtDecode } from "jwt-decode";
 import { useSession } from "next-auth/react";
-import { UserRole } from "../enums/user-role.enum";
+import { UserRole } from "../lib/enums/user-role.enum";
 
 type JwtPayload = {
   id: string;

@@ -19,15 +19,16 @@ type RefineContextProps = {
   defaultMode?: string;
 };
 
-// const CustomIcon = () => (
-//   <img
-//     src="/image/zdn-mark.svg"
-//     alt="Zodinet Mark"
-//     style={{ width: 24
-//       , height: 24
-//      }}
-//   />
-// );
+const CustomIcon = () => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src="/img/ff-mark.svg"
+    alt="Fresh-food Mark"
+    style={{ width: 26
+      , height: 26
+     }}
+  />
+);
 export const RefineContext = (
   props: React.PropsWithChildren<RefineContextProps>,
 ) => {
@@ -72,7 +73,7 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
             ]}
             options={{
               title: {
-                // icon: <CustomIcon/>,
+                icon: <CustomIcon/>,
                 text: 'dashboard',
               },
               syncWithLocation: true,

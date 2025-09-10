@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "roboto";
+  src: url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+}
+
+@media (max-width: 640px) {
+  .slick-center img {
+    @apply w-img h-img;
+  }
+}
+.slick-center span {
+  @apply text-hover w-full;
+}
+@media (max-width: 640px) {
+  .slick-center span {
+    @apply text-span w-full;
+  }
+}
+.slick-center .title {
+  @apply text-span_mobi text-center;
+}
+@media (max-width: 640px) {
+  .slick-center .title {
+    @apply text-span_mobi_2025_client text-start;
+  }
+}
+.slick-slide .cover-box {
+  width: 360px !important;
+}
+
+.slick-center .cover-box {
+  @apply bg-btn cursor-pointer h-hover border-solid border-border_simple border-2;
+  width: 414px !important;
+}
+@media (max-width: 640px) {
+  .slick-center .cover-box {
+    @apply bg-btn cursor-pointer border-solid border-border_simple border-2;
+    width: 300px !important;
+    height: 228px !important;
+  }
+}
+.slick-arrow:before {
+  display: none !important;
+}
+@media (max-width: 640px) {
+  .slick-arrow {
+    height: 50px !important;
+  }
+}

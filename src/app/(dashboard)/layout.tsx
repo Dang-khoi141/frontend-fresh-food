@@ -17,8 +17,6 @@ export default async function Layout({ children }: React.PropsWithChildren) {
 
 async function getData() {
   const session = await getServerSession(authOptions);
-  console.log("🚀 ~ getData ~ session:", session)
-
   return {
     session,
   };

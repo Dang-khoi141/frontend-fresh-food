@@ -5,10 +5,11 @@ import type { RefineThemedLayoutHeaderProps } from "@refinedev/antd";
 import { useGetIdentity } from "@refinedev/core";
 import {
   Layout as AntdLayout,
+  Avatar,
   Space,
   Switch,
+  Typography,
   theme,
-  Typography
 } from "antd";
 import React, { useContext } from "react";
 
@@ -21,9 +22,7 @@ type IUser = {
   avatar: string;
 };
 
-export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
-  sticky = true,
-}) => {
+export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
   const { token } = useToken();
   const { data: user } = useGetIdentity<IUser>();
   const { mode, setMode } = useContext(ColorModeContext);
