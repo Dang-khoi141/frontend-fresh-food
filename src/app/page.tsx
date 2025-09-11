@@ -6,8 +6,9 @@ import { Suspense } from "react";
 
 import Choose from "../lib/components/landing-page/container/choose";
 import Experience from "../lib/components/landing-page/experience/experience";
-import FreshNav from "../lib/components/landing-page/header/header-nav";
+import Footer from "../lib/components/landing-page/footer/footer";
 import Header from "../lib/components/landing-page/header/header";
+import FreshNav from "../lib/components/landing-page/header/header-nav";
 
 const LandingPage = () => (
   <div>
@@ -17,6 +18,7 @@ const LandingPage = () => (
       <Choose/>
       <Experience/>
       {/* <ClientSay/> */}
+      <Footer />
     </main>
   </div>
 );

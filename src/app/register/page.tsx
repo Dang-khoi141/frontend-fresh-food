@@ -45,6 +45,14 @@ export default function RegisterPage() {
       isValid = false;
     }
 
+    if(!formData.phone){
+      newErrors.phone = "Phone is required";
+      isValid = false;
+    }else if(!/^\d{10,11}$/.test(formData.phone)) {
+      newErrors.phone = "Phone must be 10-11 digits";
+      isValid = false;
+    }
+
     if (!formData.password) {
       newErrors.password = "Password is required";
       isValid = false;
@@ -52,7 +60,6 @@ export default function RegisterPage() {
       newErrors.password = "Password must be at least 6 characters long";
       isValid = false;
     }
-
     setErrors(newErrors);
     return isValid;
   };
@@ -62,7 +69,7 @@ export default function RegisterPage() {
     if (validateForm()) {
       register(formData, {
         onSuccess: () => {
-          router.push('/login');
+          router.push('/register');
         },
         onError: (error) => {
           console.error("Registration error:", error);
@@ -167,9 +174,14 @@ export default function RegisterPage() {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+84 123 456 789"
-                  className="w-full h-12 pl-10 pr-4 rounded-xl border border-gray-200 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-colors"
+                  className={`w-full h-12 pl-10 pr-4 rounded-xl border text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-colors ${
+                  errors.phone ? 'border-red-300' : 'border-gray-200'
+                  }`}
                 />
               </div>
+               {errors.phone && (
+                  <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                )}
             </div>
 
             <div>

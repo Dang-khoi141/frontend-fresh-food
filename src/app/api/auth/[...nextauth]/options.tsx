@@ -54,6 +54,7 @@ const authOptions: AuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         name: { label: "Name", type: "text" },
+        phone:{label:"phone",type:"number"},
       },
       async authorize(credentials): Promise<User | null> {
         try {
@@ -61,6 +62,7 @@ const authOptions: AuthOptions = {
             email: credentials?.email,
             password: credentials?.password,
             name: credentials?.name,
+            phone: credentials?.phone,
           });
 
           if (res.data?.user) {

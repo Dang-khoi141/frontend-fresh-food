@@ -21,7 +21,6 @@ export const createAuthProvider = (): AuthProvider => {
       redirectPath?: string;
     }) => {
       const { email, password, redirectPath } = params ?? {};
-      console.log("login called with", { email, password, redirectPath });
       if (!email || !password) {
         return {
           success: false,
@@ -66,9 +65,10 @@ export const createAuthProvider = (): AuthProvider => {
       email?: string;
       password?: string;
       name?: string;
+      phone?: string;
       redirectPath?: string;
     }) => {
-      const { email, password, name, redirectPath } = params ?? {};
+      const { email, password, name, phone, redirectPath } = params ?? {};
       if (!email || !password) {
         return {
           success: false,
@@ -83,6 +83,7 @@ export const createAuthProvider = (): AuthProvider => {
         email,
         password,
         name,
+        phone,
         redirect: false,
         callbackUrl: redirectPath || "/",
       });

@@ -1,9 +1,10 @@
 "use client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect } from "react";
 import Slider, { CustomArrowProps } from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
-// import useFetchClient from "../../hooks/usehookClient";
+import useFetchClient from "../../../hooks/usehookClient";
 
 const SampleNextArrow = (props: CustomArrowProps) => {
   const { className, style, onClick } = props;
@@ -128,10 +129,10 @@ const settings = {
 };
 
 const ClientSay = () => {
-//  const { client,  fetchClients } = useFetchClient();
-//   useEffect(() => {
-//     fetchClients();
-//   },[]);
+ const { client,  fetchClients } = useFetchClient();
+  useEffect(() => {
+    fetchClients();
+  },[]);
   return (
     <div className="flex justify-center items-center text-center w-full max-h bg-client">
       <div className="grid grid-cols-1 gap-7 sm:gap-0 justify-center items-center sm:grid-rows-2 sm:w-full py-16 sm:py-20">
@@ -148,17 +149,11 @@ const ClientSay = () => {
             {...settings}
             className="w-box_client sm:max-w-max_scroll sm:w-full"
           >
-            {/* {(client ?? []).map((plan) => {
+            {(client ?? []).map((plan) => {
               return (
                 <div key={plan.id} className="cover-box group flex items-start sm:bg-bg_sm rounded-2xl shadow-md px-5 py-5 sm:px-6 sm:py-6 h-box_client w-box_client cursor-pointer">
                   <div className="flex text-left self-start">
-                  <Image
-                    src={`/api/preview-image/${plan.image}`}
-                    alt="Client Avatar"
-                    className="object-cover rounded-full"
-                    width={40}
-                    height={40}
-                  />
+
                   <div className="flex flex-col justify-center items-start ml-3">
                     <span className="font-inter text-h2_container_mobi sm:text-h2_container font-bold">
                       {plan.name}
@@ -171,9 +166,9 @@ const ClientSay = () => {
                   <span className="font-inter font-normal text-span sm:text-btn w-span_clien mt-3 text-left self-start block">
                   "{plan.content}"
                   </span>
-                </div> */}
-              {/* ); */}
-               {/* })} */}
+                </div>
+               );
+                })}
           </Slider>
         </div>
       </div>

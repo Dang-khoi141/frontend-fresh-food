@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import React, { Suspense } from "react";
-import Footer from "../lib/components/landing-page/footer/footer";
 import { RefineContext } from "./_refine_context";
 import "./globals.css";
 
@@ -25,7 +24,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
+// const [ loading, setloading]= useState()
+// useEffect(()=>{
+//   setloading(true);
+// },[])
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme");
 
@@ -36,7 +38,7 @@ export default async function RootLayout({
           <AntdRegistry>
             <RefineContext defaultMode={theme?.value}>
               <main className="">{children}</main>
-              <Footer />
+              {/* <Footer /> */}
             </RefineContext>
           </AntdRegistry>
         </Suspense>
