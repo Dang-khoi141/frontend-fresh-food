@@ -181,7 +181,7 @@ export default function RegisterPage() {
               </div>
                {errors.phone && (
                   <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-                )}
+              )}
             </div>
 
             <div>

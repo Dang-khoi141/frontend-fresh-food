@@ -45,9 +45,13 @@ const FreshNav = () => {
             <a className="hover:opacity-80" href="#">Deals</a>
             <a className="hover:opacity-80" href="#">About</a>
             <div className="ml-1 flex items-center gap-4 text-slate-800">
-              <button aria-label="Wishlist" className="hover:opacity-80">
+              {/* <button aria-label="Wishlist" className="hover:opacity-80">
                 <Heart className="h-5 w-5" />
-              </button>
+              </button> */}
+
+                              <Link href="/phone-verify" className="text-blue-600 hover:text-blue-800 underline">
+                               <Heart className="h-5 w-5" />
+</Link>
               <button aria-label="Cart" className="hover:opacity-80">
                 <ShoppingCart className="h-5 w-5" />
               </button>
