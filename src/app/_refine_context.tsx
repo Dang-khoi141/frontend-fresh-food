@@ -11,7 +11,8 @@ import React from "react";
 import { ColorModeContextProvider } from "@contexts/color-mode";
 import { dataProvider } from "@providers/data-provider";
 import "@refinedev/antd/dist/reset.css";
-import { createAuthProvider } from "../providers/auth-provider";
+import { createAuthProvider } from "../providers/auth-provider/auth-provider";
+
 
 
 

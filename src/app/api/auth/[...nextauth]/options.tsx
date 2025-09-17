@@ -4,14 +4,11 @@ import { AuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 function createAxiosInstance(): AxiosInstance {
-  const instance = axios.create({
+  return axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     timeout: 10000,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
-  return instance;
 }
 const axiosInstance = createAxiosInstance();
 
@@ -30,13 +27,15 @@ const authOptions: AuthOptions = {
             email: credentials?.email,
             password: credentials?.password,
           });
-          if (res.data?.accessToken) {
-            const decode = jwtDecode<any>(res.data?.accessToken);
+
+          const accessToken = res.data?.data?.accessToken;
+          if (accessToken) {
+            const decode = jwtDecode<any>(accessToken);
             return {
               id: decode.id,
               email: decode.email,
               role: decode.role,
-              accessToken: res.data.accessToken,
+              accessToken,
             } as User;
           }
           return null;
@@ -54,7 +53,7 @@ const authOptions: AuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         name: { label: "Name", type: "text" },
-        phone:{label:"phone",type:"number"},
+        phone: { label: "Phone", type: "number" },
       },
       async authorize(credentials): Promise<User | null> {
         try {
@@ -65,11 +64,12 @@ const authOptions: AuthOptions = {
             phone: credentials?.phone,
           });
 
-          if (res.data?.user) {
+          const user = res.data?.user;
+          if (user) {
             return {
-              id: res.data.user.id,
-              email: res.data.user.email,
-              role: res.data.user.role,
+              id: user.id,
+              email: user.email,
+              role: user.role,
             } as User;
           }
           return null;
@@ -86,18 +86,23 @@ const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.accessToken;
-        token.role = user.role;
+        token.accessToken = (user as any).accessToken;
+        token.role = (user as any).role;
+        token.email = (user as any).email;
+        token.sub = (user as any).id;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.sub;
-      session.user.email = token.email;
-      session.user.role = token.role;
+      session.user = {
+        id: token.sub as string,
+        email: token.email as string,
+        role: token.role as string,
+      };
       session.accessToken = token.accessToken as string;
       return session;
     },
   },
 };
+
 export default authOptions;
