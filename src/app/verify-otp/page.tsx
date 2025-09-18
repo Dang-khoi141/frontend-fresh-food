@@ -3,20 +3,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { otpService } from "../../lib/service/otp.service";
 
-export default function VerifyEmailPage() {
+export default function VerifyOtpPage() {
   const router = useRouter();
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const email =
-    typeof window !== "undefined" ? localStorage.getItem("email") || "" : "";
-  const name =
-    typeof window !== "undefined" ? localStorage.getItem("name") || "" : "";
-  const password =
-    typeof window !== "undefined" ? localStorage.getItem("password") || "" : "";
-  const phone =
-    typeof window !== "undefined" ? localStorage.getItem("phone") || "" : "";
+    typeof window !== "undefined"
+      ? localStorage.getItem("resetEmail") || ""
+      : "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +25,14 @@ export default function VerifyEmailPage() {
 
     setLoading(true);
     try {
-      await otpService.register({ email, name, password, phone, otp });
-      localStorage.clear();
-      router.push("/login");
+      const res = await otpService.verifyOtp(email, otp);
+      if (res.valid) {
+        localStorage.setItem("resetOtp", otp);
+
+        router.push("/reset-password");
+      } else {
+        setError("Invalid OTP");
+      }
     } catch (err: any) {
       setError(err.message || "OTP verification failed");
     } finally {
@@ -41,7 +42,7 @@ export default function VerifyEmailPage() {
 
   const handleResend = async () => {
     try {
-      await otpService.sendOtp(email);
+      await otpService.sendForgotOtp(email);
       alert("📨 OTP sent again!");
     } catch (err: any) {
       setError(err.message || "Failed to resend OTP");
@@ -54,7 +55,7 @@ export default function VerifyEmailPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-gray-900 mb-2 text-h2_simple_box font-semibold">
-              Verify Your Email
+              Verify OTP
             </h1>
             <p className="text-gray-600 text-base">
               We sent a code to <span className="font-medium">{email}</span>
