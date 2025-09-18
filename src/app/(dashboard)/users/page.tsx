@@ -9,51 +9,58 @@ import {
   ShowButton,
   useTable,
 } from "@refinedev/antd";
-import { type BaseRecord, useMany } from "@refinedev/core";
-import { Space, Table } from "antd";
+import { type BaseRecord } from "@refinedev/core";
+import { Avatar, Space, Table } from "antd";
 
 export default function Users() {
-  const { result, tableProps } = useTable({
+  const { tableProps } = useTable({
     syncWithLocation: true,
   });
 
-  const {
-    result: { data: user },
-    query: { isLoading: userIsLoading },
-  } = useMany({
-    resource: "users",
-    ids: result?.data?.map((item) => item?.category?.id).filter(Boolean) ?? [],
-    queryOptions: {
-      enabled: !!result?.data,
-    },
-  });
+  // Ép dataSource về mảng chuẩn từ BE { data: [...] }
+  const safeTableProps = {
+    ...tableProps,
+    dataSource: Array.isArray((tableProps?.dataSource as any)?.data)
+      ? (tableProps.dataSource as any).data
+      : Array.isArray(tableProps?.dataSource)
+      ? tableProps.dataSource
+      : [],
+  };
 
   return (
     <List>
-      <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="name" title={"Name"} />
-        <Table.Column dataIndex="email" title={"Email"} />
+      <Table {...safeTableProps} rowKey="id">
+        <Table.Column dataIndex="name" title="Name" />
+        <Table.Column dataIndex="email" title="Email" />
         <Table.Column
           dataIndex="password"
-          title={"Password"}
+          title="Password"
           render={(value: any) => {
             if (!value) return "-";
-            return <MarkdownField value={value.slice(0, 80) + "..."} />;
+            return <MarkdownField value={value.slice(0, 20) + "..."} />;
           }}
         />
-        <Table.Column dataIndex="role" title={"Roles"} />
+        <Table.Column dataIndex="phone" title="Phone" />
         <Table.Column
-          dataIndex={["createdAt"]}
-          title={"Created at"}
+          dataIndex="avatar"
+          title="Avatar"
+          render={(value: string | null) =>
+            value ? <Avatar src={value} /> : <Avatar>{":"}</Avatar>
+          }
+        />
+        <Table.Column dataIndex="role" title="Role" />
+        <Table.Column
+          dataIndex="createdAt"
+          title="Created At"
           render={(value: any) => <DateField value={value} />}
         />
         <Table.Column
-          dataIndex={["updatedAt"]}
-          title={"Update at"}
+          dataIndex="updatedAt"
+          title="Updated At"
           render={(value: any) => <DateField value={value} />}
         />
         <Table.Column
-          title={"Actions"}
+          title="Actions"
           dataIndex="actions"
           render={(_, record: BaseRecord) => (
             <Space>

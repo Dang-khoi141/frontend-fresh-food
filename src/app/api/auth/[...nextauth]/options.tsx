@@ -21,29 +21,37 @@ const authOptions: AuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials): Promise<User | null> {
-        try {
-          const res = await axiosInstance.post("/auth/login", {
-            email: credentials?.email,
-            password: credentials?.password,
-          });
+    async authorize(credentials): Promise<User | null> {
+  try {
+    const res = await axiosInstance.post("/auth/login", {
+      email: credentials?.email,
+      password: credentials?.password,
+    });
 
-          const accessToken = res.data?.data?.accessToken;
-          if (accessToken) {
-            const decode = jwtDecode<any>(accessToken);
-            return {
-              id: decode.id,
-              email: decode.email,
-              role: decode.role,
-              accessToken,
-            } as User;
-          }
-          return null;
-        } catch (err) {
-          console.error("Login failed", err);
-          return null;
-        }
-      },
+    console.log("🚀 ~ authorize ~ res:", res.data);
+
+    const accessToken = res.data?.data?.accessToken;
+
+    if (accessToken) {
+      const decoded: any = jwtDecode(accessToken);
+
+      return {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+        name: decoded.name,
+        accessToken,
+      } as User;
+    }
+
+    return null;
+  } catch (err) {
+    console.error("Login failed", err);
+    return null;
+  }
+}
+
+
     }),
 
     CredentialsProvider({

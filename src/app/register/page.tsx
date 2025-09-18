@@ -60,24 +60,29 @@ export default function RegisterPage() {
     return isValid;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    setLoading(true);
-    try {
-      localStorage.setItem("name", formData.name);
-      localStorage.setItem("email", formData.email);
-      localStorage.setItem("password", formData.password);
-      localStorage.setItem("phone", formData.phone);
-      await otpService.sendOtp(formData.email);
-      router.push("/verify-email");
-    } catch (err: any) {
-      console.error("Error sending OTP:", err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    localStorage.setItem("name", formData.name);
+    localStorage.setItem("email", formData.email);
+    localStorage.setItem("password", formData.password);
+    localStorage.setItem("phone", formData.phone);
+
+    await otpService.sendOtp(formData.email);
+
+    router.push("/verify-email");
+  } catch (err: any) {
+    setErrors((prev) => ({
+      ...prev,
+      email: err.message,
+    }));
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
