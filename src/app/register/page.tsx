@@ -1,5 +1,6 @@
 "use client";
 
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,6 +23,9 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateForm = () => {
     const newErrors = { name: "", email: "", phone: "", password: "", confirmPassword: "" };
@@ -56,33 +60,41 @@ export default function RegisterPage() {
       isValid = false;
     }
 
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+      isValid = false;
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  setLoading(true);
-  try {
-    localStorage.setItem("name", formData.name);
-    localStorage.setItem("email", formData.email);
-    localStorage.setItem("password", formData.password);
-    localStorage.setItem("phone", formData.phone);
+    setLoading(true);
+    try {
+      localStorage.setItem("name", formData.name);
+      localStorage.setItem("email", formData.email);
+      localStorage.setItem("password", formData.password);
+      localStorage.setItem("phone", formData.phone);
 
-    await otpService.sendOtp(formData.email);
+      await otpService.sendOtp(formData.email);
 
-    router.push("/verify-email");
-  } catch (err: any) {
-    setErrors((prev) => ({
-      ...prev,
-      email: err.message,
-    }));
-  } finally {
-    setLoading(false);
-  }
-};
+      router.push("/verify-email");
+    } catch (err: any) {
+      setErrors((prev) => ({
+        ...prev,
+        email: err.message,
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -126,9 +138,7 @@ export default function RegisterPage() {
                   errors.name ? "border-red-300" : "border-gray-200"
                 } focus:outline-none focus:ring-2 focus:ring-brand`}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-              )}
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
             </div>
 
             <div>
@@ -145,9 +155,7 @@ export default function RegisterPage() {
                   errors.email ? "border-red-300" : "border-gray-200"
                 } focus:outline-none focus:ring-2 focus:ring-brand`}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-              )}
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
             <div>
@@ -164,44 +172,58 @@ export default function RegisterPage() {
                   errors.phone ? "border-red-300" : "border-gray-200"
                 } focus:outline-none focus:ring-2 focus:ring-brand`}
               />
-              {errors.phone && (
-                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-              )}
+              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
             </div>
 
             <div>
               <label className="block text-gray-700 font-medium text-sm mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-                className={`w-full h-12 px-4 rounded-xl border ${
-                  errors.password ? "border-red-300" : "border-gray-200"
-                } focus:outline-none focus:ring-2 focus:ring-brand`}
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-              )}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${
+                    errors.password ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             </div>
 
             <div>
               <label className="block text-gray-700 font-medium text-sm mb-2">
                 Confirm Password
               </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Re-enter your password"
-                className={`w-full h-12 px-4 rounded-xl border ${
-                  errors.confirmPassword ? "border-red-300" : "border-gray-200"
-                } focus:outline-none focus:ring-2 focus:ring-brand`}
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Re-enter your password"
+                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${
+                    errors.confirmPassword ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
               )}

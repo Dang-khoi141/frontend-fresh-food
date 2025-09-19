@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { otpService } from "../../lib/service/otp.service";
 
 export default function ResetPasswordPage() {
@@ -24,11 +25,13 @@ export default function ResetPasswordPage() {
 
       localStorage.clear();
 
-      alert("✅ Reset password thành công, vui lòng đăng nhập lại");
+      toast.success(" Reset password thành công, vui lòng đăng nhập lại");
 
       router.replace("/login");
     } catch (err: any) {
-      setError(err.message || "Password reset failed");
+      const msg = err.message || "Password reset failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
