@@ -1,66 +1,62 @@
 "use client";
 
-import { PlusOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
+import { axiosInstance } from "@providers/data-provider";
 import { Create } from "@refinedev/antd";
-import { Button, Form, Input, message, Modal, Select, Upload } from "antd";
-import { RcFile, UploadFile } from "antd/es/upload";
+import { Button, Form, Input, message, Select, Upload } from "antd";
+import ImgCrop from "antd-img-crop";
+import { RcFile } from "antd/es/upload";
 import { useState } from "react";
 
 export default function UserCreate() {
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = async (values: any) => {
-    setLoading(true);
+    setUploading(true);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      if (fileList.length > 0) {
-        formData.append("file", fileList[0].originFileObj as RcFile);
+
+      if (selectedFile) {
+        formData.append("file", selectedFile);
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-        method: "POST",
-        body: formData,
+      const res = await axiosInstance.post("/users", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
-
-      if (!res.ok) throw new Error("Create user failed");
-      const data = await res.json();
 
       message.success("User created successfully!");
       form.resetFields();
-      setFileList([]);
+      setSelectedFile(null);
     } catch (err: any) {
       console.error(err);
       message.error(err.message || "Error creating user");
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
-  const getBase64 = (file: RcFile): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj as RcFile);
-    }
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
+  const uploadProps = {
+    name: "file",
+    maxCount: 1,
+    multiple: false,
+    beforeUpload: (file: RcFile) => {
+      setSelectedFile(file);
+      return false;
+    },
+    onRemove: () => {
+      setSelectedFile(null);
+    },
   };
 
   return (
-    <Create isLoading={loading}>
+    <Create isLoading={uploading}>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           label="Name"
@@ -105,34 +101,14 @@ export default function UserCreate() {
         </Form.Item>
 
         <Form.Item label="Avatar">
-          <Upload
-            listType="picture-card"
-            fileList={fileList}
-            beforeUpload={(file) => {
-              setFileList([file]);
-              return false;
-            }}
-            onRemove={() => setFileList([])}
-            onPreview={handlePreview}
-          >
-            {fileList.length >= 1 ? null : (
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
-              </div>
-            )}
-          </Upload>
-          <Modal
-            open={previewOpen}
-            title="Preview Image"
-            footer={null}
-            onCancel={() => setPreviewOpen(false)}
-          >
-            <img alt="avatar" style={{ width: "100%" }} src={previewImage} />
-          </Modal>
+          <ImgCrop rotationSlider>
+            <Upload {...uploadProps}>
+              <Button icon={<UploadOutlined />}>Select Avatar</Button>
+            </Upload>
+          </ImgCrop>
         </Form.Item>
 
-        <Button type="primary" htmlType="submit" loading={loading}>
+        <Button type="primary" htmlType="submit" loading={uploading}>
           Create User
         </Button>
       </Form>

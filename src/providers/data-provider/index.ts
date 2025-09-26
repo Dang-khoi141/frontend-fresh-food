@@ -6,7 +6,7 @@ import { getSession } from "next-auth/react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     secret: process.env.NEXT_PUBLIC_SECRET_KEY,

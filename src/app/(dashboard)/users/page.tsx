@@ -17,7 +17,6 @@ export default function Users() {
     syncWithLocation: true,
   });
 
-  // Ép dataSource về mảng chuẩn từ BE { data: [...] }
   const safeTableProps = {
     ...tableProps,
     dataSource: Array.isArray((tableProps?.dataSource as any)?.data)

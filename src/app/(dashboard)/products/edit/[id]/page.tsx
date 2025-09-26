@@ -7,7 +7,8 @@ import {
   Form,
   Image,
   Input,
-  Select,
+  InputNumber,
+  Switch,
   Upload,
   UploadProps,
   message,
@@ -15,20 +16,20 @@ import {
 import ImgCrop from "antd-img-crop";
 import { useState } from "react";
 
-export default function UserEdit() {
+export default function ProductEdit() {
   const [uploading, setUploading] = useState(false);
-  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const { formProps, saveButtonProps, queryResult } = useForm({
-    resource: "users",
-    queryOptions: {
+    resource: "products",
+   queryOptions: {
       select: (response: any) => {
         return { data: response?.data?.data ?? {} };
       },
     },
   });
 
-  const currentAvatar: string = Form.useWatch("avatar", formProps.form);
+  const currentImage: string = Form.useWatch("image", formProps.form);
 
   const uploadProps: UploadProps = {
     name: "file",
@@ -51,15 +52,13 @@ export default function UserEdit() {
         const resJson = await res.json();
         console.log("📡 Response JSON:", resJson);
 
-
-        const imageUrl = resJson.data?.imageUrl;
+        const { imageUrl } = resJson;
         if (!imageUrl) throw new Error("No imageUrl returned from server");
 
+        formProps.form?.setFieldsValue({ image: imageUrl });
+        setPreviewImage(imageUrl);
 
-        formProps.form?.setFieldsValue({ avatar: imageUrl });
-        setPreviewAvatar(imageUrl);
-
-        message.success("Upload avatar success!");
+        message.success("Upload product image success!");
       } catch (err) {
         console.error("Upload error:", err);
         message.error("Upload error");
@@ -70,78 +69,64 @@ export default function UserEdit() {
       return false;
     },
     onRemove: () => {
-      formProps.form?.setFieldsValue({ avatar: "" });
-      setPreviewAvatar(null);
+      formProps.form?.setFieldsValue({ image: "" });
+      setPreviewImage(null);
     },
   };
 
   const handleFinish = async (values: any) => {
-    if (!values.password) delete values.password;
-    if (typeof values.role === "object" && values.role.value) {
-      values.role = values.role.value;
-    }
 
     await formProps.onFinish?.(values);
     await queryResult?.refetch?.();
 
-    if (values.avatar) {
-      setPreviewAvatar(values.avatar);
+    if (values.image) {
+      setPreviewImage(values.image);
     }
   };
 
   return (
     <Edit saveButtonProps={{ ...saveButtonProps, disabled: uploading }}>
       <Form {...formProps} layout="vertical" onFinish={handleFinish}>
-        <Form.Item
-          label="Name"
-          name="name"
-          rules={[{ required: true, message: "Please enter name!" }]}
-        >
-          <Input placeholder="Enter user name" />
+        <Form.Item label="Name" name="name" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Price" name="price" rules={[{ required: true }]}>
+          <InputNumber style={{ width: "100%" }} />
+        </Form.Item>
+
+        <Form.Item label="Description" name="description">
+          <Input.TextArea rows={4} />
+        </Form.Item>
+
+        <Form.Item label="Active" name="isActive" valuePropName="checked">
+          <Switch />
+        </Form.Item>
+
+        <Form.Item label="Brand ID" name="brandId" rules={[{ required: true }]}>
+          <Input placeholder="Enter brand ID" />
         </Form.Item>
 
         <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            { required: true, type: "email", message: "Please enter a valid email!" },
-          ]}
+          label="Category ID"
+          name="categoryId"
+          rules={[{ required: true }]}
         >
-          <Input placeholder="Enter email address" />
+          <Input placeholder="Enter category ID" />
         </Form.Item>
 
-        <Form.Item label="Phone" name="phone">
-          <Input placeholder="Enter phone number (optional)" />
-        </Form.Item>
-
-        <Form.Item
-          label="Role"
-          name="role"
-          rules={[{ required: true, message: "Please select a role!" }]}
-        >
-          <Select
-            options={[
-              { value: "CUSTOMER", label: "Customer" },
-              { value: "AGENT", label: "Agent" },
-              { value: "ADMIN", label: "Admin" },
-              { value: "SUPER_ADMIN", label: "Super Admin" },
-            ]}
-            placeholder="Select role"
-          />
-        </Form.Item>
-
-        <Form.Item label="Avatar" name="avatar">
-          {(previewAvatar || currentAvatar) && (
+        <Form.Item label="Product Image" name="image">
+          {(previewImage || currentImage) && (
             <Image
-              src={`${previewAvatar || currentAvatar}?t=${Date.now()}`}
-              alt="User Avatar"
+              src={`${previewImage || currentImage}?t=${Date.now()}`}
+              alt="Product Image"
               style={{ maxWidth: 200, maxHeight: 200, marginBottom: 16 }}
             />
           )}
           <ImgCrop rotationSlider>
             <Upload {...uploadProps}>
               <Button icon={<UploadOutlined />}>
-                {previewAvatar || currentAvatar ? "Change Avatar" : "Upload Avatar"}
+                {previewImage || currentImage ? "Change Image" : "Upload Image"}
               </Button>
             </Upload>
           </ImgCrop>

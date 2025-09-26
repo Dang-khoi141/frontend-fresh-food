@@ -1,5 +1,5 @@
 import { Heart, Search, ShoppingCart, User } from "lucide-react";
-import Link from "next/link"; // Thêm import Link
+import Link from "next/link";
 
 const FreshNav = () => {
 
