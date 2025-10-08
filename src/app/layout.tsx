@@ -6,6 +6,9 @@ import { cookies } from "next/headers";
 import React, { Suspense } from "react";
 import { RefineContext } from "./_refine_context";
 import "./globals.css";
+import FreshNav from "../lib/components/landing-page/header/header-nav";
+import { Header } from "../lib/components/header";
+import Footer from "../lib/components/landing-page/footer/footer";
 
 const getstInter = Inter({
   subsets: ["latin"],
@@ -24,21 +27,23 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-// const [ loading, setloading]= useState()
-// useEffect(()=>{
-//   setloading(true);
-// },[])
+  // const [ loading, setloading]= useState()
+  // useEffect(()=>{
+  //   setloading(true);
+  // },[])
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme");
 
   return (
     <html lang="en" className={getstInter.className}>
       <body className="antialiased">
-        <Suspense >
+        <Suspense>
           <AntdRegistry>
             <RefineContext defaultMode={theme?.value}>
-              <main className="">{children}</main>
-              {/* <Footer /> */}
+              <FreshNav />
+              <Header />
+              <main className="min-h-screen pt-12">{children}</main>
+              <Footer />
             </RefineContext>
           </AntdRegistry>
         </Suspense>

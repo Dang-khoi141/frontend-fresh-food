@@ -11,5 +11,8 @@
   "files.trimTrailingWhitespace": true,
   "eslint.workingDirectories": ["."],
   "prettier.requireConfig": true,
-  "typescript.autoClosingTags": false
+  "typescript.autoClosingTags": false,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
