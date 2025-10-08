@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (pathname.startsWith("/users")) {
     if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
-      return NextResponse.redirect(new URL("/products-page", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
   return NextResponse.next();

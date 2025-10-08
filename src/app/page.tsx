@@ -11,12 +11,14 @@ import TopCategories from "../lib/components/landing-page/top-categories/top-cat
 import Footer from "../lib/components/landing-page/footer/footer";
 import Header from "../lib/components/landing-page/header/header";
 import FreshNav from "../lib/components/landing-page/header/header-nav";
+import CategoriesProduct from "../lib/components/landing-page/categories-product/categories-product";
 
 const LandingPage = () => (
   <div>
     <main className="overflow-hidden">
       <FreshNav/>
       <Header/>
+      <CategoriesProduct />
       <Choose/>
       <TrendingProducts />
       <Experience/>
