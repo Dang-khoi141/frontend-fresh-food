@@ -21,35 +21,35 @@ const authOptions: AuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-    async authorize(credentials): Promise<User | null> {
-  try {
-    const res = await axiosInstance.post("/auth/login", {
-      email: credentials?.email,
-      password: credentials?.password,
-    });
+      async authorize(credentials): Promise<User | null> {
+        try {
+          const res = await axiosInstance.post("/auth/login", {
+            email: credentials?.email,
+            password: credentials?.password,
+          });
 
-    console.log("🚀 ~ authorize ~ res:", res.data);
+          console.log("🚀 ~ authorize ~ res:", res.data);
 
-    const accessToken = res.data?.data?.accessToken;
+          const accessToken = res.data?.data?.accessToken;
 
-    if (accessToken) {
-      const decoded: any = jwtDecode(accessToken);
+          if (accessToken) {
+            const decoded: any = jwtDecode(accessToken);
 
-      return {
-        id: decoded.id,
-        email: decoded.email,
-        role: decoded.role,
-        name: decoded.name,
-        accessToken,
-      } as User;
-    }
+            return {
+              id: decoded.id,
+              email: decoded.email,
+              role: decoded.role,
+              name: decoded.name,
+              accessToken,
+            } as User;
+          }
 
-    return null;
-  } catch (err) {
-    console.error("Login failed", err);
-    return null;
-  }
-}
+          return null;
+        } catch (err) {
+          console.error("Login failed", err);
+          return null;
+        }
+      }
 
 
     }),
@@ -98,6 +98,9 @@ const authOptions: AuthOptions = {
         token.role = (user as any).role;
         token.email = (user as any).email;
         token.sub = (user as any).id;
+        if (typeof window !== "undefined" && token.accessToken) {
+          localStorage.setItem("access_token", token.accessToken as string);
+        }
       }
       return token;
     },

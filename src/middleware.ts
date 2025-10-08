@@ -7,19 +7,25 @@ export async function middleware(request: NextRequest) {
     req: request,
     secret: process.env.JWT_SECRET,
   });
+
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
+
   const userRole: UserRole = (token as any)?.role;
+
   if (!userRole) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
+
   const { pathname } = request.nextUrl;
+
   if (pathname.startsWith("/users")) {
     if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
+
   return NextResponse.next();
 }
 

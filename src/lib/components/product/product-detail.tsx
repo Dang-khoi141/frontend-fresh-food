@@ -9,6 +9,8 @@ import ProductGallery from "./product-gallery";
 import ProductInfo from "./product-info";
 import AddToCart from "./add-to-cart";
 import RelatedProducts from "./related-products";
+import FreshNav from "../landing-page/header/header-nav";
+import Footer from "../landing-page/footer/footer";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -47,17 +49,21 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <ProductGallery image={product.image} name={product.name} />
-        <div className="flex flex-col space-y-6">
-          <ProductInfo product={product} />
-          <AddToCart product={product} />
+    <>
+      <FreshNav />
+      <div className="max-w-7xl mx-auto px-4 py-10 space-y-10 mt-28">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <ProductGallery image={product.image} name={product.name} />
+          <div className="flex flex-col space-y-6">
+            <ProductInfo product={product} />
+            <AddToCart product={product} />
+          </div>
         </div>
-      </div>
 
-      <RelatedProducts currentProduct={product} />
-    </div>
+        <RelatedProducts currentProduct={product} />
+      </div>
+      <Footer />
+    </>
   );
 };
 

@@ -13,6 +13,6 @@
   "prettier.requireConfig": true,
   "typescript.autoClosingTags": false,
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   }
 }

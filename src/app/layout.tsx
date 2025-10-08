@@ -6,9 +6,7 @@ import { cookies } from "next/headers";
 import React, { Suspense } from "react";
 import { RefineContext } from "./_refine_context";
 import "./globals.css";
-import FreshNav from "../lib/components/landing-page/header/header-nav";
-import { Header } from "../lib/components/header";
-import Footer from "../lib/components/landing-page/footer/footer";
+import { CartProvider } from "../contexts/cart-context";
 
 const getstInter = Inter({
   subsets: ["latin"],
@@ -40,10 +38,9 @@ export default async function RootLayout({
         <Suspense>
           <AntdRegistry>
             <RefineContext defaultMode={theme?.value}>
-              <FreshNav />
-              <Header />
-              <main className="min-h-screen pt-12">{children}</main>
-              <Footer />
+              <CartProvider>
+                <main className="min-h-screen">{children}</main>
+              </CartProvider>
             </RefineContext>
           </AntdRegistry>
         </Suspense>

@@ -1,34 +1,26 @@
 "use client";
 
-import { Authenticated } from "@refinedev/core";
-import { NavigateToResource } from "@refinedev/nextjs-router";
-import { Suspense } from "react";
-
 import Choose from "../lib/components/landing-page/container/choose";
 import Experience from "../lib/components/landing-page/experience/experience";
 import TrendingProducts from "../lib/components/landing-page/trending-products/trending-products";
 import TopCategories from "../lib/components/landing-page/top-categories/top-categories";
 import CategoriesProduct from "../lib/components/landing-page/categories-product/categories-product";
+import FreshNav from "../lib/components/landing-page/header/header-nav";
+import Footer from "../lib/components/landing-page/footer/footer";
 
-const LandingPage = () => (
-  <div>
-    <main className="overflow-hidden">
-      <CategoriesProduct />
-      <Choose />
-      <TrendingProducts />
-      <Experience />
-      <TopCategories />
-      {/* <ClientSay/> */}
-    </main>
-  </div>
-);
-
-export default function IndexPage() {
+export default function LandingPage() {
   return (
-    <Suspense>
-      <Authenticated key="home-page" fallback={<LandingPage />}>
-        <NavigateToResource />
-      </Authenticated>
-    </Suspense>
+    <div>
+      <main className="overflow-hidden">
+        <FreshNav />
+        <CategoriesProduct />
+        <Choose />
+        <TrendingProducts />
+        <Experience />
+        <TopCategories />
+        {/* <ClientSay/> */}
+        <Footer />
+      </main>
+    </div>
   );
 }

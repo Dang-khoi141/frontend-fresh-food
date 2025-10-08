@@ -1,15 +1,21 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { getSession } from "next-auth/react";
 
 export abstract class BaseApiService {
   protected axiosInstance: AxiosInstance;
   protected baseUrl: string;
+
   constructor() {
-    this.baseUrl = this.getBaserUrl();
+    this.baseUrl = this.getBaseUrl();
     this.axiosInstance = this.createAxiosInstance();
   }
-  private getBaserUrl(): string {
+
+  private getBaseUrl(): string {
     const NEST_API = process.env.NEXT_PUBLIC_API_URL;
-    return `${NEST_API}`;
+    if (!NEST_API) {
+      throw new Error("Missing NEXT_PUBLIC_API_URL in .env");
+    }
+    return NEST_API;
   }
 
   private createAxiosInstance(): AxiosInstance {
@@ -20,6 +26,23 @@ export abstract class BaseApiService {
         "Content-Type": "application/json",
       },
     });
+
+    instance.interceptors.request.use(
+      async config => {
+        const session = await getSession();
+        const token = session?.accessToken;
+
+        if (token) {
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${token}`,
+          };
+        }
+        return config;
+      },
+      error => Promise.reject(error)
+    );
+
     return instance;
   }
 

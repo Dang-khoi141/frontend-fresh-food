@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { ShoppingCart, Star } from "lucide-react";
 import { useState } from "react";
+import { useCart } from "@/contexts/cart-context";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: {
@@ -16,12 +19,28 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const { addToCart } = useCart();
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const rating = 4.5;
   const reviewCount = Math.floor(Math.random() * 20) + 5;
   const hasDiscount = Math.random() > 0.6;
   const discountPercentage = hasDiscount ? 20 : 0;
   const discountPrice = hasDiscount ? (product.price * 0.8).toFixed(2) : null;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+    if (product.id) {
+      await addToCart(product.id, 1);
+    }
+  };
+
+
 
   return (
     <Link href={`/products/${product.id}`}>
@@ -63,11 +82,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </span>
               )}
             </div>
+
             <button
-              onClick={e => {
-                e.preventDefault();
-                console.log("Add to cart:", product.id);
-              }}
+              onClick={handleAddToCart}
               className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-md transition"
             >
               <ShoppingCart className="h-4 w-4" />
