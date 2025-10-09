@@ -17,6 +17,10 @@ class CategoryService extends BaseApiService {
     const res = await this.axiosInstance.get(`/categories/top?limit=${limit}`);
     return res.data?.data ?? res.data;
   }
+  async getAllCategories() {
+    const res = await this.axiosInstance.get("/categories");
+    return res.data?.data ?? res.data;
+  }
 }
 
 export const categoryService = new CategoryService();
