@@ -12,6 +12,7 @@ import CategoriesProduct from "../lib/components/landing-page/categories-product
 import FreshNav from "../lib/components/landing-page/header/header-nav";
 import Footer from "../lib/components/landing-page/footer/footer";
 import { useSession } from "next-auth/react";
+import { UserRole } from "../lib/enums/user-role.enum";
 
 const LandingPage = () => (
   <div>
