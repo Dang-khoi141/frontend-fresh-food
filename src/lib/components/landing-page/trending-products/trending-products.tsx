@@ -1,15 +1,34 @@
 "use client";
 
+import Link from "next/link";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useEffect } from "react";
 import useFetchProducts from "../../../hooks/useFetchProducts";
+import { useCart } from "@/contexts/cart-context";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const TrendingProducts = () => {
   const { products, loading, error, fetchProducts } = useFetchProducts();
+  const { addToCart } = useCart();
+  const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleAddToCart = async (
+    e: React.MouseEvent,
+    productId: string
+  ) => {
+    e.preventDefault();
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+    await addToCart(productId, 1);
+  };
 
   if (loading) {
     return (
@@ -41,8 +60,9 @@ const TrendingProducts = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products?.slice(0, 8).map((product, idx) => (
-            <div
+          {products?.slice(0, 8).map((product) => (
+            <Link
+              href={`/products/${product.id}`}
               key={product.id}
               className="relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition transform hover:-translate-y-2 group overflow-hidden"
             >
@@ -50,7 +70,10 @@ const TrendingProducts = () => {
                 Trending
               </span>
 
-              <button className="absolute top-3 right-3 bg-white p-2 rounded-full hover:bg-red-50 transition z-10">
+              <button
+                onClick={(e) => e.preventDefault()}
+                className="absolute top-3 right-3 bg-white p-2 rounded-full hover:bg-red-50 transition z-10"
+              >
                 <Heart className="h-5 w-5 text-gray-400 hover:text-red-500 transition" />
               </button>
 
@@ -72,6 +95,7 @@ const TrendingProducts = () => {
                 <p className="text-sm text-gray-500 mb-1">
                   {product.brand?.name || "Fresh Produce"}
                 </p>
+
                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                   {product.name}
                 </h3>
@@ -80,11 +104,10 @@ const TrendingProducts = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-4 w-4 ${
-                        i < 4
+                      className={`h-4 w-4 ${i < 4
                           ? "text-yellow-400 fill-yellow-400"
                           : "text-gray-300"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -93,12 +116,16 @@ const TrendingProducts = () => {
                   <span className="text-lg font-bold text-gray-900">
                     ${product.price ? Number(product.price).toFixed(2) : "0.00"}
                   </span>
-                  <button className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg transition">
+
+                  <button
+                    onClick={(e) => handleAddToCart(e, product.id)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg transition"
+                  >
                     <ShoppingCart className="h-5 w-5" />
                   </button>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
 
           {products?.length === 0 && (
