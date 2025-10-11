@@ -2,16 +2,63 @@
 
 import { useCart } from "@/contexts/cart-context";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import FreshNav from "../../lib/components/landing-page/header/header-nav";
 import Footer from "../../lib/components/landing-page/footer/footer";
+import useFetchPayment from "../../lib/hooks/useFetchPayment";
+
+type PaymentMethod = "COD" | "ONLINE";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
+  const { createPayment, loading, error } = useFetchPayment();
+  const router = useRouter();
 
   const subtotal = cart.reduce(
     (sum, item) => sum + Number(item.product.price || 0) * item.quantity,
     0
   );
+
+  const handleCheckout = async () => {
+    if (paymentMethod === "COD") {
+      // Handle COD - create order directly
+      try {
+        // TODO: Call your order creation API
+        // const response = await fetch('/api/v1/orders/create', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ userId: 'your-user-id' })
+        // });
+        alert("Đặt hàng COD thành công!");
+        clearCart();
+        router.push("/orders");
+      } catch (error) {
+        console.error("Error creating COD order:", error);
+        alert("Có lỗi xảy ra khi đặt hàng");
+      }
+    } else {
+      try {
+        const items = cart.map(item => ({
+          name: item.product.name,
+          price: Number(item.product.price),
+          quantity: item.quantity
+        }));
+
+        const paymentData = {
+          orderId: crypto.randomUUID(),
+          description: `Thanh toán cho ${cart.length} sản phẩm`,
+          items
+        };
+
+        await createPayment(paymentData);
+      } catch (error) {
+        console.error("Error creating payment:", error);
+        alert(error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo thanh toán");
+      }
+    }
+  };
 
   if (cart.length === 0) {
     return (
@@ -39,6 +86,11 @@ export default function CartPage() {
       <FreshNav />
       <section className="max-w-5xl mx-auto px-4 py-10 mt-28">
         <h1 className="text-2xl font-bold mb-6">Giỏ hàng</h1>
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <p className="font-medium">Lỗi: {error.message}</p>
+          </div>
+        )}
 
         <div className="overflow-x-auto border rounded-lg shadow-sm">
           <table className="w-full text-sm">
@@ -76,7 +128,7 @@ export default function CartPage() {
                               Math.max(1, item.quantity - 1)
                             )
                           }
-                          className="px-2 bg-gray-200 rounded"
+                          className="px-2 bg-gray-200 rounded hover:bg-gray-300"
                         >
                           -
                         </button>
@@ -85,7 +137,7 @@ export default function CartPage() {
                           onClick={() =>
                             updateQuantity(item.product.id, item.quantity + 1)
                           }
-                          className="px-2 bg-gray-200 rounded"
+                          className="px-2 bg-gray-200 rounded hover:bg-gray-300"
                         >
                           +
                         </button>
@@ -111,7 +163,7 @@ export default function CartPage() {
           </table>
         </div>
 
-        <div className="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="mt-6 flex flex-col md:flex-row justify-between items-start gap-6">
           <button
             onClick={clearCart}
             className="text-red-600 hover:underline text-sm"
@@ -119,20 +171,70 @@ export default function CartPage() {
             Xóa toàn bộ giỏ hàng
           </button>
 
-          <div className="text-right space-y-3">
-            <p className="text-lg font-semibold">
-              Tạm tính:{" "}
-              <span className="text-emerald-600">${subtotal.toFixed(2)}</span>
-            </p>
+          <div className="flex-1 max-w-md space-y-6">
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <h3 className="font-semibold mb-3">Phương thức thanh toán</h3>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 p-3 border rounded-lg bg-white cursor-pointer hover:border-emerald-500">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={paymentMethod === "COD"}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="w-4 h-4 text-emerald-600"
+                  />
+                  <div>
+                    <p className="font-medium">Thanh toán khi nhận hàng (COD)</p>
+                    <p className="text-xs text-gray-500">Thanh toán bằng tiền mặt khi nhận hàng</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 p-3 border rounded-lg bg-white cursor-pointer hover:border-emerald-500">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="ONLINE"
+                    checked={paymentMethod === "ONLINE"}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="w-4 h-4 text-emerald-600"
+                  />
+                  <div>
+                    <p className="font-medium">Thanh toán trực tuyến</p>
+                    <p className="text-xs text-gray-500">Thanh toán qua QR Code ngân hàng</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-4 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span>Tạm tính:</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Phí vận chuyển:</span>
+                <span className="text-emerald-600">Miễn phí</span>
+              </div>
+              <div className="border-t pt-3 flex justify-between font-semibold text-lg">
+                <span>Tổng cộng:</span>
+                <span className="text-emerald-600">${subtotal.toFixed(2)}</span>
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <Link
                 href="/"
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-lg"
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-3 rounded-lg text-center font-medium"
               >
                 Tiếp tục mua hàng
               </Link>
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-semibold">
-                Thanh toán
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Đang xử lý..." : "Thanh toán"}
               </button>
             </div>
           </div>
