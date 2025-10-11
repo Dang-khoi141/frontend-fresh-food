@@ -10,7 +10,36 @@ function createAxiosInstance(): AxiosInstance {
     headers: { "Content-Type": "application/json" },
   });
 }
+
 const axiosInstance = createAxiosInstance();
+
+async function refreshAccessToken(token: any) {
+  try {
+    const response = await axiosInstance.post("/auth/refresh", {
+      refreshToken: token.refreshToken,
+    });
+
+    if (!response.data?.data?.accessToken) {
+      return {
+        ...token,
+        error: "RefreshAccessTokenError",
+      };
+    }
+
+    return {
+      ...token,
+      accessToken: response.data.data.accessToken,
+      refreshToken: response.data.data.refreshToken,
+      accessTokenExpires: Date.now() + 15 * 60 * 1000,
+    };
+  } catch (error) {
+    console.error("RefreshAccessTokenError", error);
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
 
 const authOptions: AuthOptions = {
   providers: [
@@ -30,7 +59,7 @@ const authOptions: AuthOptions = {
 
           console.log("🚀 ~ authorize ~ res:", res.data);
 
-          const accessToken = res.data?.data?.accessToken;
+          const { accessToken, refreshToken } = res.data.data;
 
           if (accessToken) {
             const decoded: any = jwtDecode(accessToken);
@@ -41,6 +70,7 @@ const authOptions: AuthOptions = {
               role: decoded.role,
               name: decoded.name,
               accessToken,
+              refreshToken,
             } as User;
           }
 
@@ -49,9 +79,7 @@ const authOptions: AuthOptions = {
           console.error("Login failed", err);
           return null;
         }
-      }
-
-
+      },
     }),
 
     CredentialsProvider({
@@ -94,25 +122,45 @@ const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = (user as any).accessToken;
-        token.role = (user as any).role;
-        token.email = (user as any).email;
-        token.sub = (user as any).id;
-        if (typeof window !== "undefined" && token.accessToken) {
-          localStorage.setItem("access_token", token.accessToken as string);
-        }
+        token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
+        token.accessTokenExpires = Date.now() + 15 * 60 * 1000;
+        token.role = user.role;
+        token.email = user.email;
+        token.name = user.name;
+        token.sub = user.id;
       }
-      return token;
+
+      if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+        return token;
+      }
+
+      return refreshAccessToken(token);
     },
+
     async session({ session, token }) {
       session.user = {
         id: token.sub as string,
         email: token.email as string,
         role: token.role as string,
+        name: token.name as string,
+        address: null,
+        organizationId: null,
       };
       session.accessToken = token.accessToken as string;
+      session.refreshToken = token.refreshToken as string;
+
       return session;
     },
+  },
+
+  pages: {
+    signIn: "/login",
+  },
+
+  session: {
+    strategy: "jwt",
+    maxAge: 15 * 24 * 60 * 60,
   },
 };
 

@@ -1,9 +1,20 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { getSession } from "next-auth/react";
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from "axios";
+import { getSession, signOut } from "next-auth/react";
 
 export abstract class BaseApiService {
   protected axiosInstance: AxiosInstance;
   protected baseUrl: string;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (value: unknown) => void;
+    reject: (reason?: any) => void;
+    config: AxiosRequestConfig;
+  }> = [];
 
   constructor() {
     this.baseUrl = this.getBaseUrl();
@@ -43,7 +54,79 @@ export abstract class BaseApiService {
       error => Promise.reject(error)
     );
 
+    instance.interceptors.response.use(
+      response => response,
+      async (error: AxiosError) => {
+        const originalRequest = error.config;
+
+        if (!originalRequest || error.response?.status !== 401) {
+          return Promise.reject(error);
+        }
+
+        if ((originalRequest as any)._retry) {
+          return Promise.reject(error);
+        }
+
+        if (this.isRefreshing) {
+          return new Promise((resolve, reject) => {
+            this.failedQueue.push({
+              resolve,
+              reject,
+              config: originalRequest,
+            });
+          });
+        }
+
+        (originalRequest as any)._retry = true;
+        this.isRefreshing = true;
+
+        try {
+          const session = await getSession();
+          if (!session?.refreshToken) {
+            console.warn("Missing refresh token, logging out...");
+            await signOut({ redirect: true, callbackUrl: "/login" });
+            return Promise.reject(error);
+          }
+
+          const response = await axios.post(`${this.baseUrl}/auth/refresh`, {
+            refreshToken: session.refreshToken,
+          });
+
+          const { accessToken, refreshToken } = response.data;
+
+          if (!accessToken) throw new Error("Invalid refresh response");
+
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+          this.processQueue(null, { accessToken, refreshToken });
+
+          return instance(originalRequest);
+        } catch (refreshError) {
+          this.processQueue(refreshError, null);
+          await signOut({ redirect: true, callbackUrl: "/login" });
+          return Promise.reject(refreshError);
+        } finally {
+          this.isRefreshing = false;
+        }
+      }
+    );
+
     return instance;
+  }
+
+  private processQueue(
+    error: any,
+    tokens: { accessToken: string; refreshToken: string } | null
+  ) {
+    this.failedQueue.forEach(({ resolve, reject, config }) => {
+      if (error) {
+        reject(error);
+      } else if (tokens) {
+        config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        resolve(this.axiosInstance(config));
+      }
+    });
+    this.failedQueue = [];
   }
 
   protected async get<T>(
@@ -69,6 +152,54 @@ export abstract class BaseApiService {
       const response: AxiosResponse<ArrayBuffer> = await this.axiosInstance.get(
         endpoint,
         { responseType: "arraybuffer", ...config }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+  protected async post<T, D = any>(
+    endpoint: string,
+    data?: D,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await this.axiosInstance.post(
+        endpoint,
+        data,
+        config
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  protected async put<T, D = any>(
+    endpoint: string,
+    data?: D,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await this.axiosInstance.put(
+        endpoint,
+        data,
+        config
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  protected async delete<T>(
+    endpoint: string,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await this.axiosInstance.delete(
+        endpoint,
+        config
       );
       return response.data;
     } catch (error) {

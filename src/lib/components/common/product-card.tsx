@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ShoppingCart, Star } from "lucide-react";
-import { useState } from "react";
 import { useCart } from "@/contexts/cart-context";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -18,16 +17,9 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const { addToCart } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
-
-  const rating = 4.5;
-  const reviewCount = Math.floor(Math.random() * 20) + 5;
-  const hasDiscount = Math.random() > 0.6;
-  const discountPercentage = hasDiscount ? 20 : 0;
-  const discountPrice = hasDiscount ? (product.price * 0.8).toFixed(2) : null;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,17 +32,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-
-
   return (
     <Link href={`/products/${product.id}`}>
       <div className="relative bg-white border border-gray-200 rounded-lg shadow hover:shadow-md transition overflow-hidden group flex flex-col cursor-pointer">
-        {hasDiscount && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded text-xs font-bold z-10 shadow">
-            -{discountPercentage}%
-          </span>
-        )}
-
         <div className="relative bg-gray-50 h-44 flex items-center justify-center overflow-hidden">
           {product.image ? (
             <img
@@ -67,21 +51,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <p className="text-xs text-gray-500 mb-1 truncate">
             {product.brand?.name || "Uncategorized"}
           </p>
+
           <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 h-[38px] leading-tight">
             {product.name}
           </h3>
 
           <div className="mt-2 flex items-center justify-between">
-            <div>
-              <span className="text-base font-bold text-emerald-700">
-                ${discountPrice || Number(product.price).toFixed(2)}
-              </span>
-              {hasDiscount && (
-                <span className="block text-xs text-gray-400 line-through">
-                  ${Number(product.price).toFixed(2)}
-                </span>
-              )}
-            </div>
+            <span className="text-base font-bold text-emerald-700">
+              ${Number(product.price).toFixed(2)}
+            </span>
 
             <button
               onClick={handleAddToCart}
@@ -93,10 +71,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <div className="mt-auto flex items-center gap-1 text-xs pt-2">
             <div className="flex items-center bg-emerald-600 text-white px-2 py-0.5 rounded gap-1">
-              <span>{rating}</span>
+              <span>4.5</span>
               <Star className="h-3 w-3 fill-white" />
             </div>
-            <span className="text-gray-500">({reviewCount})</span>
+            <span className="text-gray-500">(7)</span>
           </div>
         </div>
       </div>

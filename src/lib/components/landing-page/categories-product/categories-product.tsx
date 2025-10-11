@@ -14,7 +14,7 @@ const CategoriesProduct = () => {
   }, []);
 
   const categories = products
-    ? Array.from(new Set(products.map(p => p.brand?.name || "Uncategorized")))
+    ? Array.from(new Set(products.map(p => p.category?.name || "Uncategorized")))
     : [];
 
   const handleCategorySelect = (category: string | null) => {
@@ -45,9 +45,9 @@ const CategoriesProduct = () => {
 
   const groupedProducts: Record<string, typeof products> = {};
   products?.forEach(product => {
-    const brand = product.brand?.name || "Uncategorized";
-    if (!groupedProducts[brand]) groupedProducts[brand] = [];
-    groupedProducts[brand].push(product);
+    const category = product.category?.name || "Uncategorized";
+    if (!groupedProducts[category]) groupedProducts[category] = [];
+    groupedProducts[category].push(product);
   });
 
   return (
@@ -61,11 +61,10 @@ const CategoriesProduct = () => {
                 <li>
                   <button
                     onClick={() => handleCategorySelect(null)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition ${
-                      selectedCategory === null
+                    className={`w-full text-left px-3 py-2 rounded-lg transition ${selectedCategory === null
                         ? "bg-emerald-50 text-emerald-700 font-semibold"
                         : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     Tất cả sản phẩm
                   </button>
@@ -74,11 +73,10 @@ const CategoriesProduct = () => {
                   <li key={category}>
                     <button
                       onClick={() => handleCategorySelect(category)}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition ${
-                        selectedCategory === category
+                      className={`w-full text-left px-3 py-2 rounded-lg transition ${selectedCategory === category
                           ? "bg-emerald-50 text-emerald-700 font-semibold"
                           : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       {category}
                     </button>
@@ -100,17 +98,17 @@ const CategoriesProduct = () => {
               </div>
             ) : (
               <div className="space-y-16">
-                {Object.entries(groupedProducts).map(([brand, items]) => (
+                {Object.entries(groupedProducts).map(([category, items]) => (
                   <div
-                    key={brand}
+                    key={category}
                     className="bg-white rounded-lg p-4 shadow-sm"
                   >
                     <div className="flex justify-between items-center mb-6 border-b pb-2">
                       <h3 className="text-xl font-bold text-emerald-700 uppercase">
-                        {brand}
+                        {category}
                       </h3>
                       <button
-                        onClick={() => handleCategorySelect(brand)}
+                        onClick={() => handleCategorySelect(category)}
                         className="text-emerald-600 hover:underline text-sm font-semibold"
                       >
                         Xem thêm →
