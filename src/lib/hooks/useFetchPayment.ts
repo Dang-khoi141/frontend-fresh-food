@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { paymentService } from "@/lib/service/payment.service";
 import {
   CreatePaymentRequest,
   CreatePaymentResponse,
   PaymentStatus,
 } from "@/lib/interface/payment";
+import { paymentService } from "@/lib/service/payment.service";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 
 export default function useFetchPayment() {
   const [paymentData, setPaymentData] = useState<
@@ -30,8 +30,6 @@ export default function useFetchPayment() {
 
         if (response.statusCode === 201 && response.data) {
           setPaymentData(response.data);
-          const paymentInfo = encodeURIComponent(JSON.stringify(response.data));
-          router.push(`/payment?data=${paymentInfo}`);
           return response.data;
         } else {
           throw new Error(response.message || "Failed to create payment");

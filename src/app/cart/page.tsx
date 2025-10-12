@@ -6,14 +6,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FreshNav from "../../lib/components/landing-page/header/header-nav";
 import Footer from "../../lib/components/landing-page/footer/footer";
-import useFetchPayment from "../../lib/hooks/useFetchPayment";
+import { orderService } from "../../lib/service/order.service";
 
 type PaymentMethod = "COD" | "ONLINE";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
-  const { createPayment, loading, error } = useFetchPayment();
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const subtotal = cart.reduce(
@@ -21,42 +24,34 @@ export default function CartPage() {
     0
   );
 
-  const handleCheckout = async () => {
-    if (paymentMethod === "COD") {
-      // Handle COD - create order directly
-      try {
-        // TODO: Call your order creation API
-        // const response = await fetch('/api/v1/orders/create', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ userId: 'your-user-id' })
-        // });
-        alert("Đặt hàng COD thành công!");
+  const handlePlaceOrder = async () => {
+    if (!shippingAddress.trim()) {
+      setError("Vui lòng nhập địa chỉ giao hàng");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const orderData = {
+        paymentMethod,
+        shippingAddress,
+        notes,
+      };
+
+      const order = await orderService.createOrder(orderData);
+
+      if (order && order.id) {
         clearCart();
-        router.push("/orders");
-      } catch (error) {
-        console.error("Error creating COD order:", error);
-        alert("Có lỗi xảy ra khi đặt hàng");
+        router.push(`/orders/${order.id}`);
+      } else {
+        throw new Error('Order ID không hợp lệ');
       }
-    } else {
-      try {
-        const items = cart.map(item => ({
-          name: item.product.name,
-          price: Number(item.product.price),
-          quantity: item.quantity
-        }));
-
-        const paymentData = {
-          orderId: crypto.randomUUID(),
-          description: `Thanh toán cho ${cart.length} sản phẩm`,
-          items
-        };
-
-        await createPayment(paymentData);
-      } catch (error) {
-        console.error("Error creating payment:", error);
-        alert(error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo thanh toán");
-      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Có lỗi xảy ra khi đặt hàng");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,9 +81,10 @@ export default function CartPage() {
       <FreshNav />
       <section className="max-w-5xl mx-auto px-4 py-10 mt-28">
         <h1 className="text-2xl font-bold mb-6">Giỏ hàng</h1>
+
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            <p className="font-medium">Lỗi: {error.message}</p>
+            <p className="font-medium">{error}</p>
           </div>
         )}
 
@@ -170,8 +166,28 @@ export default function CartPage() {
           >
             Xóa toàn bộ giỏ hàng
           </button>
-
           <div className="flex-1 max-w-md space-y-6">
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <h3 className="font-semibold mb-3">Địa chỉ giao hàng</h3>
+              <textarea
+                value={shippingAddress}
+                onChange={(e) => setShippingAddress(e.target.value)}
+                placeholder="Nhập địa chỉ giao hàng đầy đủ..."
+                className="w-full border rounded-lg p-3 text-sm min-h-[80px] focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+            </div>
+
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <h3 className="font-semibold mb-3">Ghi chú đơn hàng</h3>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Ghi chú thêm cho đơn hàng (không bắt buộc)..."
+                className="w-full border rounded-lg p-3 text-sm min-h-[60px] focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              />
+            </div>
+
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-3">Phương thức thanh toán</h3>
               <div className="space-y-2">
@@ -230,11 +246,11 @@ export default function CartPage() {
                 Tiếp tục mua hàng
               </Link>
               <button
-                onClick={handleCheckout}
-                disabled={loading}
+                onClick={handlePlaceOrder}
+                disabled={loading || !shippingAddress.trim()}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Đang xử lý..." : "Thanh toán"}
+                {loading ? "Đang xử lý..." : "Đặt hàng"}
               </button>
             </div>
           </div>

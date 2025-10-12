@@ -48,6 +48,11 @@ class CartService extends BaseApiService {
   async clearCart(): Promise<void> {
     await this.axiosInstance.delete("/cart/clear");
   }
+
+  async updateCartItem(productId: string, updates: Partial<CartItem>): Promise<Cart> {
+    const res = await this.axiosInstance.patch(`/cart/items/${productId}`, updates);
+    return res.data?.data ?? res.data;
+  }
 }
 
 export const cartService = new CartService();
