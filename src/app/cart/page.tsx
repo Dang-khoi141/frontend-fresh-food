@@ -1,12 +1,18 @@
 "use client";
 
 import { useCart } from "@/contexts/cart-context";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import FreshNav from "../../lib/components/landing-page/header/header-nav";
+import { useState } from "react";
 import Footer from "../../lib/components/landing-page/footer/footer";
+import FreshNav from "../../lib/components/landing-page/header/header-nav";
 import { orderService } from "../../lib/service/order.service";
+
+const MapAddressInput = dynamic(
+  () => import("../../lib/components/check-map/MapAddressInput"),
+  { ssr: false }
+);
 
 type PaymentMethod = "COD" | "ONLINE";
 
@@ -18,6 +24,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
 
   const subtotal = cart.reduce(
     (sum, item) => sum + Number(item.product.price || 0) * item.quantity,
@@ -169,12 +176,9 @@ export default function CartPage() {
           <div className="flex-1 max-w-md space-y-6">
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-3">Địa chỉ giao hàng</h3>
-              <textarea
-                value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
-                placeholder="Nhập địa chỉ giao hàng đầy đủ..."
-                className="w-full border rounded-lg p-3 text-sm min-h-[80px] focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                required
+              <MapAddressInput
+                address={shippingAddress}
+                onAddressChange={(value) => setShippingAddress(value)}
               />
             </div>
 
