@@ -6,11 +6,13 @@ import FreshNav from "../../lib/components/landing-page/header/header-nav";
 import Footer from "../../lib/components/landing-page/footer/footer";
 import { orderService, Order } from "../../lib/service/order.service";
 import Link from "next/link";
+import { useAddressContext } from "../../contexts/address-context";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { defaultAddress, refreshAddress } = useAddressContext();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -26,6 +28,10 @@ export default function OrdersPage() {
 
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+    refreshAddress();
+  }, [defaultAddress]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
@@ -44,6 +50,9 @@ export default function OrdersPage() {
       </span>
     );
   };
+
+  const formatPrice = (price: number) =>
+    price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
   if (loading) {
     return (
@@ -102,19 +111,22 @@ export default function OrdersPage() {
 
               <div className="border-t pt-3 mb-3">
                 <p className="text-sm text-gray-600 mb-2">
-                  <strong>Địa chỉ giao hàng:</strong> {order.shippingAddress}
+                  <strong>Địa chỉ giao hàng:</strong>{" "}
+                  {order.shippingAddress || `${defaultAddress?.line1}, ${defaultAddress?.city}, ${defaultAddress?.province}`}
                 </p>
                 <p className="text-sm text-gray-600">
                   <strong>Phương thức thanh toán:</strong>{" "}
-                  {order.paymentMethod === "COD" ? "COD" : "Trực tuyến"}
+                  {order.paymentMethod === "COD" ? "Thanh toán khi nhận hàng (COD)" : "Trực tuyến"}
                 </p>
               </div>
 
               <div className="flex justify-between items-center border-t pt-3">
                 <div>
                   <p className="text-sm text-gray-600">
-                    Tổng cộng: <strong className="text-emerald-600 text-lg">${Number(order.total || 0).toFixed(2)}
-</strong>
+                    Tổng cộng:{" "}
+                    <strong className="text-emerald-600 text-lg">
+                      {formatPrice(Number(order.total || 0))}
+                    </strong>
                   </p>
                   <p className="text-xs text-gray-500">
                     {order.items.length} sản phẩm

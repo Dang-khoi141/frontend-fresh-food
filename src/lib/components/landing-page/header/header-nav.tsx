@@ -22,6 +22,7 @@ import { productService } from "@/lib/service/product.service";
 import { Product } from "@/lib/interface/product";
 import { useFetchAddress } from "../../../hooks/useFetchAddress";
 import { useAddressContext } from "../../../../contexts/address-context";
+import { usePathname } from "next/navigation";
 
 const FreshNav = () => {
   const [openCart, setOpenCart] = useState(false);
@@ -33,12 +34,15 @@ const FreshNav = () => {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [updatingDefault, setUpdatingDefault] = useState(false);
+  const pathname = usePathname();
+  const isAuthPage = ["/login", "/register", "/forgot-password"].includes(pathname);
+  const { data: session } = isAuthPage ? { data: null } : useSession();
   const { defaultAddress, refreshAddress } = useAddressContext();
+
 
   const searchRef = useRef<HTMLDivElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
   const { cart } = useCart();
-  const { data: session } = useSession();
   const router = useRouter();
 
   const {
@@ -123,13 +127,19 @@ const FreshNav = () => {
     else setOpenCart(true);
   };
 
-  const handleOpenLocation = () => {
+  const handleOpenLocation = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+
     if (!session) {
-      router.push("/login");
+      if (pathname !== "/login") {
+        router.push("/login");
+      }
       return;
     }
+
     setOpenLocationMenu((prev) => !prev);
   };
+
 
   const handleLogout = () => signOut({ callbackUrl: "/" });
 
@@ -173,7 +183,10 @@ const FreshNav = () => {
 
           <div className="hidden md:block relative flex-shrink-0" ref={locationRef}>
             <button
-              onClick={handleOpenLocation}
+              onClick={(e) => {
+                if (session) handleOpenLocation(e);
+                else router.push("/login");
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition"
             >
               <MapPin className="h-5 w-5 text-emerald-600" />

@@ -1,41 +1,65 @@
 "use client";
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { addressService } from "@/lib/service/address.service";
-import { Address } from "@/lib/service/address.service";
+
+import { createContext, useContext, ReactNode, useEffect, useState, useCallback } from "react";
+import { Address, addressService } from "@/lib/service/address.service";
+import { useSession } from "next-auth/react";
 
 interface AddressContextType {
     defaultAddress: Address | null;
     refreshAddress: () => Promise<void>;
-    setDefaultAddress: (addr: Address) => void;
+    isLoading: boolean;
 }
 
 const AddressContext = createContext<AddressContextType | undefined>(undefined);
 
-export const AddressProvider = ({ children }: { children: ReactNode }) => {
+export function AddressProvider({ children }: { children: ReactNode }) {
+    const { data: session } = useSession();
     const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const refreshAddress = async () => {
-        try {
-            const res = await addressService.getDefaultAddress();
-            setDefaultAddress(res);
-        } catch (err) {
-            console.error("Không thể tải địa chỉ mặc định:", err);
+    const loadDefaultAddress = useCallback(async () => {
+        if (!session) {
+            setDefaultAddress(null);
+            return;
         }
-    };
+
+        setIsLoading(true);
+        try {
+            const data = await addressService.getDefaultAddress();
+            setDefaultAddress(data);
+        } catch (error) {
+            console.error("Error loading default address:", error);
+            setDefaultAddress(null);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [session]);
 
     useEffect(() => {
-        refreshAddress();
-    }, []);
+        loadDefaultAddress();
+    }, [loadDefaultAddress]);
+
+    const refreshAddress = useCallback(async () => {
+        await loadDefaultAddress();
+    }, [loadDefaultAddress]);
 
     return (
-        <AddressContext.Provider value={{ defaultAddress, refreshAddress, setDefaultAddress }}>
+        <AddressContext.Provider
+            value={{
+                defaultAddress,
+                refreshAddress,
+                isLoading
+            }}
+        >
             {children}
         </AddressContext.Provider>
     );
-};
+}
 
-export const useAddressContext = () => {
-    const ctx = useContext(AddressContext);
-    if (!ctx) throw new Error("useAddressContext must be used within AddressProvider");
-    return ctx;
-};
+export function useAddressContext() {
+    const context = useContext(AddressContext);
+    if (context === undefined) {
+        throw new Error("useAddressContext must be used within AddressProvider");
+    }
+    return context;
+}

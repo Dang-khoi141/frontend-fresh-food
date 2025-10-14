@@ -6,6 +6,7 @@ import FreshNav from "../../../lib/components/landing-page/header/header-nav";
 import Footer from "../../../lib/components/landing-page/footer/footer";
 import { orderService, Order } from "../../../lib/service/order.service";
 import Link from "next/link";
+import { useAddressContext } from "../../../contexts/address-context";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
   const resolvedParams = use(params);
@@ -13,15 +14,16 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [canceling, setCanceling] = useState(false);
+  const { defaultAddress, refreshAddress } = useAddressContext();
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchOrder = async () => {
       try {
         const orderData = await orderService.getOrderDetail(resolvedParams.orderId);
         setOrder(orderData);
 
         const fromPayment = sessionStorage.getItem(`from_payment_${resolvedParams.orderId}`);
-        if (fromPayment === 'true') {
+        if (fromPayment === "true") {
           sessionStorage.removeItem(`from_payment_${resolvedParams.orderId}`);
         }
       } catch (error) {
@@ -35,9 +37,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
     fetchOrder();
   }, [resolvedParams.orderId, router]);
 
+  useEffect(() => {
+    refreshAddress();
+  }, [defaultAddress]);
+
   const handleCancelOrder = async () => {
     if (!order) return;
-
     if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return;
 
     try {
@@ -55,9 +60,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
   };
 
   const handlePayNow = () => {
-    if (order) {
-      router.push(`/payment/${order.id}`);
-    }
+    if (order) router.push(`/payment/${order.id}`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -77,6 +80,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
       </span>
     );
   };
+
+  const formatPrice = (price: number) =>
+    price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
   if (loading) {
     return (
@@ -116,7 +122,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-bold mb-2">Chi tiết đơn hàng</h1>
-              <p className="text-gray-600">Mã đơn hàng: <strong>{order.orderNumber}</strong></p>
+              <p className="text-gray-600">
+                Mã đơn hàng: <strong>{order.orderNumber}</strong>
+              </p>
               <p className="text-sm text-gray-500">
                 Ngày đặt: {new Date(order.createdAt).toLocaleString("vi-VN")}
               </p>
@@ -128,7 +136,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           <div className="border rounded-lg p-4 bg-white shadow-sm">
             <h3 className="font-semibold mb-3">Thông tin giao hàng</h3>
-            <p className="text-sm text-gray-600">{order.shippingAddress}</p>
+            <p className="text-sm text-gray-600">
+              {order.shippingAddress ||
+                `${defaultAddress?.line1}, ${defaultAddress?.city}, ${defaultAddress?.province}`}
+            </p>
             {order.notes && (
               <div className="mt-2 pt-2 border-t">
                 <p className="text-sm text-gray-500">Ghi chú: {order.notes}</p>
@@ -144,7 +155,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
                 : "Thanh toán trực tuyến"}
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              Tổng tiền: <strong className="text-emerald-600 text-lg">${Number(order.total || 0).toFixed(2)}</strong>
+              Tổng tiền:{" "}
+              <strong className="text-emerald-600 text-lg">
+                {formatPrice(Number(order.total || 0))}
+              </strong>
             </p>
           </div>
         </div>
@@ -177,9 +191,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
                       </div>
                     </td>
                     <td className="text-center py-3">{item.quantity}</td>
-                    <td className="text-right py-3">${Number(item.unitPrice).toFixed(2)}</td>
+                    <td className="text-right py-3">
+                      {formatPrice(Number(item.unitPrice))}
+                    </td>
                     <td className="text-right py-3 font-semibold">
-                      ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                      {formatPrice(Number(item.unitPrice) * item.quantity)}
                     </td>
                   </tr>
                 ))}
