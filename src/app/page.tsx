@@ -19,11 +19,11 @@ const LandingPage = () => (
     <main className="overflow-hidden">
       <FreshNav />
       <CategoriesProduct />
-      <Choose />
+      {/* <Choose />
       <TrendingProducts />
       <Experience />
       <TopCategories />
-      <Footer />
+      <Footer /> */}
     </main>
   </div>
 );

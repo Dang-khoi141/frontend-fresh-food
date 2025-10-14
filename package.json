@@ -27,6 +27,7 @@
     "antd": "^5.23.0",
     "antd-img-crop": "^4.25.0",
     "firebase": "^12.2.1",
+    "framer-motion": "^12.23.24",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.543.0",
