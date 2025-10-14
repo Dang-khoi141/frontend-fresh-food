@@ -7,6 +7,7 @@ import React, { Suspense } from "react";
 import { RefineContext } from "./_refine_context";
 import "./globals.css";
 import { CartProvider } from "../contexts/cart-context";
+import { AddressProvider } from "../contexts/address-context";
 
 const getstInter = Inter({
   subsets: ["latin"],
@@ -39,7 +40,9 @@ export default async function RootLayout({
           <AntdRegistry>
             <RefineContext defaultMode={theme?.value}>
               <CartProvider>
-                <main className="min-h-screen">{children}</main>
+                <AddressProvider>
+                  <main className="min-h-screen">{children}</main>
+                </AddressProvider>
               </CartProvider>
             </RefineContext>
           </AntdRegistry>

@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { productService } from "@/lib/service/product.service";
 import { Product } from "@/lib/interface/product";
 import { useFetchAddress } from "../../../hooks/useFetchAddress";
+import { useAddressContext } from "../../../../contexts/address-context";
 
 const FreshNav = () => {
   const [openCart, setOpenCart] = useState(false);
@@ -31,6 +32,8 @@ const FreshNav = () => {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [updatingDefault, setUpdatingDefault] = useState(false);
+  const { defaultAddress, refreshAddress } = useAddressContext();
 
   const searchRef = useRef<HTMLDivElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
@@ -177,7 +180,11 @@ const FreshNav = () => {
               <div className="text-left">
                 <p className="text-xs text-gray-500">Giao hàng đến</p>
                 <p className="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                  {session ? getDisplayAddress() : "Nhấn để chọn vị trí"}
+                  {session
+                    ? defaultAddress
+                      ? defaultAddress.line1
+                      : "Nhấn để chọn vị trí"
+                    : "Nhấn để chọn vị trí"}
                   <ChevronDown className="h-4 w-4" />
                 </p>
               </div>
@@ -218,17 +225,25 @@ const FreshNav = () => {
                       <div
                         key={address.id}
                         className={`p-4 mb-2 rounded-lg border-2 cursor-pointer transition ${address.isDefault
-                            ? "border-emerald-500 bg-emerald-50"
-                            : "border-gray-200 hover:border-emerald-300"
+                          ? "border-emerald-500 bg-emerald-50"
+                          : "border-gray-200 hover:border-emerald-300"
                           }`}
                       >
                         <div className="flex items-start justify-between">
                           <div
                             className="flex-1"
-                            onClick={() => {
-                              setAsDefaultAddress(address.id);
-                              setOpenLocationMenu(false);
+                            onClick={async () => {
+                              if (updatingDefault) return;
+                              setUpdatingDefault(true);
+                              try {
+                                await setAsDefaultAddress(address.id);
+                                await refreshAddress();
+                              } finally {
+                                setUpdatingDefault(false);
+                                setOpenLocationMenu(false);
+                              }
                             }}
+
                           >
                             <div className="flex items-center gap-2 mb-2">
                               <MapPin className="h-4 w-4 text-emerald-600" />

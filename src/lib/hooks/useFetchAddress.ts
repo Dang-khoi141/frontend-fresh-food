@@ -179,39 +179,40 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
     []
   );
 
-  const createAddress = useCallback(async () => {
-    if (
-      !addressForm.line1 ||
-      !addressForm.provinceCode ||
-      !addressForm.districtCode ||
-      !addressForm.wardCode
-    ) {
-      alert("Vui lòng điền đầy đủ thông tin địa chỉ");
-      return false;
-    }
+  const createAddress = useCallback(
+    async (manualAddress?: string) => {
+      const finalLine1 = manualAddress || addressForm.line1;
 
-    setLoadingAddress(true);
-    try {
-      await addressService.createAddress({
-        line1: addressForm.line1,
-        province: addressForm.provinceName,
-        city: addressForm.districtName,
-        country: "Vietnam",
-        postalCode: addressForm.wardName,
-        isDefault: addressForm.isDefault,
-      });
-      await loadAddresses();
-      await loadDefaultAddress();
-      resetForm();
-      return true;
-    } catch (error) {
-      console.error("Error creating address:", error);
-      alert("Không thể tạo địa chỉ. Vui lòng thử lại!");
-      return false;
-    } finally {
-      setLoadingAddress(false);
-    }
-  }, [addressForm, loadAddresses, loadDefaultAddress]);
+      if (!finalLine1) {
+        alert("Vui lòng điền hoặc chọn địa chỉ trước khi lưu");
+        return false;
+      }
+
+      setLoadingAddress(true);
+      try {
+        await addressService.createAddress({
+          line1: finalLine1,
+          province: addressForm.provinceName || "",
+          city: addressForm.districtName || "",
+          country: "Vietnam",
+          postalCode: addressForm.wardName || "",
+          isDefault: true,
+        });
+
+        await loadAddresses();
+        await loadDefaultAddress();
+        resetForm();
+        return true;
+      } catch (error) {
+        console.error("Error creating address:", error);
+        alert("Không thể tạo địa chỉ. Vui lòng thử lại!");
+        return false;
+      } finally {
+        setLoadingAddress(false);
+      }
+    },
+    [addressForm, loadAddresses, loadDefaultAddress]
+  );
 
   const setAsDefaultAddress = useCallback(
     async (addressId: string) => {
@@ -276,12 +277,12 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
     loadingWards,
 
     addressForm,
-
     loadProvinces,
     handleProvinceChange,
     handleDistrictChange,
     handleWardChange,
     updateFormField,
+
     createAddress,
     setAsDefaultAddress,
     deleteAddress,

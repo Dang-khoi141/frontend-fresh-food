@@ -4,10 +4,14 @@ import { useCart } from "@/contexts/cart-context";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Footer from "../../lib/components/landing-page/footer/footer";
 import FreshNav from "../../lib/components/landing-page/header/header-nav";
+import { useFetchAddress } from "../../lib/hooks/useFetchAddress";
 import { orderService } from "../../lib/service/order.service";
+import { useSession } from "next-auth/react";
+import ShippingAddressSection from "../../lib/components/shipping-address/shipping-address-sesion";
+import { useAddressContext } from "../../contexts/address-context";
 
 const MapAddressInput = dynamic(
   () => import("../../lib/components/check-map/MapAddressInput"),
@@ -18,6 +22,15 @@ type PaymentMethod = "COD" | "ONLINE";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { data: session } = useSession();
+  const isAuthenticated = !!session;
+
+  const {
+    createAddress,
+  } = useFetchAddress(isAuthenticated);
+
+  const { defaultAddress, refreshAddress } = useAddressContext();
+
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
   const [shippingAddress, setShippingAddress] = useState("");
   const [notes, setNotes] = useState("");
@@ -25,15 +38,48 @@ export default function CartPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const formatPrice = (price: number) =>
+    price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
   const subtotal = cart.reduce(
     (sum, item) => sum + Number(item.product.price || 0) * item.quantity,
     0
   );
 
+  useEffect(() => {
+  if (defaultAddress) {
+    setShippingAddress(
+      `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
+    );
+  } else if (!shippingAddress && "geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2`
+          );
+          const data = await res.json();
+          const detected =
+            data.display_name ||
+            `${data.address.road || ""}, ${data.address.city || ""}, ${
+              data.address.state || ""
+            }`;
+          setShippingAddress(detected);
+        } catch (err) {
+          console.error("Lỗi reverse geocode:", err);
+        }
+      },
+      (err) => console.warn("Không thể lấy vị trí:", err.message),
+      { enableHighAccuracy: true }
+    );
+  }
+}, [defaultAddress]);
+
+
   const handlePlaceOrder = async () => {
     if (!shippingAddress.trim()) {
-      setError("Vui lòng nhập địa chỉ giao hàng");
+      setError("Vui lòng chọn hoặc nhập địa chỉ giao hàng");
       return;
     }
 
@@ -49,14 +95,16 @@ export default function CartPage() {
 
       const order = await orderService.createOrder(orderData);
 
-      if (order && order.id) {
+      if (order?.id) {
         clearCart();
         router.push(`/orders/${order.id}`);
-      } else {
-        throw new Error('Order ID không hợp lệ');
-      }
+      } else throw new Error("Order ID không hợp lệ");
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Có lỗi xảy ra khi đặt hàng");
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Có lỗi xảy ra khi đặt hàng"
+      );
     } finally {
       setLoading(false);
     }
@@ -119,9 +167,7 @@ export default function CartPage() {
                       />
                       <span className="font-medium">{item.product.name}</span>
                     </td>
-
-                    <td className="p-3">${price.toFixed(2)}</td>
-
+                    <td className="p-3">{formatPrice(price)}</td>
                     <td className="p-3 text-center">
                       <div className="flex justify-center items-center gap-2">
                         <button
@@ -146,11 +192,9 @@ export default function CartPage() {
                         </button>
                       </div>
                     </td>
-
                     <td className="p-3 text-right font-semibold">
-                      ${(price * item.quantity).toFixed(2)}
+                      {formatPrice(price * item.quantity)}
                     </td>
-
                     <td className="p-3 text-center">
                       <button
                         onClick={() => removeFromCart(item.product.id)}
@@ -173,14 +217,19 @@ export default function CartPage() {
           >
             Xóa toàn bộ giỏ hàng
           </button>
+
           <div className="flex-1 max-w-md space-y-6">
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-3">Địa chỉ giao hàng</h3>
-              <MapAddressInput
-                address={shippingAddress}
-                onAddressChange={(value) => setShippingAddress(value)}
+              <ShippingAddressSection
+                defaultAddress={defaultAddress}
+                createAddress={createAddress}
+                shippingAddress={shippingAddress}
+                setShippingAddress={setShippingAddress}
               />
             </div>
+
+
 
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-3">Ghi chú đơn hàng</h3>
@@ -195,42 +244,42 @@ export default function CartPage() {
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-3">Phương thức thanh toán</h3>
               <div className="space-y-2">
-                <label className="flex items-center gap-3 p-3 border rounded-lg bg-white cursor-pointer hover:border-emerald-500">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="COD"
-                    checked={paymentMethod === "COD"}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="w-4 h-4 text-emerald-600"
-                  />
-                  <div>
-                    <p className="font-medium">Thanh toán khi nhận hàng (COD)</p>
-                    <p className="text-xs text-gray-500">Thanh toán bằng tiền mặt khi nhận hàng</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 p-3 border rounded-lg bg-white cursor-pointer hover:border-emerald-500">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="ONLINE"
-                    checked={paymentMethod === "ONLINE"}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="w-4 h-4 text-emerald-600"
-                  />
-                  <div>
-                    <p className="font-medium">Thanh toán trực tuyến</p>
-                    <p className="text-xs text-gray-500">Thanh toán qua QR Code ngân hàng</p>
-                  </div>
-                </label>
+                {(["COD", "ONLINE"] as PaymentMethod[]).map((method) => (
+                  <label
+                    key={method}
+                    className="flex items-center gap-3 p-3 border rounded-lg bg-white cursor-pointer hover:border-emerald-500"
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={method}
+                      checked={paymentMethod === method}
+                      onChange={(e) =>
+                        setPaymentMethod(e.target.value as PaymentMethod)
+                      }
+                      className="w-4 h-4 text-emerald-600"
+                    />
+                    <div>
+                      <p className="font-medium">
+                        {method === "COD"
+                          ? "Thanh toán khi nhận hàng (COD)"
+                          : "Thanh toán trực tuyến"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {method === "COD"
+                          ? "Thanh toán bằng tiền mặt khi nhận hàng"
+                          : "Thanh toán qua QR Code ngân hàng"}
+                      </p>
+                    </div>
+                  </label>
+                ))}
               </div>
             </div>
 
             <div className="border rounded-lg p-4 space-y-3">
               <div className="flex justify-between text-sm">
                 <span>Tạm tính:</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Phí vận chuyển:</span>
@@ -238,7 +287,9 @@ export default function CartPage() {
               </div>
               <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                 <span>Tổng cộng:</span>
-                <span className="text-emerald-600">${subtotal.toFixed(2)}</span>
+                <span className="text-emerald-600">
+                  {formatPrice(subtotal)}
+                </span>
               </div>
             </div>
 

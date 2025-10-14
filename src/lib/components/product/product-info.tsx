@@ -1,8 +1,10 @@
 "use client";
 
-export default function ProductInfo({ product }: { product: any }) {
-  const hasDiscount = Math.random() > 0.5;
-  const discountPrice = hasDiscount ? (product.price * 0.9).toFixed(2) : null;
+import { Product } from "@/lib/interface/product";
+
+export default function ProductInfo({ product }: { product: Product }) {
+  const formatPrice = (value: number) =>
+    value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
   return (
     <div className="space-y-4">
@@ -13,13 +15,8 @@ export default function ProductInfo({ product }: { product: any }) {
 
       <div className="flex items-center gap-3">
         <span className="text-2xl font-bold text-emerald-600">
-          ${discountPrice || Number(product.price).toFixed(2)}
+          {formatPrice(Number(product.price))}
         </span>
-        {hasDiscount && (
-          <span className="text-sm text-gray-400 line-through">
-            ${Number(product.price).toFixed(2)}
-          </span>
-        )}
       </div>
 
       {product.description && (

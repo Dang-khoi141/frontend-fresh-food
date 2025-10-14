@@ -24,6 +24,9 @@ export default function CartDrawer({
     }
   };
 
+  const formatPrice = (price: number) =>
+    price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+
   const subtotal = cart.reduce(
     (s, i) => s + Number(i.product.price || 0) * i.quantity,
     0
@@ -65,7 +68,9 @@ export default function CartDrawer({
                   <p className="font-medium text-sm truncate">
                     {item.product.name}
                   </p>
-                  <p className="text-xs text-gray-500">${price.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatPrice(price)}
+                  </p>
                   <div className="flex gap-2 items-center mt-1">
                     <button
                       onClick={() =>
@@ -98,17 +103,12 @@ export default function CartDrawer({
         </div>
 
         <div className="p-4 border-t">
-          <p className="font-semibold">Tạm tính: ${subtotal.toFixed(2)}</p>
-          <Link href="/cart">
-            <button
-              onClick={handleViewCart}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded mt-2"
-            >
-              Xem giỏ hàng
-            </button>
-          </Link>
-          <button className="w-full bg-black hover:bg-gray-800 text-white py-2 rounded mt-2">
-            Thanh toán
+          <p className="font-semibold">Tạm tính: {formatPrice(subtotal)}</p>
+          <button
+            onClick={handleViewCart}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded mt-2"
+          >
+            Xem giỏ hàng
           </button>
         </div>
       </div>
