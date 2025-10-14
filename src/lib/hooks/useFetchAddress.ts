@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { addressService, Address } from "@/lib/service/address.service";
+import { Address, addressService } from "@/lib/service/address.service";
+import { useCallback, useEffect, useState } from "react";
 import {
   District,
   Province,
@@ -254,8 +254,13 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
   }, []);
 
   const getDisplayAddress = useCallback(() => {
-    if (!defaultAddress) return "Chọn địa chỉ giao hàng";
-    return `${defaultAddress.city}, ${defaultAddress.province}`;
+    if (!defaultAddress) return "Chọn vị trí giao hàng";
+
+    const { city, province } = defaultAddress;
+    if (city && province) return `${city}, ${province}`;
+    if (city) return city;
+    if (province) return province;
+    return "Chọn vị trí giao hàng";
   }, [defaultAddress]);
 
   return {
