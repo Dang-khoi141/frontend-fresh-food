@@ -1,22 +1,8 @@
-import { Address, addressService } from "@/lib/service/address.service";
 import { useCallback, useEffect, useState } from "react";
-import {
-  District,
-  Province,
-  Ward,
-  provinceApiService,
-} from "../service/province-api.service";
-
-interface AddressFormData {
-  line1: string;
-  provinceCode: number;
-  provinceName: string;
-  districtCode: number;
-  districtName: string;
-  wardCode: number;
-  wardName: string;
-  isDefault: boolean;
-}
+import { Address, AddressFormData } from "@/lib/interface/address";
+import { Province, District, Ward } from "@/lib/interface/province";
+import { addressService } from "@/lib/service/address.service";
+import { provinceApiService } from "@/lib/service/province-api.service";
 
 const initialFormState: AddressFormData = {
   line1: "",

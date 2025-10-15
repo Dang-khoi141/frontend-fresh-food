@@ -1,22 +1,5 @@
+import { Cart, CartItem } from "../interface/cart";
 import { BaseApiService } from "./baseApi.service";
-
-export interface ProductInCart {
-  id: string;
-  name: string;
-  image?: string;
-  price: string;
-}
-
-export interface CartItem {
-  id: string;
-  quantity: number;
-  product: ProductInCart;
-}
-
-export interface Cart {
-  id: string;
-  items: CartItem[];
-}
 
 class CartService extends BaseApiService {
   async getCart(): Promise<Cart> {
@@ -49,8 +32,14 @@ class CartService extends BaseApiService {
     await this.axiosInstance.delete("/cart/clear");
   }
 
-  async updateCartItem(productId: string, updates: Partial<CartItem>): Promise<Cart> {
-    const res = await this.axiosInstance.patch(`/cart/items/${productId}`, updates);
+  async updateCartItem(
+    productId: string,
+    updates: Partial<CartItem>
+  ): Promise<Cart> {
+    const res = await this.axiosInstance.patch(
+      `/cart/items/${productId}`,
+      updates
+    );
     return res.data?.data ?? res.data;
   }
 }

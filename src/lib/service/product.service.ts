@@ -1,25 +1,9 @@
-import { Product } from "../interface/product";
+import {
+  Product,
+  SearchProductParams,
+  SearchProductResponse,
+} from "../interface/product";
 import { BaseApiService } from "./baseApi.service";
-
-export interface SearchProductParams {
-  search?: string;
-  categoryId?: string;
-  brandId?: string;
-  isActive?: boolean;
-  minPrice?: number;
-  maxPrice?: number;
-  page?: number;
-  limit?: number;
-  sortBy?: "relevance" | "priceAsc" | "priceDesc" | "newest";
-}
-
-export interface SearchProductResponse {
-  data: Product[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
 
 class ProductService extends BaseApiService {
   async getProducts(): Promise<Product[]> {

@@ -14,3 +14,23 @@ export interface Product {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface SearchProductParams {
+  search?: string;
+  categoryId?: string;
+  brandId?: string;
+  isActive?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: "relevance" | "priceAsc" | "priceDesc" | "newest";
+}
+
+export interface SearchProductResponse {
+  data: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

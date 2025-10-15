@@ -2,25 +2,21 @@
 
 import { useState } from "react";
 import { Product } from "@/lib/interface/product";
-import { cartService, Cart } from "@/lib/service/cart.service";
-
-export interface CartItem {
-  product: Product;
-  quantity: number;
-}
+import { Cart, CartItemDisplay } from "@/lib/interface/cart";
+import { cartService } from "@/lib/service/cart.service";
 
 export default function useFetchCart() {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItemDisplay[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const mapCart = (serverCart: Cart): CartItem[] => {
+  const mapCart = (serverCart: Cart): CartItemDisplay[] => {
     return serverCart.items.map(i => ({
       product: {
-        id: i.productId,
-        name: i.name,
-        price: i.price,
-        image: i.image,
+        id: i.product.id,
+        name: i.product.name,
+        price: Number(i.product.price),
+        image: i.product.image,
       } as Product,
       quantity: i.quantity,
     }));
@@ -39,7 +35,7 @@ export default function useFetchCart() {
   };
 
   const addToCart = async (product: Product, quantity: number = 1) => {
-    const updated = await cartService.addToCart(product.id, quantity);
+    const updated = await cartService.addToCart(String(product.id), quantity);
     setCart(mapCart(updated));
   };
 

@@ -1,41 +1,5 @@
+import { Order, CreateOrderRequest } from "../interface/order";
 import { BaseApiService } from "./baseApi.service";
-
-export interface Order {
-  id: string;
-  orderNumber: string;
-  status:
-    | "PENDING"
-    | "CONFIRMED"
-    | "PAID"
-    | "SHIPPED"
-    | "DELIVERED"
-    | "CANCELED";
-  total: number;
-  paymentMethod: string;
-  shippingAddress: string;
-  notes?: string;
-  items: OrderItem[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface OrderItem {
-  id: string;
-  quantity: number;
-  unitPrice: number;
-  product: {
-    id: string;
-    name: string;
-    image?: string;
-    price: string;
-  };
-}
-
-export interface CreateOrderRequest {
-  paymentMethod: "COD" | "ONLINE";
-  shippingAddress: string;
-  notes?: string;
-}
 
 class OrderService extends BaseApiService {
   async createOrder(data: CreateOrderRequest): Promise<Order> {

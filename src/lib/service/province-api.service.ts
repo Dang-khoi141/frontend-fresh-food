@@ -1,33 +1,7 @@
 import axios from "axios";
+import { Province, District, Ward } from "../interface/province";
 
 const PROVINCE_API_BASE = "https://provinces.open-api.vn/api";
-
-export interface Ward {
-  code: number;
-  name: string;
-  codename: string;
-  division_type: string;
-  short_codename: string;
-}
-
-export interface District {
-  code: number;
-  name: string;
-  codename: string;
-  division_type: string;
-  short_codename: string;
-  province_code: number;
-  wards?: Ward[];
-}
-
-export interface Province {
-  code: number;
-  name: string;
-  codename: string;
-  division_type: string;
-  phone_code: number;
-  districts?: District[];
-}
 
 class ProvinceApiService {
   private axiosInstance;
@@ -38,6 +12,7 @@ class ProvinceApiService {
       timeout: 10000,
     });
   }
+
   async getAllProvinces(): Promise<Province[]> {
     try {
       const response = await this.axiosInstance.get("/p/");

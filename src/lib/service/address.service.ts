@@ -1,34 +1,9 @@
+import {
+  Address,
+  CreateAddressDto,
+  UpdateAddressDto,
+} from "../interface/address";
 import { BaseApiService } from "./baseApi.service";
-
-export interface Address {
-  id: string;
-  line1: string;
-  city: string;
-  province: string;
-  country: string;
-  postalCode?: string;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateAddressDto {
-  line1: string;
-  city: string;
-  province: string;
-  country?: string;
-  postalCode?: string;
-  isDefault?: boolean;
-}
-
-export interface UpdateAddressDto {
-  line1?: string;
-  city?: string;
-  province?: string;
-  country?: string;
-  postalCode?: string;
-  isDefault?: boolean;
-}
 
 class AddressService extends BaseApiService {
   async getAllAddresses(): Promise<Address[]> {

@@ -1,3 +1,5 @@
+import { Order } from "./order";
+
 export interface PaymentItem {
   name: string;
   price: number;
@@ -45,7 +47,16 @@ export interface CreatePaymentResponse {
 
 export interface PaymentStatus {
   orderId: string;
-  status: 'PENDING' | 'PAID' | 'CANCELED' | 'FAILED';
+  status: "PENDING" | "PAID" | "CANCELED" | "FAILED";
   amount: number;
   orderCode: number;
+}
+
+export interface PaymentFlowState {
+  order: Order | null;
+  paymentData: CreatePaymentResponse["data"] | null;
+  status: "idle" | "loading" | "pending" | "success" | "failed";
+  countdown: number;
+  error: string | null;
+  handleCopy: (text: string, label: string) => void;
 }
