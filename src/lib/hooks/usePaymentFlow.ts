@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Order } from "@/lib/interface/order";
+import {
+  CreatePaymentResponse,
+  PaymentFlowState,
+} from "@/lib/interface/payment";
 import useFetchPayment from "./useFetchPayment";
-import { Order, orderService } from "../service/order.service";
-
-export interface PaymentFlowState {
-  order: Order | null;
-  paymentData: any | null;
-  status: "idle" | "loading" | "pending" | "success" | "failed";
-  countdown: number;
-  error: string | null;
-  handleCopy: (text: string, label: string) => void;
-}
+import { orderService } from "@/lib/service/order.service";
 
 /**
  * usePaymentFlow — hook quản lý toàn bộ vòng đời thanh toán online.
@@ -25,7 +21,9 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
   const router = useRouter();
   const { createPayment, checkPaymentStatus } = useFetchPayment();
   const [order, setOrder] = useState<Order | null>(null);
-  const [paymentData, setPaymentData] = useState<any | null>(null);
+  const [paymentData, setPaymentData] = useState<
+    CreatePaymentResponse["data"] | null
+  >(null);
   const [status, setStatus] = useState<
     "idle" | "loading" | "pending" | "success" | "failed"
   >("idle");
@@ -114,9 +112,9 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
           orderService.getOrderDetail(order.id),
         ]);
 
-        const payosStatus = payosResult?.data?.status?.toUpperCase();
+        const payosStatus = payosResult?.status?.toUpperCase();
         if (
-          ["PAID", "SUCCESS", "COMPLETED"].includes(payosStatus) ||
+          ["PAID", "SUCCESS", "COMPLETED"].includes(payosStatus || "") ||
           latestOrder.status === "PAID"
         ) {
           setStatus("success");
@@ -134,7 +132,7 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
       isActive = false;
       clearInterval(interval);
     };
-  }, [paymentData, order?.id, status]);
+  }, [paymentData, order?.id, status, checkPaymentStatus, router]);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
