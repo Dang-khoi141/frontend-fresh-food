@@ -5,11 +5,12 @@ module.exports = {
     "./src/lib/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  darkMode: false, // or 'media' or 'class'
+  darkMode: false,
   theme: {
     extend: {
       fontFamily: {
         roboto: ["Roboto", ...fontFamily.sans],
+        sans: ["Inter", ...fontFamily.sans],
       },
       fontSize: {
         titleHeader: ["60px", "72px"],
@@ -75,12 +76,21 @@ module.exports = {
         brand: "#10b981",
         bg_nav: "#7a838e;",
         footer: "#0F172A",
+        primary: "#00C49F",
+        secondary: "#0088FE",
+        accent: "#FFBB28",
+        danger: "#FF4D4F",
+        success: "#22C55E",
+        grayLight: "#F9FAFB",
       },
       boxShadow: {
         sl: "1px 1px 10px 1px rgba(0,0,0,0.2)",
+        soft: "0 4px 10px rgba(0, 0, 0, 0.05)",
       },
       borderRadius: {
         box: "12px",
+        xl: "1rem",
+        "2xl": "1.5rem",
       },
       borderColor: {
         bor_col: ["#C4C4FF"],
