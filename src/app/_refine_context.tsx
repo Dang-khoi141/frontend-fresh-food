@@ -70,31 +70,38 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
                 meta: {
                     canDelete: true,
                 },
+              },
+              {
+                name: "brands",
+                list: "/brands",
+                create: "/brands/create",
+                edit: "/brands/edit/:id",
+                show: "/brands/show/:id",
+                meta: { canDelete: true },
+              },
+              {
+                name: "categories",
+                list: "/categories",
+                create: "/categories/create",
+                edit: "/categories/edit/:id",
+                show: "/categories/show/:id",
+                meta: { canDelete: true },
+              },
+              {
+                name: "products",
+                list: "/products",
+                create: "/products/create",
+                edit: "/products/edit/:id",
+                show: "/products/show/:id",
+                meta: { canDelete: true },
+              },
+              {
+                name: "statistics",
+                list: "/statistics",
+                meta: {
+                  label: "Statistics",
                 },
-                {
-    name: "brands",
-    list: "/brands",
-    create: "/brands/create",
-    edit: "/brands/edit/:id",
-    show: "/brands/show/:id",
-    meta: { canDelete: true },
-  },
-  {
-    name: "categories",
-    list: "/categories",
-    create: "/categories/create",
-    edit: "/categories/edit/:id",
-    show: "/categories/show/:id",
-    meta: { canDelete: true },
-  },
-  {
-    name: "products",
-    list: "/products",
-    create: "/products/create",
-    edit: "/products/edit/:id",
-    show: "/products/show/:id",
-    meta: { canDelete: true },
-  },
+              },
             ]}
             options={{
               title: {
@@ -113,4 +120,3 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
     </>
   );
 };
-

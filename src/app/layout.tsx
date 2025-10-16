@@ -26,16 +26,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const [ loading, setloading]= useState()
-  // useEffect(()=>{
-  //   setloading(true);
-  // },[])
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme");
 
   return (
-    <html lang="en" className={getstInter.className}>
-      <body className="antialiased">
+    <html lang="en" className={getstInter.className} suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
         <Suspense>
           <AntdRegistry>
             <RefineContext defaultMode={theme?.value}>

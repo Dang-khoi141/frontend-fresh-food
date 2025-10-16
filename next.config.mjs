@@ -13,6 +13,9 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    optimizePackageImports: ['recharts', '@ant-design/icons', 'antd'],
+  },
 };
 
 export default nextConfig;

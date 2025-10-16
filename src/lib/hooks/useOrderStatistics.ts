@@ -11,15 +11,16 @@ const useOrderStatistics = () => {
 
   const fetchStatistics = async (period: "day" | "week" | "month" = "week") => {
     setLoading(true);
+    setError(null);
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/orders/statistics`,
-        { params: { period: "week" } }
+        { params: { period } }
       );
 
       setStats(response.data.data || response.data);
     } catch (err) {
-      console.error("❌ Error fetching order statistics:", err);
+      console.error("Error fetching order statistics:", err);
       setError(err as Error);
     } finally {
       setLoading(false);
