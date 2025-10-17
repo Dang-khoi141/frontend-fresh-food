@@ -15,7 +15,9 @@ export async function middleware(request: NextRequest) {
     if (
       pathname.startsWith("/users") ||
       pathname.startsWith("/cart") ||
-      pathname.startsWith("/orders")
+      pathname.startsWith("/orders") ||
+      pathname.startsWith("/addresses") ||
+      pathname.startsWith("/payment")
     ) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -44,6 +46,45 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname.startsWith("/addresses")) {
+    if (![UserRole.CUSTOMER].includes(userRole)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (pathname.startsWith("/payment")) {
+    if (![UserRole.CUSTOMER].includes(userRole)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (pathname.startsWith("/brands")) {
+    if (
+      request.method !== "GET" &&
+      ![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)
+    ) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (pathname.startsWith("/categories")) {
+    if (
+      request.method !== "GET" &&
+      ![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)
+    ) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (pathname.startsWith("/promotions")) {
+    if (
+      request.method !== "GET" &&
+      ![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)
+    ) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (pathname.startsWith("/products")) {
     if (
       pathname.match(/\/products\/[^/]+$/) &&
@@ -53,9 +94,26 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname.startsWith("/inventory")) {
+    if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/users/:path*", "/orders/:path*", "/cart/:path*", "/products/:path*"],
+  matcher: [
+    "/users/:path*",
+    "/orders/:path*",
+    "/cart/:path*",
+    "/products/:path*",
+    "/addresses/:path*",
+    "/brands/:path*",
+    "/categories/:path*",
+    "/promotions/:path*",
+    "/payment/:path*",
+    "/inventory/:path*",
+  ],
 };

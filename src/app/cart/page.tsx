@@ -51,7 +51,7 @@ export default function CartPage() {
       setShippingAddress(
         `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
       );
-    } else if (!shippingAddress && "geolocation" in navigator) {
+    } else if (!shippingAddress && isAuthenticated && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const { latitude, longitude } = pos.coords;
@@ -77,10 +77,10 @@ export default function CartPage() {
           }
         },
         (err) => console.warn("Không thể lấy vị trí:", err.message),
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
-  }, [defaultAddress, shippingAddress]);
+  }, [defaultAddress, shippingAddress, isAuthenticated]);
 
 
   const handlePlaceOrder = async () => {
