@@ -1,6 +1,5 @@
 "use client";
 
-import { useCart } from "@/contexts/cart-context";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,6 +11,7 @@ import { orderService } from "../../lib/service/order.service";
 import { useSession } from "next-auth/react";
 import ShippingAddressSection from "../../lib/components/shipping-address/shipping-address-sesion";
 import { useAddressContext } from "../../contexts/address-context";
+import { useCart } from "../../contexts/cart-context";
 
 const MapAddressInput = dynamic(
   () => import("../../lib/components/check-map/MapAddressInput"),
@@ -47,34 +47,40 @@ export default function CartPage() {
   );
 
   useEffect(() => {
-  if (defaultAddress) {
-    setShippingAddress(
-      `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
-    );
-  } else if (!shippingAddress && "geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2`
-          );
-          const data = await res.json();
-          const detected =
-            data.display_name ||
-            `${data.address.road || ""}, ${data.address.city || ""}, ${
-              data.address.state || ""
-            }`;
-          setShippingAddress(detected);
-        } catch (err) {
-          console.error("Lỗi reverse geocode:", err);
-        }
-      },
-      (err) => console.warn("Không thể lấy vị trí:", err.message),
-      { enableHighAccuracy: true }
-    );
-  }
-}, [defaultAddress]);
+    if (defaultAddress) {
+      setShippingAddress(
+        `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
+      );
+    } else if (!shippingAddress && "geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2`,
+              {
+                headers: { "Accept": "application/json" }
+              }
+            );
+
+            if (!res.ok) throw new Error("Reverse geocode failed");
+
+            const data = await res.json();
+            const detected =
+              data.display_name ||
+              `${data.address?.road || ""}, ${data.address?.city || ""}, ${data.address?.state || ""
+              }`;
+            setShippingAddress(detected.trim());
+          } catch (err) {
+            console.warn("Không thể lấy vị trí:", err);
+            setShippingAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          }
+        },
+        (err) => console.warn("Không thể lấy vị trí:", err.message),
+        { enableHighAccuracy: true }
+      );
+    }
+  }, [defaultAddress, shippingAddress]);
 
 
   const handlePlaceOrder = async () => {

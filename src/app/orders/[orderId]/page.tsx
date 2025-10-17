@@ -4,9 +4,10 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import FreshNav from "../../../lib/components/landing-page/header/header-nav";
 import Footer from "../../../lib/components/landing-page/footer/footer";
-import { orderService, Order } from "../../../lib/service/order.service";
+import { orderService } from "../../../lib/service/order.service";
 import Link from "next/link";
 import { useAddressContext } from "../../../contexts/address-context";
+import { Order } from "../../../lib/interface/order";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
   const resolvedParams = use(params);
@@ -14,7 +15,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [canceling, setCanceling] = useState(false);
-  const { defaultAddress, refreshAddress } = useAddressContext();
+  const { defaultAddress } = useAddressContext();
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -36,10 +37,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
 
     fetchOrder();
   }, [resolvedParams.orderId, router]);
-
-  useEffect(() => {
-    refreshAddress();
-  }, [defaultAddress]);
 
   const handleCancelOrder = async () => {
     if (!order) return;

@@ -1,28 +1,27 @@
 "use client";
 
+import { useCart } from "@/contexts/cart-context";
+import { Product } from "@/lib/interface/product";
+import { productService } from "@/lib/service/product.service";
 import {
+  ChevronDown,
   Heart,
   LogOut,
+  MapPin,
+  Package,
+  Plus,
   Search,
   ShoppingCart,
   User,
   X,
-  MapPin,
-  ChevronDown,
-  Package,
-  Plus,
 } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
-import { useCart } from "@/contexts/cart-context";
-import CartDrawer from "../../common/cart-drawer";
-import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { productService } from "@/lib/service/product.service";
-import { Product } from "@/lib/interface/product";
-import { useFetchAddress } from "../../../hooks/useFetchAddress";
+import { usePathname, useRouter } from "next/navigation";
+import { memo, useEffect, useRef, useState } from "react";
 import { useAddressContext } from "../../../../contexts/address-context";
-import { usePathname } from "next/navigation";
+import { useFetchAddress } from "../../../hooks/useFetchAddress";
+import CartDrawer from "../../common/cart-drawer";
 
 const FreshNav = () => {
   const [openCart, setOpenCart] = useState(false);
@@ -570,4 +569,4 @@ const FreshNav = () => {
   );
 };
 
-export default FreshNav;
+export default memo(FreshNav);

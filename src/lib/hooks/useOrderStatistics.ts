@@ -1,7 +1,7 @@
 "use client";
 
-import axios from "axios";
 import { useState } from "react";
+import { orderService } from "../service/order.service";
 import { OrderStatistics } from "../interface/orderStatistics";
 
 const useOrderStatistics = () => {
@@ -13,12 +13,8 @@ const useOrderStatistics = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/orders/statistics`,
-        { params: { period } }
-      );
-
-      setStats(response.data.data || response.data);
+      const response = await orderService.getStatistics(period);
+      setStats(response);
     } catch (err) {
       console.error("Error fetching order statistics:", err);
       setError(err as Error);

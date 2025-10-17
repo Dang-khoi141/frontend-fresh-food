@@ -15,11 +15,19 @@ const axiosInstance = createAxiosInstance();
 
 async function refreshAccessToken(token: any) {
   try {
+    console.log("Refreshing access token...");
+
     const response = await axiosInstance.post("/auth/refresh", {
       refreshToken: token.refreshToken,
     });
 
-    if (!response.data?.data?.accessToken) {
+    console.log("Token refreshed successfully");
+
+    const newAccessToken = response.data?.data?.accessToken || response.data?.accessToken;
+    const newRefreshToken = response.data?.data?.refreshToken || response.data?.refreshToken;
+
+    if (!newAccessToken) {
+      console.error("No accessToken in refresh response:", response.data);
       return {
         ...token,
         error: "RefreshAccessTokenError",
@@ -28,12 +36,13 @@ async function refreshAccessToken(token: any) {
 
     return {
       ...token,
-      accessToken: response.data.data.accessToken,
-      refreshToken: response.data.data.refreshToken,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
       accessTokenExpires: Date.now() + 15 * 60 * 1000,
+      error: undefined,
     };
   } catch (error) {
-    console.error("RefreshAccessTokenError", error);
+    console.error("RefreshAccessTokenError:", error);
     return {
       ...token,
       error: "RefreshAccessTokenError",
@@ -76,7 +85,7 @@ const authOptions: AuthOptions = {
 
           return null;
         } catch (err) {
-          console.error("Login failed", err);
+          console.error("❌ Login failed", err);
           return null;
         }
       },
@@ -110,7 +119,7 @@ const authOptions: AuthOptions = {
           }
           return null;
         } catch (err) {
-          console.error("Register failed", err);
+          console.error("❌ Register failed", err);
           return null;
         }
       },
@@ -129,16 +138,22 @@ const authOptions: AuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.sub = user.id;
+        token.error = undefined;
+        return token;
       }
 
       if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
         return token;
       }
-
       return refreshAccessToken(token);
     },
 
     async session({ session, token }) {
+      if (token.error === "RefreshAccessTokenError") {
+        session.error = "RefreshAccessTokenError";
+        return session;
+      }
+
       session.user = {
         id: token.sub as string,
         email: token.email as string,
@@ -160,7 +175,8 @@ const authOptions: AuthOptions = {
 
   session: {
     strategy: "jwt",
-    maxAge: 15 * 24 * 60 * 60,
+    maxAge: 14 * 60,
+    updateInterval: 5 * 60,
   },
 };
 

@@ -16,6 +16,9 @@ export abstract class BaseApiService {
     config: AxiosRequestConfig;
   }> = [];
 
+  private cachedSession: { session: any; timestamp: number } | null = null;
+  private readonly SESSION_CACHE_TIME = 5 * 60 * 1000;
+
   constructor() {
     this.baseUrl = this.getBaseUrl();
     this.axiosInstance = this.createAxiosInstance();
@@ -29,6 +32,38 @@ export abstract class BaseApiService {
     return NEST_API;
   }
 
+  private isBrowser(): boolean {
+    return typeof window !== "undefined";
+  }
+
+  private async getCachedSession() {
+    const now = Date.now();
+
+    if (
+      this.cachedSession &&
+      now - this.cachedSession.timestamp < this.SESSION_CACHE_TIME
+    ) {
+      return this.cachedSession.session;
+    }
+
+    const session = await getSession();
+
+    if (session) {
+      this.cachedSession = {
+        session,
+        timestamp: now,
+      };
+    } else {
+      this.cachedSession = null;
+    }
+
+    return session;
+  }
+
+  private clearSessionCache() {
+    this.cachedSession = null;
+  }
+
   private createAxiosInstance(): AxiosInstance {
     const instance = axios.create({
       baseURL: this.baseUrl,
@@ -40,14 +75,16 @@ export abstract class BaseApiService {
 
     instance.interceptors.request.use(
       async config => {
-        const session = await getSession();
-        const token = session?.accessToken;
+        if (this.isBrowser()) {
+          const session = await this.getCachedSession();
+          const token = session?.accessToken;
 
-        if (token) {
-          config.headers = {
-            ...config.headers,
-            Authorization: `Bearer ${token}`,
-          };
+          if (token) {
+            config.headers = {
+              ...config.headers,
+              Authorization: `Bearer ${token}`,
+            };
+          }
         }
         return config;
       },
@@ -67,6 +104,10 @@ export abstract class BaseApiService {
           return Promise.reject(error);
         }
 
+        if (!this.isBrowser()) {
+          return Promise.reject(error);
+        }
+
         if (this.isRefreshing) {
           return new Promise((resolve, reject) => {
             this.failedQueue.push({
@@ -81,9 +122,12 @@ export abstract class BaseApiService {
         this.isRefreshing = true;
 
         try {
-          const session = await getSession();
+          this.clearSessionCache();
+          const session = await this.getCachedSession();
+
           if (!session?.refreshToken) {
             console.warn("Missing refresh token, logging out...");
+            this.clearSessionCache();
             await signOut({ redirect: true, callbackUrl: "/login" });
             return Promise.reject(error);
           }
@@ -92,7 +136,7 @@ export abstract class BaseApiService {
             refreshToken: session.refreshToken,
           });
 
-          const { accessToken, refreshToken } = response.data;
+          const { accessToken, refreshToken } = response.data.data;
 
           if (!accessToken) throw new Error("Invalid refresh response");
 
@@ -102,7 +146,9 @@ export abstract class BaseApiService {
 
           return instance(originalRequest);
         } catch (refreshError) {
+          console.error("Token refresh failed:", refreshError);
           this.processQueue(refreshError, null);
+          this.clearSessionCache();
           await signOut({ redirect: true, callbackUrl: "/login" });
           return Promise.reject(refreshError);
         } finally {
@@ -151,13 +197,17 @@ export abstract class BaseApiService {
     try {
       const response: AxiosResponse<ArrayBuffer> = await this.axiosInstance.get(
         endpoint,
-        { responseType: "arraybuffer", ...config }
+        {
+          responseType: "arraybuffer",
+          ...config,
+        }
       );
       return response.data;
     } catch (error) {
       throw error;
     }
   }
+
   protected async post<T, D = any>(
     endpoint: string,
     data?: D,

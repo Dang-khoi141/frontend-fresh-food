@@ -1,6 +1,7 @@
 "use client";
 
-import { Show, useShow } from "@refinedev/antd";
+import { Show } from "@refinedev/antd";
+import { useShow } from "@refinedev/core"
 import { Typography } from "antd";
 
 const { Title, Text } = Typography;

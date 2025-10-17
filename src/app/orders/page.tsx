@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import FreshNav from "../../lib/components/landing-page/header/header-nav";
 import Footer from "../../lib/components/landing-page/footer/footer";
-import { orderService, Order } from "../../lib/service/order.service";
+import { orderService } from "../../lib/service/order.service";
 import Link from "next/link";
 import { useAddressContext } from "../../contexts/address-context";
+import { Order } from "../../lib/interface/order";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { defaultAddress, refreshAddress } = useAddressContext();
+  const { defaultAddress } = useAddressContext();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -28,10 +29,6 @@ export default function OrdersPage() {
 
     fetchOrders();
   }, []);
-
-  useEffect(() => {
-    refreshAddress();
-  }, [defaultAddress]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {

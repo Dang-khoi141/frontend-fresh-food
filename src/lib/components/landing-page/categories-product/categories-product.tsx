@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import useFetchProducts from "../../../hooks/useFetchProducts";
 import ProductCard from "../../common/product-card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,18 +14,36 @@ const CategoriesProduct = () => {
     fetchProducts();
   }, []);
 
-  const categories = products
-    ? Array.from(new Set(products.map((p) => p.category?.name?.toUpperCase() || "KHÁC")))
-    : [];
+  const categories = useMemo(
+    () =>
+      products
+        ? Array.from(
+          new Set(
+            products.map((p) => p.category?.name?.toUpperCase() || "KHÁC")
+          )
+        ).sort()
+        : [],
+    [products]
+  );
 
-  const handleCategorySelect = (category: string | null) => {
+  const handleCategorySelect = useCallback((category: string | null) => {
     setSelectedCategory(category);
 
     if (productGridRef.current) {
       const y = productGridRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({ top: y - 150, behavior: "smooth" });
     }
-  };
+  }, []);
+
+  const groupedProducts = useMemo(() => {
+    const grouped: Record<string, typeof products> = {};
+    products?.forEach((p) => {
+      const category = p.category?.name?.toUpperCase() || "KHÁC";
+      if (!grouped[category]) grouped[category] = [];
+      grouped[category].push(p);
+    });
+    return grouped;
+  }, [products]);
 
   if (loading)
     return (
@@ -41,19 +59,10 @@ const CategoriesProduct = () => {
       </section>
     );
 
-  const groupedProducts: Record<string, typeof products> = {};
-  products?.forEach((p) => {
-    const category = p.category?.name?.toUpperCase() || "KHÁC";
-    if (!groupedProducts[category]) groupedProducts[category] = [];
-    groupedProducts[category].push(p);
-  });
-
   return (
     <section className="bg-gray-50 py-12 mt-28 relative">
       <div className="max-w-7xl mx-auto flex gap-10 px-6">
-        <aside
-          className="w-[250px] bg-white border border-gray-200 rounded-2xl shadow-sm p-5 fixed left-[calc((100vw-1280px)/2)] top-[130px] h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 z-20"
-        >
+        <aside className="w-[250px] bg-white border border-gray-200 rounded-2xl shadow-sm p-5 fixed left-[calc((100vw-1280px)/2)] top-[130px] h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 z-20">
           <h3 className="text-base font-semibold text-gray-800 mb-3 border-b pb-2 tracking-wide">
             Danh mục sản phẩm
           </h3>
@@ -86,7 +95,6 @@ const CategoriesProduct = () => {
             ))}
           </ul>
         </aside>
-
 
         <div className="flex-1 ml-[280px]" ref={productGridRef}>
           <AnimatePresence mode="wait">

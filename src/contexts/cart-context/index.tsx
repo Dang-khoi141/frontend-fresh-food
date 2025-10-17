@@ -1,17 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode, useEffect, useState } from "react";
-import { cartService, CartItem } from "@/lib/service/cart.service";
 import { useSession } from "next-auth/react";
-
-interface CartContextType {
-  cart: CartItem[];
-  addToCart: (productId: string, quantity?: number) => Promise<void>;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
-  removeFromCart: (productId: string) => Promise<void>;
-  clearCart: () => Promise<void>;
-  isLoading: boolean;
-}
+import { CartContextType, CartItem } from "../../lib/interface/cart";
+import { UserRole } from "../../lib/enums/user-role.enum";
+import { cartService } from "../../lib/service/cart.service";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -20,8 +13,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
 
+  const isCustomer = (): boolean => {
+    if (!session?.user?.role) return false;
+    return session.user.role === UserRole.CUSTOMER;
+  };
+
   const fetchCart = async () => {
-    if (status !== "authenticated") return;
+    if (status !== "authenticated" || !isCustomer()) return;
+
     setIsLoading(true);
     try {
       const data = await cartService.getCart();
@@ -35,7 +34,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const addToCart = async (productId: string, quantity: number = 1) => {
-    if (status !== "authenticated") {
+    if (!isCustomer()) {
       window.location.href = "/login";
       return;
     }
@@ -50,9 +49,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-
   const updateQuantity = async (productId: string, quantity: number) => {
-    if (status !== "authenticated") {
+    if (!isCustomer()) {
       window.location.href = "/login";
       return;
     }
@@ -68,7 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = async (productId: string) => {
-    if (status !== "authenticated") {
+    if (!isCustomer()) {
       window.location.href = "/login";
       return;
     }
@@ -84,7 +82,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const clearCart = async () => {
-    if (status !== "authenticated") {
+    if (!isCustomer()) {
       window.location.href = "/login";
       return;
     }
@@ -100,12 +98,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && isCustomer()) {
       fetchCart();
     } else if (status === "unauthenticated") {
       setCart([]);
     }
-  }, [status]);
+  }, [status, session?.user?.role]);
 
   return (
     <CartContext.Provider

@@ -1,4 +1,5 @@
 import { Order, CreateOrderRequest } from "../interface/order";
+import { OrderStatistics } from "../interface/orderStatistics";
 import { BaseApiService } from "./baseApi.service";
 
 class OrderService extends BaseApiService {
@@ -78,6 +79,23 @@ class OrderService extends BaseApiService {
     } catch (error: any) {
       console.error(
         "Error updating order status:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  }
+
+  async getStatistics(
+    period: "day" | "week" | "month" = "week"
+  ): Promise<OrderStatistics> {
+    try {
+      const res = await this.axiosInstance.get("/orders/statistics", {
+        params: { period },
+      });
+      return res.data?.data ?? res.data;
+    } catch (error: any) {
+      console.error(
+        "Error fetching order statistics:",
         error.response?.data || error.message
       );
       throw error;

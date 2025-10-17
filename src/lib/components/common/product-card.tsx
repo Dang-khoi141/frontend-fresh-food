@@ -6,16 +6,8 @@ import { useCart } from "@/contexts/cart-context";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { ProductCardProps } from "../../interface/product";
 
-interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    image?: string;
-    brand?: { name: string };
-  };
-}
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
@@ -39,10 +31,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <img
               src={product.image}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               className="max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           ) : (
-            <div className="text-4xl">🛍️</div>
+            <div className="text-4xl">🛒</div>
           )}
         </div>
 

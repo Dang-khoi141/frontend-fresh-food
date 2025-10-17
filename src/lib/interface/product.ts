@@ -34,3 +34,13 @@ export interface SearchProductResponse {
   limit: number;
   totalPages: number;
 }
+
+export interface ProductCardProps {
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image?: string;
+    brand?: { name: string };
+  };
+}

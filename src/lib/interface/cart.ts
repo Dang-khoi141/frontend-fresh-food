@@ -22,3 +22,12 @@ export interface CartItemDisplay {
   product: Product;
   quantity: number;
 }
+
+export interface CartContextType {
+  cart: CartItem[];
+  addToCart: (productId: string, quantity?: number) => Promise<void>;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  removeFromCart: (productId: string) => Promise<void>;
+  clearCart: () => Promise<void>;
+  isLoading: boolean;
+}
