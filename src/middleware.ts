@@ -86,11 +86,22 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/products")) {
-    if (
-      pathname.match(/\/products\/[^/]+$/) &&
-      ![UserRole.CUSTOMER].includes(userRole)
-    ) {
+    const isProductDetailRoute = pathname.match(
+      /\/products\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    );
+
+    if (isProductDetailRoute && ![UserRole.CUSTOMER].includes(userRole)) {
       return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (
+      pathname.includes("/create") ||
+      pathname.includes("/edit") ||
+      request.method !== "GET"
+    ) {
+      if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
     }
   }
 

@@ -2,27 +2,32 @@
 
 import { UploadOutlined } from "@ant-design/icons";
 import { Edit, useForm } from "@refinedev/antd";
+import { axiosInstance } from "@providers/data-provider";
 import {
+  App,
   Button,
   Form,
   Image,
   Input,
   InputNumber,
+  Select,
   Switch,
   Upload,
   UploadProps,
-  message,
 } from "antd";
 import ImgCrop from "antd-img-crop";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ProductEdit() {
+  const { message } = App.useApp();
   const [uploading, setUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
 
   const { formProps, saveButtonProps, queryResult } = useForm({
     resource: "products",
-   queryOptions: {
+    queryOptions: {
       select: (response: any) => {
         return { data: response?.data?.data ?? {} };
       },
@@ -30,6 +35,15 @@ export default function ProductEdit() {
   });
 
   const currentImage: string = Form.useWatch("image", formProps.form);
+
+  useEffect(() => {
+    axiosInstance.get("/categories").then((res) => {
+      setCategories(Array.isArray(res.data) ? res.data : res.data.data || []);
+    });
+    axiosInstance.get("/brands").then((res) => {
+      setBrands(Array.isArray(res.data) ? res.data : res.data.data || []);
+    });
+  }, []);
 
   const uploadProps: UploadProps = {
     name: "file",
@@ -42,26 +56,24 @@ export default function ProductEdit() {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image`, {
-          method: "POST",
-          body: formData,
+        const res = await axiosInstance.post("/upload/image", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
 
-        if (!res.ok) throw new Error("Failed to upload image");
-
-        const resJson = await res.json();
-        console.log("📡 Response JSON:", resJson);
-
-        const { imageUrl } = resJson;
+        const imageUrl = res.data?.data?.imageUrl;
         if (!imageUrl) throw new Error("No imageUrl returned from server");
 
         formProps.form?.setFieldsValue({ image: imageUrl });
         setPreviewImage(imageUrl);
 
         message.success("Upload product image success!");
-      } catch (err) {
+      } catch (err: any) {
         console.error("Upload error:", err);
-        message.error("Upload error");
+        const errorMessage =
+          err.response?.data?.message || err.message || "Upload error";
+        message.error(errorMessage);
         return Upload.LIST_IGNORE;
       } finally {
         setUploading(false);
@@ -75,7 +87,6 @@ export default function ProductEdit() {
   };
 
   const handleFinish = async (values: any) => {
-
     await formProps.onFinish?.(values);
     await queryResult?.refetch?.();
 
@@ -92,7 +103,7 @@ export default function ProductEdit() {
         </Form.Item>
 
         <Form.Item label="Price" name="price" rules={[{ required: true }]}>
-          <InputNumber style={{ width: "100%" }} />
+          <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
 
         <Form.Item label="Description" name="description">
@@ -103,27 +114,46 @@ export default function ProductEdit() {
           <Switch />
         </Form.Item>
 
-        <Form.Item label="Brand ID" name="brandId" rules={[{ required: true }]}>
-          <Input placeholder="Enter brand ID" />
+        <Form.Item
+          label="Brand"
+          name="brandId"
+          rules={[{ required: true, message: "Please select brand" }]}
+        >
+          <Select
+            placeholder="Select brand"
+            options={brands?.map((b: any) => ({
+              label: b.name,
+              value: b.id,
+            }))}
+          />
         </Form.Item>
 
         <Form.Item
-          label="Category ID"
+          label="Category"
           name="categoryId"
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: "Please select category" }]}
         >
-          <Input placeholder="Enter category ID" />
+          <Select
+            placeholder="Select category"
+            options={categories?.map((cat: any) => ({
+              label: cat.name,
+              value: cat.id,
+            }))}
+          />
         </Form.Item>
 
-        <Form.Item label="Product Image" name="image">
-          {(previewImage || currentImage) && (
+        {(previewImage || currentImage) && (
+          <Form.Item label="Current Product Image">
             <Image
               src={`${previewImage || currentImage}?t=${Date.now()}`}
               alt="Product Image"
-              style={{ maxWidth: 200, maxHeight: 200, marginBottom: 16 }}
+              style={{ maxWidth: 200, maxHeight: 200 }}
             />
-          )}
-          <ImgCrop rotationSlider>
+          </Form.Item>
+        )}
+
+        <Form.Item label="Product Image" name="image">
+          <ImgCrop rotationSlider destroyOnHidden>
             <Upload {...uploadProps}>
               <Button icon={<UploadOutlined />}>
                 {previewImage || currentImage ? "Change Image" : "Upload Image"}

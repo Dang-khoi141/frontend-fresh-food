@@ -2,7 +2,9 @@
 
 import { UploadOutlined } from "@ant-design/icons";
 import { Edit, useForm } from "@refinedev/antd";
+import { axiosInstance } from "@providers/data-provider";
 import {
+  App,
   Button,
   Form,
   Image,
@@ -10,12 +12,12 @@ import {
   Select,
   Upload,
   UploadProps,
-  message,
 } from "antd";
 import ImgCrop from "antd-img-crop";
 import { useState } from "react";
 
 export default function UserEdit() {
+  const { message } = App.useApp();
   const [uploading, setUploading] = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
@@ -41,28 +43,26 @@ export default function UserEdit() {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image`, {
-          method: "POST",
-          body: formData,
+        const res = await axiosInstance.post("/upload/image", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
 
-        if (!res.ok) throw new Error("Failed to upload image");
-
-        const resJson = await res.json();
-        console.log("📡 Response JSON:", resJson);
-
-
-        const imageUrl = resJson.data?.imageUrl;
+        const imageUrl = res.data?.data?.imageUrl;
         if (!imageUrl) throw new Error("No imageUrl returned from server");
-
 
         formProps.form?.setFieldsValue({ avatar: imageUrl });
         setPreviewAvatar(imageUrl);
 
         message.success("Upload avatar success!");
-      } catch (err) {
+      } catch (err: any) {
         console.error("Upload error:", err);
-        message.error("Upload error");
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Upload error";
+        message.error(errorMessage);
         return Upload.LIST_IGNORE;
       } finally {
         setUploading(false);
@@ -130,15 +130,18 @@ export default function UserEdit() {
           />
         </Form.Item>
 
-        <Form.Item label="Avatar" name="avatar">
-          {(previewAvatar || currentAvatar) && (
+        {(previewAvatar || currentAvatar) && (
+          <Form.Item label="Current Avatar">
             <Image
               src={`${previewAvatar || currentAvatar}?t=${Date.now()}`}
               alt="User Avatar"
-              style={{ maxWidth: 200, maxHeight: 200, marginBottom: 16 }}
+              style={{ maxWidth: 200, maxHeight: 200 }}
             />
-          )}
-          <ImgCrop rotationSlider>
+          </Form.Item>
+        )}
+
+        <Form.Item label="Avatar" name="avatar">
+          <ImgCrop rotationSlider destroyOnHidden>
             <Upload {...uploadProps}>
               <Button icon={<UploadOutlined />}>
                 {previewAvatar || currentAvatar ? "Change Avatar" : "Upload Avatar"}

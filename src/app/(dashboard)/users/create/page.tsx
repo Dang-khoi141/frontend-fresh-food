@@ -3,12 +3,13 @@
 import { UploadOutlined } from "@ant-design/icons";
 import { axiosInstance } from "@providers/data-provider";
 import { Create } from "@refinedev/antd";
-import { Button, Form, Input, message, Select, Upload } from "antd";
+import { App, Button, Form, Input, Select, Upload } from "antd";
 import ImgCrop from "antd-img-crop";
 import { RcFile } from "antd/es/upload";
 import { useState } from "react";
 
 export default function UserCreate() {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -17,8 +18,11 @@ export default function UserCreate() {
     setUploading(true);
     try {
       const formData = new FormData();
+
       Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value as string);
+        if (value !== null && value !== undefined && value !== "") {
+          formData.append(key, value as string);
+        }
       });
 
       if (selectedFile) {
@@ -36,7 +40,7 @@ export default function UserCreate() {
       setSelectedFile(null);
     } catch (err: any) {
       console.error(err);
-      message.error(err.message || "Error creating user");
+      message.error(err.response?.data?.message || err.message || "Error creating user");
     } finally {
       setUploading(false);
     }
@@ -101,7 +105,7 @@ export default function UserCreate() {
         </Form.Item>
 
         <Form.Item label="Avatar">
-          <ImgCrop rotationSlider>
+          <ImgCrop rotationSlider destroyOnHidden>
             <Upload {...uploadProps}>
               <Button icon={<UploadOutlined />}>Select Avatar</Button>
             </Upload>

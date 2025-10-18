@@ -4,11 +4,11 @@ import { UploadOutlined } from "@ant-design/icons";
 import { axiosInstance } from "@providers/data-provider";
 import { Create } from "@refinedev/antd";
 import {
+  App,
   Button,
   Form,
   Input,
   InputNumber,
-  message,
   Select,
   Switch,
   Upload,
@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProductCreate() {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -26,15 +27,14 @@ export default function ProductCreate() {
   const [brands, setBrands] = useState<any[]>([]);
   const router = useRouter();
 
-useEffect(() => {
-  axiosInstance.get("/categories").then((res) => {
-    setCategories(Array.isArray(res.data) ? res.data : res.data.data || []);
-  });
-  axiosInstance.get("/brands").then((res) => {
-    setBrands(Array.isArray(res.data) ? res.data : res.data.data || []);
-  });
-}, []);
-
+  useEffect(() => {
+    axiosInstance.get("/categories").then((res) => {
+      setCategories(Array.isArray(res.data) ? res.data : res.data.data || []);
+    });
+    axiosInstance.get("/brands").then((res) => {
+      setBrands(Array.isArray(res.data) ? res.data : res.data.data || []);
+    });
+  }, []);
 
   const handleSubmit = async (values: any) => {
     setUploading(true);
@@ -58,11 +58,11 @@ useEffect(() => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      message.success("✅ Product created successfully!");
+      message.success("Product created successfully!");
       router.push("/products");
     } catch (err: any) {
-      console.error(" Product create error:", err.response?.data || err);
-      message.error(err.message || "Error creating product");
+      console.error("Product create error:", err.response?.data || err);
+      message.error(err.response?.data?.message || err.message || "Error creating product");
     } finally {
       setUploading(false);
     }
@@ -113,36 +113,36 @@ useEffect(() => {
           <Switch />
         </Form.Item>
 
-<Form.Item
-  label="Category"
-  name="categoryId"
-  rules={[{ required: true, message: "Please select category" }]}
->
-  <Select
-    placeholder="Select category"
-    options={categories?.map((cat: any) => ({
-      label: cat.name,
-      value: cat.id,
-    }))}
-  />
-</Form.Item>
+        <Form.Item
+          label="Category"
+          name="categoryId"
+          rules={[{ required: true, message: "Please select category" }]}
+        >
+          <Select
+            placeholder="Select category"
+            options={categories?.map((cat: any) => ({
+              label: cat.name,
+              value: cat.id,
+            }))}
+          />
+        </Form.Item>
 
-<Form.Item
-  label="Brand"
-  name="brandId"
-  rules={[{ required: true, message: "Please select brand" }]}
->
-  <Select
-    placeholder="Select brand"
-    options={brands?.map((b: any) => ({
-      label: b.name,
-      value: b.id,
-    }))}
-  />
-</Form.Item>
+        <Form.Item
+          label="Brand"
+          name="brandId"
+          rules={[{ required: true, message: "Please select brand" }]}
+        >
+          <Select
+            placeholder="Select brand"
+            options={brands?.map((b: any) => ({
+              label: b.name,
+              value: b.id,
+            }))}
+          />
+        </Form.Item>
 
         <Form.Item label="Image">
-          <ImgCrop rotationSlider>
+          <ImgCrop rotationSlider destroyOnHidden>
             <Upload {...uploadProps}>
               <Button icon={<UploadOutlined />}>
                 {selectedFile ? "Change Image" : "Select Image"}

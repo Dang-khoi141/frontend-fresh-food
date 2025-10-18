@@ -1,10 +1,23 @@
 "use client";
 
 import { Edit, useForm } from "@refinedev/antd";
+import { useParams } from "next/navigation";
 import { Form, Input } from "antd";
+import { Brand } from "../../../../../lib/interface/brands";
 
 export default function BrandEdit() {
-  const { formProps, saveButtonProps } = useForm({ resource: "brands" });
+  const params = useParams();
+  const brandId = params?.id as string;
+
+  const { formProps, saveButtonProps } = useForm<Brand>({
+    resource: "brands",
+    id: brandId,
+    queryOptions: {
+      select: (response: any) => {
+        return { data: response?.data?.data ?? {} };
+      },
+    },
+  });
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
