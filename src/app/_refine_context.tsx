@@ -25,9 +25,10 @@ const CustomIcon = () => (
   <img
     src="/img/ff-mark.svg"
     alt="Fresh-food Mark"
-    style={{ width: 26
+    style={{
+      width: 26
       , height: 26
-     }}
+    }}
   />
 );
 export const RefineContext = (
@@ -68,7 +69,7 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
                 edit: "/users/edit/:id",
                 show: "/users/show/:id",
                 meta: {
-                    canDelete: true,
+                  canDelete: true,
                 },
               },
               {
@@ -102,10 +103,18 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
                   label: "Statistics",
                 },
               },
+              {
+                name: "promotions",
+                list: "/promotions",
+                create: "/promotions/create",
+                edit: "/promotions/edit/:id",
+                show: "/promotions/show/:id",
+                meta: { canDelete: true },
+              },
             ]}
             options={{
               title: {
-                icon: <CustomIcon/>,
+                icon: <CustomIcon />,
                 text: 'dashboard',
               },
               syncWithLocation: true,

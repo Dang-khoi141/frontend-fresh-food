@@ -38,23 +38,27 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
     }
   }, [isAuthenticated]);
 
-  const loadAddresses = useCallback(async () => {
-    try {
-      const data = await addressService.getAllAddresses();
-      setAddresses(data);
-    } catch (error) {
+const loadAddresses = useCallback(async () => {
+  try {
+    const data = await addressService.getAllAddresses();
+    setAddresses(data);
+  } catch (error: any) {
+    if (error.response?.status !== 403) {
       console.error("Error loading addresses:", error);
     }
-  }, []);
+  }
+}, []);
 
   const loadDefaultAddress = useCallback(async () => {
-    try {
-      const data = await addressService.getDefaultAddress();
-      setDefaultAddress(data);
-    } catch (error) {
+  try {
+    const data = await addressService.getDefaultAddress();
+    setDefaultAddress(data);
+  } catch (error: any) {
+    if (error.response?.status !== 403) {
       console.error("Error loading default address:", error);
     }
-  }, []);
+  }
+}, []);
 
   const loadProvinces = useCallback(async () => {
     if (provinces.length > 0) return;

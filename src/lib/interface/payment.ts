@@ -10,6 +10,7 @@ export interface CreatePaymentRequest {
   orderId: string;
   description: string;
   items: PaymentItem[];
+  discountAmount?: number;
 }
 
 export interface PayosData {

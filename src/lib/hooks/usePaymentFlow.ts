@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Order } from "@/lib/interface/order";
 import {
   CreatePaymentResponse,
   PaymentFlowState,
 } from "@/lib/interface/payment";
-import useFetchPayment from "./useFetchPayment";
 import { orderService } from "@/lib/service/order.service";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import useFetchPayment from "./useFetchPayment";
 
 /**
  * usePaymentFlow — hook quản lý toàn bộ vòng đời thanh toán online.
@@ -69,6 +69,7 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
               price: Number(i.unitPrice),
               quantity: i.quantity,
             })),
+            discountAmount: orderData.discountAmount || 0,
           });
 
           if (resp?.payosResponse?.data) {

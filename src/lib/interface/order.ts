@@ -27,6 +27,8 @@ export interface Order {
   shippingAddress: string;
   notes?: string;
   items: OrderItem[];
+  discountAmount?: number;
+  promotionCode?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -35,4 +37,6 @@ export interface CreateOrderRequest {
   paymentMethod: "COD" | "ONLINE";
   shippingAddress: string;
   notes?: string;
+  promotionCode?: string;
+  discountAmount?: number;
 }

@@ -18,6 +18,7 @@ export abstract class BaseApiService {
 
   private cachedSession: { session: any; timestamp: number } | null = null;
   private readonly SESSION_CACHE_TIME = 5 * 60 * 1000;
+  private handle403Called = false;
 
   constructor() {
     this.baseUrl = this.getBaseUrl();
@@ -95,6 +96,10 @@ export abstract class BaseApiService {
       response => response,
       async (error: AxiosError) => {
         const originalRequest = error.config;
+
+        if (error.response?.status === 403) {
+          return Promise.reject(error);
+        }
 
         if (!originalRequest || error.response?.status !== 401) {
           return Promise.reject(error);
