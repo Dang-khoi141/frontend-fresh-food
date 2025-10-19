@@ -111,6 +111,13 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
                 show: "/promotions/show/:id",
                 meta: { canDelete: true },
               },
+              {
+                name: "orders",
+                list: "/admin/orders",
+                show: "/admin//orders/show/:id",
+                edit: "/admin/orders/edit/:id",
+                meta: { label: "Orders" },
+              }
             ]}
             options={{
               title: {

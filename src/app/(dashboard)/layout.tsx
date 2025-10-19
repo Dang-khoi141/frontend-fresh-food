@@ -17,6 +17,7 @@ import {
   Search,
   ChevronRight,
   Package,
+  Building2,
 } from 'lucide-react';
 
 const { Header, Sider, Content } = Layout;
@@ -33,11 +34,12 @@ export default function DashboardLayout({
 
   const menuItems = [
     { key: '/users', label: 'Users', icon: Users },
-    { key: '/products', label: 'Products', icon: ShoppingCart },
+    { key: '/products', label: 'Products', icon: Package },
     { key: '/categories', label: 'Categories', icon: Tag },
-    { key: '/brands', label: 'Brands', icon: Package },
+    { key: '/brands', label: 'Brands', icon: Building2 },
     { key: '/statistics', label: 'Statistics', icon: LineChart },
     { key: '/promotions', label: 'Promotions', icon: Gift },
+    { key: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   ];
 
   const getPageTitle = () => {

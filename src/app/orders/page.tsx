@@ -1,41 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Spin } from "antd";
 import FreshNav from "../../lib/components/landing-page/header/header-nav";
 import Footer from "../../lib/components/landing-page/footer/footer";
-import { orderService } from "../../lib/service/order.service";
 import Link from "next/link";
 import { useAddressContext } from "../../contexts/address-context";
-import { Order } from "../../lib/interface/order";
+import { useFetchOrder } from "../../lib/hooks/useFetchOrder";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const { defaultAddress } = useAddressContext();
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const data = await orderService.getMyOrders();
-        setOrders(data);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
+  const { orders, loading, error } = useFetchOrder({
+    autoFetch: true,
+  });
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       PENDING: { label: "Chờ xử lý", className: "bg-yellow-100 text-yellow-800" },
       CONFIRMED: { label: "Đã xác nhận", className: "bg-blue-100 text-blue-800" },
       PAID: { label: "Đã thanh toán", className: "bg-green-100 text-green-800" },
-      SHIPPED: { label: "Đang giao", className: "bg-purple-100 text-purple-800" },
+      SHIPPED: { label: "Đang vận chuyển", className: "bg-violet-100 text-violet-800" },
       DELIVERED: { label: "Đã giao", className: "bg-emerald-100 text-emerald-800" },
       CANCELED: { label: "Đã hủy", className: "bg-red-100 text-red-800" },
     };
@@ -54,11 +37,26 @@ export default function OrdersPage() {
   if (loading) {
     return (
       <>
-        <FreshNav />
         <div className="max-w-6xl mx-auto px-4 py-20 text-center mt-28">
           <p>Đang tải danh sách đơn hàng...</p>
         </div>
-        <Footer />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <div className="max-w-6xl mx-auto px-4 py-20 text-center mt-28">
+          <h2 className="text-2xl font-bold mb-4 text-red-600">Lỗi tải dữ liệu</h2>
+          <p className="text-gray-600 mb-6">{error.message}</p>
+          <Link
+            href="/"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold inline-block"
+          >
+            Quay lại trang chủ
+          </Link>
+        </div>
       </>
     );
   }
@@ -84,6 +82,12 @@ export default function OrdersPage() {
     );
   }
 
+  const sortedOrders = [...orders].sort((a, b) => {
+    const dateA = new Date(a.updatedAt || a.createdAt).getTime();
+    const dateB = new Date(b.updatedAt || b.createdAt).getTime();
+    return dateB - dateA;
+  });
+
   return (
     <>
       <FreshNav />
@@ -91,7 +95,7 @@ export default function OrdersPage() {
         <h1 className="text-2xl font-bold mb-6">Đơn hàng của tôi</h1>
 
         <div className="space-y-4">
-          {orders.map((order) => (
+          {sortedOrders.map((order) => (
             <div
               key={order.id}
               className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow"

@@ -20,19 +20,16 @@ export default function PaymentPage({
   if (status === "loading" || status === "idle")
     return (
       <>
-        <FreshNav />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Đang tải thông tin thanh toán...</p>
         </div>
-        <Footer />
       </>
     );
 
   if (error)
     return (
       <>
-        <FreshNav />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
           <div className="bg-red-50 border border-red-200 rounded-lg p-8">
             <div className="text-red-600 text-5xl mb-4">⚠️</div>
@@ -54,14 +51,12 @@ export default function PaymentPage({
             </div>
           </div>
         </div>
-        <Footer />
       </>
     );
 
   if (!order || !paymentData)
     return (
       <>
-        <FreshNav />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8">
             <h2 className="text-2xl font-bold text-yellow-700 mb-4">
@@ -78,7 +73,6 @@ export default function PaymentPage({
             </Link>
           </div>
         </div>
-        <Footer />
       </>
     );
 
@@ -87,7 +81,6 @@ export default function PaymentPage({
   if (status === "success")
     return (
       <>
-        <FreshNav />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
           <div className="bg-green-50 border border-green-200 rounded-lg p-8">
             <div className="text-green-600 text-6xl mb-4">✓</div>
@@ -100,7 +93,6 @@ export default function PaymentPage({
             <p className="text-sm text-gray-500">Đang chuyển hướng...</p>
           </div>
         </div>
-        <Footer />
       </>
     );
 

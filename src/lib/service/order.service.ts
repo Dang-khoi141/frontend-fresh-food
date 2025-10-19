@@ -1,4 +1,4 @@
-import { Order, CreateOrderRequest } from "../interface/order";
+import { CreateOrderRequest, Order } from "../interface/order";
 import { OrderStatistics } from "../interface/orderStatistics";
 import { BaseApiService } from "./baseApi.service";
 
@@ -33,6 +33,18 @@ class OrderService extends BaseApiService {
       throw error;
     }
   }
+  async getAllOrders(): Promise<Order[]> {
+    try {
+      const res = await this.axiosInstance.get("/orders");
+      return res.data?.data ?? res.data;
+    } catch (error: any) {
+      console.error(
+        "Error fetching all orders:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  }
 
   async getOrderDetail(orderId: string): Promise<Order> {
     try {
@@ -48,6 +60,29 @@ class OrderService extends BaseApiService {
       return order;
     } catch (error: any) {
       console.error("Error fetching order detail:", {
+        orderId,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
+  }
+
+  async getOrderDetailAdmin(orderId: string): Promise<Order> {
+    try {
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(orderId)) {
+        console.error("Invalid UUID format:", orderId);
+        throw new Error("Invalid order ID format");
+      }
+
+      const res = await this.axiosInstance.get(`/orders/admin/${orderId}`);
+      const order = res.data?.data ?? res.data;
+      return order;
+    } catch (error: any) {
+      console.error("Error fetching order detail (admin):", {
         orderId,
         status: error.response?.status,
         data: error.response?.data,

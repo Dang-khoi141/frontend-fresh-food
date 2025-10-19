@@ -16,6 +16,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/users") ||
       pathname.startsWith("/cart") ||
       pathname.startsWith("/orders") ||
+      pathname.startsWith("/admin") ||
       pathname.startsWith("/addresses") ||
       pathname.startsWith("/payment")
     ) {
@@ -26,6 +27,12 @@ export async function middleware(request: NextRequest) {
 
   if (!userRole) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (pathname.startsWith("/admin")) {
+    if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
 
   if (pathname.startsWith("/users")) {
@@ -117,6 +124,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/users/:path*",
+    "/admin/:path*",
     "/orders/:path*",
     "/cart/:path*",
     "/products/:path*",

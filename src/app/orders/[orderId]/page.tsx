@@ -84,11 +84,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
   if (loading) {
     return (
       <>
-        <FreshNav />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
           <p>Đang tải thông tin đơn hàng...</p>
         </div>
-        <Footer />
       </>
     );
   }
@@ -134,8 +132,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
           <div className="border rounded-lg p-4 bg-white shadow-sm">
             <h3 className="font-semibold mb-3">Thông tin giao hàng</h3>
             <p className="text-sm text-gray-600">
-              {order.shippingAddress ||
-                `${defaultAddress?.line1}, ${defaultAddress?.city}, ${defaultAddress?.province}`}
+              {order.shippingAddress}
             </p>
             {order.notes && (
               <div className="mt-2 pt-2 border-t">

@@ -5,6 +5,15 @@ import axios, {
   AxiosError,
 } from "axios";
 import { getSession, signOut } from "next-auth/react";
+export class SilentError extends Error {
+  constructor(
+    public originalError: any,
+    message = "Silent Error (auth or permission issue)"
+  ) {
+    super(message);
+    this.name = "SilentError";
+  }
+}
 
 export abstract class BaseApiService {
   protected axiosInstance: AxiosInstance;
@@ -18,7 +27,6 @@ export abstract class BaseApiService {
 
   private cachedSession: { session: any; timestamp: number } | null = null;
   private readonly SESSION_CACHE_TIME = 5 * 60 * 1000;
-  private handle403Called = false;
 
   constructor() {
     this.baseUrl = this.getBaseUrl();
@@ -81,10 +89,7 @@ export abstract class BaseApiService {
           const token = session?.accessToken;
 
           if (token) {
-            config.headers = {
-              ...config.headers,
-              Authorization: `Bearer ${token}`,
-            };
+            config.headers.Authorization = `Bearer ${token}`;
           }
         }
         return config;
@@ -95,17 +100,17 @@ export abstract class BaseApiService {
     instance.interceptors.response.use(
       response => response,
       async (error: AxiosError) => {
-        const originalRequest = error.config;
+        const originalRequest = error.config as any;
 
         if (error.response?.status === 403) {
-          return Promise.reject(error);
+          throw new SilentError(error, "Forbidden (403)");
         }
 
         if (!originalRequest || error.response?.status !== 401) {
           return Promise.reject(error);
         }
 
-        if ((originalRequest as any)._retry) {
+        if (originalRequest._retry) {
           return Promise.reject(error);
         }
 
@@ -123,7 +128,7 @@ export abstract class BaseApiService {
           });
         }
 
-        (originalRequest as any)._retry = true;
+        originalRequest._retry = true;
         this.isRefreshing = true;
 
         try {
@@ -173,11 +178,17 @@ export abstract class BaseApiService {
       if (error) {
         reject(error);
       } else if (tokens) {
-        config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        if (config.headers) {
+          config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        }
         resolve(this.axiosInstance(config));
       }
     });
     this.failedQueue = [];
+  }
+
+  protected isSilentError(error: any): boolean {
+    return error instanceof SilentError;
   }
 
   protected async get<T>(
