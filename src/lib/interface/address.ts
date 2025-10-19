@@ -38,3 +38,9 @@ export interface AddressFormData {
   wardName: string;
   isDefault: boolean;
 }
+
+export interface AddressContextType {
+  defaultAddress: Address | null;
+  refreshAddress: () => Promise<void>;
+  isLoading: boolean;
+}

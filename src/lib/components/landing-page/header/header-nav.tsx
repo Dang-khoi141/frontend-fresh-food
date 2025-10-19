@@ -1,7 +1,6 @@
 "use client";
 
-import { useCart } from "@/contexts/cart-context";
-import { Product } from "@/lib/interface/product";
+
 import { productService } from "@/lib/service/product.service";
 import {
   ChevronDown,
@@ -22,6 +21,8 @@ import { memo, useEffect, useRef, useState } from "react";
 import { useAddressContext } from "../../../../contexts/address-context";
 import { useFetchAddress } from "../../../hooks/useFetchAddress";
 import CartDrawer from "../../common/cart-drawer";
+import { Product } from "../../../interface/product";
+import { useCart } from "../../../../contexts/cart-context";
 
 const FreshNav = () => {
   const [openCart, setOpenCart] = useState(false);
@@ -403,20 +404,20 @@ const FreshNav = () => {
                       className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 rounded-md"
                       onClick={() => setOpenMenu(false)}
                     >
-                      <User className="h-5 w-5 text-emerald-600" /> Hồ sơ cá nhân
+                      Hồ sơ cá nhân
                     </Link>
                     <Link
                       href="/orders"
                       className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 rounded-md"
                       onClick={() => setOpenMenu(false)}
                     >
-                      <Package className="h-5 w-5 text-emerald-600" /> Đơn hàng đã mua
+                      Đơn hàng đã mua
                     </Link>
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-3 w-full text-left px-4 py-3 hover:bg-red-50 rounded-md text-red-600"
                     >
-                      <LogOut className="h-5 w-5" /> Đăng xuất
+                      Đăng xuất
                     </button>
                   </div>
                 )}

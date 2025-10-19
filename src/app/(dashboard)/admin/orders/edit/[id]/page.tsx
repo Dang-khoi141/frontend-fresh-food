@@ -1,20 +1,21 @@
 "use client";
 
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import { useForm } from "@refinedev/antd";
 import {
-    Form,
-    Select,
+    Alert,
     App,
+    Button,
     Card,
     Descriptions,
-    Tag,
-    Alert,
+    Form,
+    Select,
     Space,
-    Button,
     Spin,
+    Tag,
 } from "antd";
-import { useRouter, useParams } from "next/navigation";
-import { useState, useMemo } from "react";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { useParams, useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import { useFetchOrder } from "../../../../../../lib/hooks/useFetchOrder";
 
 const ORDER_STATUS_COLORS: Record<string, string> = {
@@ -48,7 +49,7 @@ export default function OrderEdit() {
     const params = useParams();
     const orderId = params?.id as string;
 
-    const [form] = Form.useForm();
+    const { formProps } = useForm({ resource: "orders" });
     const [isUpdating, setIsUpdating] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<string>("");
 
@@ -249,7 +250,7 @@ export default function OrderEdit() {
 
                 <Card title="Status Transition" style={{ marginBottom: "20px" }}>
                     <Form
-                        form={form}
+                        {...formProps}
                         layout="vertical"
                         onFinish={handleFinish}
                     >

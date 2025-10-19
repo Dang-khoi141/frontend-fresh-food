@@ -22,8 +22,8 @@ export default function Users() {
     dataSource: Array.isArray((tableProps?.dataSource as any)?.data)
       ? (tableProps.dataSource as any).data
       : Array.isArray(tableProps?.dataSource)
-      ? tableProps.dataSource
-      : [],
+        ? tableProps.dataSource
+        : [],
   };
 
   return (
@@ -31,14 +31,6 @@ export default function Users() {
       <Table {...safeTableProps} rowKey="id">
         <Table.Column dataIndex="name" title="Name" />
         <Table.Column dataIndex="email" title="Email" />
-        <Table.Column
-          dataIndex="password"
-          title="Password"
-          render={(value: any) => {
-            if (!value) return "-";
-            return <MarkdownField value={value.slice(0, 20) + "..."} />;
-          }}
-        />
         <Table.Column dataIndex="phone" title="Phone" />
         <Table.Column
           dataIndex="avatar"

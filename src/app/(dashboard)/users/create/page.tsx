@@ -2,7 +2,7 @@
 
 import { UploadOutlined } from "@ant-design/icons";
 import { axiosInstance } from "@providers/data-provider";
-import { Create } from "@refinedev/antd";
+import { Create, useForm } from "@refinedev/antd";
 import { App, Button, Form, Input, Select, Upload } from "antd";
 import ImgCrop from "antd-img-crop";
 import { RcFile } from "antd/es/upload";
@@ -10,7 +10,7 @@ import { useState } from "react";
 
 export default function UserCreate() {
   const { message } = App.useApp();
-  const [form] = Form.useForm();
+  const { formProps, saveButtonProps } = useForm({ resource: "users" });
   const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -36,7 +36,7 @@ export default function UserCreate() {
       });
 
       message.success("User created successfully!");
-      form.resetFields();
+      formProps.form?.resetFields();
       setSelectedFile(null);
     } catch (err: any) {
       console.error(err);
@@ -61,7 +61,7 @@ export default function UserCreate() {
 
   return (
     <Create isLoading={uploading}>
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+      <Form {...formProps} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           label="Name"
           name="name"

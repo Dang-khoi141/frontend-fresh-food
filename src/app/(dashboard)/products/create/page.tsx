@@ -2,7 +2,7 @@
 
 import { UploadOutlined } from "@ant-design/icons";
 import { axiosInstance } from "@providers/data-provider";
-import { Create } from "@refinedev/antd";
+import { Create, useForm } from "@refinedev/antd";
 import {
   App,
   Button,
@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 
 export default function ProductCreate() {
   const { message } = App.useApp();
-  const [form] = Form.useForm();
+  const { formProps, saveButtonProps } = useForm({ resource: "products" });
   const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
@@ -82,8 +82,8 @@ export default function ProductCreate() {
   };
 
   return (
-    <Create isLoading={uploading}>
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+    <Create isLoading={uploading} saveButtonProps={saveButtonProps}>
+      <Form {...formProps} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           label="Name"
           name="name"
@@ -150,10 +150,6 @@ export default function ProductCreate() {
             </Upload>
           </ImgCrop>
         </Form.Item>
-
-        <Button type="primary" htmlType="submit" loading={uploading}>
-          Create Product
-        </Button>
       </Form>
     </Create>
   );

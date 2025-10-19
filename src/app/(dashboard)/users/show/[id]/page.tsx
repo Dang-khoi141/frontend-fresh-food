@@ -35,9 +35,6 @@ export default function UserShow() {
 
   return (
     <Show isLoading={isLoading}>
-      <Title level={5}>ID</Title>
-      <TextField value={record?.id ?? "-"} />
-
       <Title level={5}>Name</Title>
       <TextField value={record?.name ?? "-"} />
 

@@ -1,24 +1,22 @@
 "use client";
 
 import { createContext, useContext, ReactNode, useEffect, useState, useCallback } from "react";
-import { Address, addressService } from "@/lib/service/address.service";
 import { useSession } from "next-auth/react";
-
-interface AddressContextType {
-    defaultAddress: Address | null;
-    refreshAddress: () => Promise<void>;
-    isLoading: boolean;
-}
+import { UserRole } from "@/lib/enums/user-role.enum";
+import { Address, AddressContextType } from "../../lib/interface/address";
+import { addressService } from "../../lib/service/address.service";
 
 const AddressContext = createContext<AddressContextType | undefined>(undefined);
-
 export function AddressProvider({ children }: { children: ReactNode }) {
     const { data: session } = useSession();
+    const userRole = (session?.user as any)?.role;
+    const isCustomer = userRole === UserRole.CUSTOMER || !userRole;
+
     const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const loadDefaultAddress = useCallback(async () => {
-        if (!session) {
+        if (!session || !isCustomer) {
             setDefaultAddress(null);
             return;
         }
@@ -33,7 +31,7 @@ export function AddressProvider({ children }: { children: ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    }, [session]);
+    }, [session, isCustomer]);
 
     useEffect(() => {
         loadDefaultAddress();

@@ -1,14 +1,14 @@
 "use client";
 
 import { promotionService } from "@/lib/service/promotion.service";
-import { Create } from "@refinedev/antd";
+import { Create, useForm } from "@refinedev/antd";
 import {
+    App,
     Button,
     DatePicker,
     Form,
     Input,
     InputNumber,
-    App,
     Switch
 } from "antd";
 import { useRouter } from "next/navigation";
@@ -18,11 +18,11 @@ const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
 export default function PromotionCreate() {
-    const [form] = Form.useForm();
+    const { formProps } = useForm({ resource: "promotions" });
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const discountPercent = Form.useWatch("discountPercent", form);
-    const discountAmount = Form.useWatch("discountAmount", form);
+    const discountPercent = Form.useWatch("discountPercent", formProps.form);
+    const discountAmount = Form.useWatch("discountAmount", formProps.form);
     const { message } = App.useApp();
 
     const handleSubmit = async (values: any) => {
@@ -52,7 +52,7 @@ export default function PromotionCreate() {
 
             await promotionService.create(payload);
             message.success("Promotion created successfully!");
-            form.resetFields();
+            formProps.form?.resetFields();
             router.push("/promotions");
         } catch (err: any) {
             console.error(err);
@@ -64,7 +64,7 @@ export default function PromotionCreate() {
 
     return (
         <Create isLoading={loading} saveButtonProps={{ hidden: true }}>
-            <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form {...formProps} form={formProps.form} layout="vertical" onFinish={handleSubmit}>
                 <Form.Item
                     label="Promotion Code"
                     name="code"

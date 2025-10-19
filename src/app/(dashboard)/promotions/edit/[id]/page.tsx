@@ -65,7 +65,7 @@ export default function PromotionEdit() {
 
     return (
         <Edit saveButtonProps={saveButtonProps}>
-            <Form {...formProps} layout="vertical" onFinish={handleFinish}>
+            <Form {...formProps} form={formProps.form} layout="vertical" onFinish={handleFinish}>
                 <Form.Item
                     label="Promotion Code"
                     name="code"
