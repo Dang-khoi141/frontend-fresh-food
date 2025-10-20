@@ -5,24 +5,23 @@ import { productService } from "@/lib/service/product.service";
 import {
   ChevronDown,
   Heart,
-  LogOut,
   MapPin,
-  Package,
   Plus,
   Search,
   ShoppingCart,
   User,
-  X,
+  X
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { memo, useEffect, useRef, useState } from "react";
 import { useAddressContext } from "../../../../contexts/address-context";
-import { useFetchAddress } from "../../../hooks/useFetchAddress";
-import CartDrawer from "../../common/cart-drawer";
-import { Product } from "../../../interface/product";
 import { useCart } from "../../../../contexts/cart-context";
+import { useFetchAddress } from "../../../hooks/useFetchAddress";
+import { Product } from "../../../interface/product";
+import CartDrawer from "../../common/cart-drawer";
+import AddressFormModal from "../../profile-page/address/address-from-model";
 
 const FreshNav = () => {
   const [openCart, setOpenCart] = useState(false);
@@ -34,11 +33,11 @@ const FreshNav = () => {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [updatingDefault, setUpdatingDefault] = useState(false);
+
   const pathname = usePathname();
   const isAuthPage = ["/login", "/register", "/forgot-password"].includes(pathname);
   const { data: session } = isAuthPage ? { data: null } : useSession();
   const { defaultAddress, refreshAddress } = useAddressContext();
-
 
   const searchRef = useRef<HTMLDivElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
@@ -64,7 +63,6 @@ const FreshNav = () => {
     setAsDefaultAddress,
     deleteAddress,
     resetForm,
-    getDisplayAddress,
   } = useFetchAddress(!!session);
 
   useEffect(() => {
@@ -145,12 +143,31 @@ const FreshNav = () => {
 
   const handleCreateAddress = async () => {
     const success = await createAddress();
-    if (success) setOpenAddressModal(false);
+    if (success) {
+      setOpenAddressModal(false);
+      await refreshAddress();
+    }
   };
 
   const handleCloseModal = () => {
     setOpenAddressModal(false);
     resetForm();
+  };
+
+  const handleSetDefault = async (addressId: string) => {
+    if (updatingDefault) return;
+    setUpdatingDefault(true);
+    try {
+      await setAsDefaultAddress(addressId);
+      setOpenLocationMenu(false);
+    } finally {
+      setUpdatingDefault(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    await deleteAddress(addressId);
+    await refreshAddress();
   };
 
   const clearSearch = () => {
@@ -245,18 +262,7 @@ const FreshNav = () => {
                         <div className="flex items-start justify-between">
                           <div
                             className="flex-1"
-                            onClick={async () => {
-                              if (updatingDefault) return;
-                              setUpdatingDefault(true);
-                              try {
-                                await setAsDefaultAddress(address.id);
-                                await refreshAddress();
-                              } finally {
-                                setUpdatingDefault(false);
-                                setOpenLocationMenu(false);
-                              }
-                            }}
-
+                            onClick={() => handleSetDefault(address.id)}
                           >
                             <div className="flex items-center gap-2 mb-2">
                               <MapPin className="h-4 w-4 text-emerald-600" />
@@ -276,7 +282,7 @@ const FreshNav = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                deleteAddress(address.id);
+                                handleDeleteAddress(address.id);
                               }}
                               className="text-red-500 hover:text-red-700 text-sm font-medium ml-2"
                             >
@@ -400,14 +406,14 @@ const FreshNav = () => {
                 {openMenu && (
                   <div className="absolute right-0 mt-2 w-52 bg-white shadow-xl rounded-lg border p-2 text-sm">
                     <Link
-                      href="/profile-page"
+                      href="/profile-page?tab=profile"
                       className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 rounded-md"
                       onClick={() => setOpenMenu(false)}
                     >
                       Hồ sơ cá nhân
                     </Link>
                     <Link
-                      href="/orders"
+                      href="/profile-page?tab=orders"
                       className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 rounded-md"
                       onClick={() => setOpenMenu(false)}
                     >
@@ -431,139 +437,23 @@ const FreshNav = () => {
         </div>
       </div>
 
-      {/* Add Address Modal */}
-      {openAddressModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-6 rounded-t-2xl z-10">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">Thêm địa chỉ mới</h3>
-                <button
-                  onClick={handleCloseModal}
-                  className="text-white hover:bg-white/20 p-2 rounded-lg transition"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Tỉnh/Thành phố <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={addressForm.provinceCode || ""}
-                  onChange={(e) => handleProvinceChange(e.target.value)}
-                  disabled={loadingProvinces}
-                  className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-emerald-500 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {loadingProvinces ? "Đang tải..." : "Chọn Tỉnh/Thành phố"}
-                  </option>
-                  {provinces.map((p) => (
-                    <option key={p.code} value={p.code}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Quận/Huyện <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={addressForm.districtCode || ""}
-                  onChange={(e) => handleDistrictChange(e.target.value)}
-                  disabled={!addressForm.provinceCode || loadingDistricts}
-                  className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-emerald-500 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {loadingDistricts
-                      ? "Đang tải..."
-                      : addressForm.provinceCode
-                        ? "Chọn Quận/Huyện"
-                        : "Vui lòng chọn Tỉnh/Thành phố trước"}
-                  </option>
-                  {districts.map((d) => (
-                    <option key={d.code} value={d.code}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phường/Xã <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={addressForm.wardCode || ""}
-                  onChange={(e) => handleWardChange(e.target.value)}
-                  disabled={!addressForm.districtCode || loadingWards}
-                  className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-emerald-500 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {loadingWards
-                      ? "Đang tải..."
-                      : addressForm.districtCode
-                        ? "Chọn Phường/Xã"
-                        : "Vui lòng chọn Quận/Huyện trước"}
-                  </option>
-                  {wards.map((w) => (
-                    <option key={w.code} value={w.code}>
-                      {w.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Địa chỉ chi tiết <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  value={addressForm.line1}
-                  onChange={(e) => updateFormField("line1", e.target.value)}
-                  placeholder="Số nhà, tên đường..."
-                  rows={3}
-                  className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-emerald-500 outline-none transition resize-none"
-                />
-              </div>
-
-              <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-lg">
-                <input
-                  type="checkbox"
-                  id="isDefault"
-                  checked={addressForm.isDefault}
-                  onChange={(e) => updateFormField("isDefault", e.target.checked)}
-                  className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500"
-                />
-                <label htmlFor="isDefault" className="text-sm font-medium text-gray-700 cursor-pointer">
-                  Đặt làm địa chỉ mặc định
-                </label>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={handleCloseModal}
-                  className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={handleCreateAddress}
-                  disabled={loadingAddress}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loadingAddress ? "Đang lưu..." : "Lưu địa chỉ"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddressFormModal
+        isOpen={openAddressModal}
+        onClose={handleCloseModal}
+        addressForm={addressForm}
+        provinces={provinces}
+        districts={districts}
+        wards={wards}
+        loadingProvinces={loadingProvinces}
+        loadingDistricts={loadingDistricts}
+        loadingWards={loadingWards}
+        onProvinceChange={handleProvinceChange}
+        onDistrictChange={handleDistrictChange}
+        onWardChange={handleWardChange}
+        onFieldChange={updateFormField}
+        onSubmit={handleCreateAddress}
+        isLoading={loadingAddress}
+      />
 
       <CartDrawer open={openCart} onClose={() => setOpenCart(false)} />
     </header>

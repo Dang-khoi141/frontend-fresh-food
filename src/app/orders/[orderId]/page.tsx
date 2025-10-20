@@ -29,7 +29,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
         }
       } catch (error) {
         console.error("Error fetching order:", error);
-        router.push("/orders");
+        router.push("/profile-page?tab=orders");
       } finally {
         setLoading(false);
       }
@@ -65,7 +65,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
       PENDING: { label: "Chờ xử lý", className: "bg-yellow-100 text-yellow-800" },
       CONFIRMED: { label: "Đã xác nhận", className: "bg-blue-100 text-blue-800" },
       PAID: { label: "Đã thanh toán", className: "bg-green-100 text-green-800" },
-      SHIPPED: { label: "Đang giao", className: "bg-purple-100 text-purple-800" },
+      SHIPPED: { label: "Đang giao", className: "bg-violet-100 text-violet-800" },
       DELIVERED: { label: "Đã giao", className: "bg-emerald-100 text-emerald-800" },
       CANCELED: { label: "Đã hủy", className: "bg-red-100 text-red-800" },
     };
@@ -97,7 +97,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
         <FreshNav />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
           <h2 className="text-2xl font-bold mb-4">Không tìm thấy đơn hàng</h2>
-          <Link href="/orders" className="text-emerald-600 hover:underline">
+          <Link href="/profile-page?tab=orders" className="text-emerald-600 hover:underline">
             Xem tất cả đơn hàng
           </Link>
         </div>
@@ -111,7 +111,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
       <FreshNav />
       <section className="max-w-4xl mx-auto px-4 py-10 mt-28 mb-10">
         <div className="mb-6">
-          <Link href="/orders" className="text-emerald-600 hover:underline mb-4 inline-block">
+          <Link href="/profile-page?tab=orders" className="text-emerald-600 hover:underline mb-4 inline-block">
             ← Quay lại danh sách đơn hàng
           </Link>
           <div className="flex justify-between items-start">
@@ -217,13 +217,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
               {canceling ? "Đang hủy..." : "Hủy đơn hàng"}
             </button>
           )}
-
-          <Link
-            href="/orders"
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium"
-          >
-            Xem tất cả đơn hàng
-          </Link>
         </div>
       </section>
       <Footer />

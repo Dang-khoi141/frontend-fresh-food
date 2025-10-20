@@ -1,3 +1,5 @@
+import { District, Province, Ward } from "./province";
+
 export interface Address {
   id: string;
   line1: string;
@@ -43,4 +45,37 @@ export interface AddressContextType {
   defaultAddress: Address | null;
   refreshAddress: () => Promise<void>;
   isLoading: boolean;
+}
+
+export interface AddressCardProps {
+  address: Address;
+  onSetDefault: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+  isUpdating: boolean;
+}
+
+export interface AddressFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  addressForm: AddressFormData;
+  provinces: Province[];
+  districts: District[];
+  wards: Ward[];
+  loadingProvinces: boolean;
+  loadingDistricts: boolean;
+  loadingWards: boolean;
+  onProvinceChange: (code: string) => void;
+  onDistrictChange: (code: string) => void;
+  onWardChange: (code: string) => void;
+  onFieldChange: (field: keyof AddressFormData, value: any) => void;
+  onSubmit: () => Promise<void>;
+  isLoading: boolean;
+}
+
+export interface AddressListSectionProps {
+  addresses: Address[];
+  onAddNew: () => void;
+  onSetDefault: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+  isUpdating: boolean;
 }

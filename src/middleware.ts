@@ -18,7 +18,8 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/orders") ||
       pathname.startsWith("/admin") ||
       pathname.startsWith("/addresses") ||
-      pathname.startsWith("/payment")
+      pathname.startsWith("/payment") ||
+      pathname.startsWith("/profile-page")
     ) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -48,6 +49,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/orders")) {
+    if (![UserRole.CUSTOMER].includes(userRole)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (pathname.startsWith("/profile-page")) {
     if (![UserRole.CUSTOMER].includes(userRole)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -134,5 +141,6 @@ export const config = {
     "/promotions/:path*",
     "/payment/:path*",
     "/inventory/:path*",
+    "/profile-page/:path*",
   ],
 };

@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
 import { Address, AddressFormData } from "@/lib/interface/address";
-import { Province, District, Ward } from "@/lib/interface/province";
+import { District, Province, Ward } from "@/lib/interface/province";
 import { addressService } from "@/lib/service/address.service";
 import { provinceApiService } from "@/lib/service/province-api.service";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAddressContext } from "../../contexts/address-context";
 
 const initialFormState: AddressFormData = {
   line1: "",
@@ -16,6 +17,8 @@ const initialFormState: AddressFormData = {
 };
 
 export const useFetchAddress = (isAuthenticated: boolean) => {
+  const { refreshAddress } = useAddressContext();
+  const refreshTriggerRef = useRef(0);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
@@ -31,34 +34,34 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
   const [addressForm, setAddressForm] =
     useState<AddressFormData>(initialFormState);
 
+  const loadAddresses = useCallback(async () => {
+    try {
+      const data = await addressService.getAllAddresses();
+      setAddresses(data);
+    } catch (error: any) {
+      if (error.response?.status !== 403) {
+        console.error("Error loading addresses:", error);
+      }
+    }
+  }, []);
+
+  const loadDefaultAddress = useCallback(async () => {
+    try {
+      const data = await addressService.getDefaultAddress();
+      setDefaultAddress(data);
+    } catch (error: any) {
+      if (error.response?.status !== 403) {
+        console.error("Error loading default address:", error);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       loadAddresses();
       loadDefaultAddress();
     }
   }, [isAuthenticated]);
-
-const loadAddresses = useCallback(async () => {
-  try {
-    const data = await addressService.getAllAddresses();
-    setAddresses(data);
-  } catch (error: any) {
-    if (error.response?.status !== 403) {
-      console.error("Error loading addresses:", error);
-    }
-  }
-}, []);
-
-  const loadDefaultAddress = useCallback(async () => {
-  try {
-    const data = await addressService.getDefaultAddress();
-    setDefaultAddress(data);
-  } catch (error: any) {
-    if (error.response?.status !== 403) {
-      console.error("Error loading default address:", error);
-    }
-  }
-}, []);
 
   const loadProvinces = useCallback(async () => {
     if (provinces.length > 0) return;
@@ -186,11 +189,12 @@ const loadAddresses = useCallback(async () => {
           city: addressForm.districtName || "",
           country: "Vietnam",
           postalCode: addressForm.wardName || "",
-          isDefault: true,
+          isDefault: addressForm.isDefault,
         });
 
         await loadAddresses();
         await loadDefaultAddress();
+        await refreshAddress();
         resetForm();
         return true;
       } catch (error) {
@@ -201,7 +205,7 @@ const loadAddresses = useCallback(async () => {
         setLoadingAddress(false);
       }
     },
-    [addressForm, loadAddresses, loadDefaultAddress]
+    [addressForm, loadAddresses, loadDefaultAddress, refreshAddress]
   );
 
   const setAsDefaultAddress = useCallback(
@@ -210,6 +214,7 @@ const loadAddresses = useCallback(async () => {
         await addressService.setDefaultAddress(addressId);
         await loadAddresses();
         await loadDefaultAddress();
+        await refreshAddress();
         return true;
       } catch (error) {
         console.error("Error setting default address:", error);
@@ -217,7 +222,7 @@ const loadAddresses = useCallback(async () => {
         return false;
       }
     },
-    [loadAddresses, loadDefaultAddress]
+    [loadAddresses, loadDefaultAddress, refreshAddress]
   );
 
   const deleteAddress = useCallback(
@@ -228,6 +233,7 @@ const loadAddresses = useCallback(async () => {
         await addressService.deleteAddress(addressId);
         await loadAddresses();
         await loadDefaultAddress();
+        await refreshAddress();
         return true;
       } catch (error) {
         console.error("Error deleting address:", error);
@@ -235,7 +241,7 @@ const loadAddresses = useCallback(async () => {
         return false;
       }
     },
-    [loadAddresses, loadDefaultAddress]
+    [loadAddresses, loadDefaultAddress, refreshAddress]
   );
 
   const resetForm = useCallback(() => {
