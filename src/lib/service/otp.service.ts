@@ -45,18 +45,23 @@ class OtpService extends BaseApiService {
 
   async verifyOtp(email: string, otp: string): Promise<{ valid: boolean }> {
     try {
-      return await this.axiosInstance
-        .post("/otp/verify", { email, otp })
-        .then(res => {
-          if (res.data?.valid !== undefined) {
-            return res.data;
-          }
-          if (res.status === 200 || res.status === 201) {
-            return { valid: true };
-          }
-          return { valid: false };
-        });
+      const response = await this.axiosInstance.post("/otp/verify", {
+        email,
+        otp,
+      });
+
+      const isValid = response.data?.data?.valid === true;
+
+      if (!isValid) {
+        throw new Error("Invalid or expired OTP");
+      }
+
+      return { valid: true };
     } catch (error: any) {
+      if (error.response?.data?.data?.valid === false) {
+        throw new Error("Invalid or expired OTP");
+      }
+
       throw new Error(
         error.response?.data?.message || "OTP verification failed"
       );

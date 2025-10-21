@@ -58,7 +58,6 @@ export default function OrderList() {
     if (orders.length === 0) {
         return (
             <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-                <div className="text-6xl mb-4">📦</div>
                 <h2 className="text-2xl font-bold mb-4">Bạn chưa có đơn hàng nào</h2>
                 <p className="text-gray-600 mb-6">
                     Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên.

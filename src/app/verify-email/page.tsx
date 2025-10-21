@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { otpService } from "../../lib/service/otp.service";
 
 export default function VerifyEmailPage() {
@@ -29,7 +30,15 @@ export default function VerifyEmailPage() {
 
     setLoading(true);
     try {
+      const verifyResult = await otpService.verifyOtp(email, otp);
+
+      if (!verifyResult.valid) {
+        setError("Invalid or expired OTP");
+        setLoading(false);
+        return;
+      }
       await otpService.register({ email, name, password, phone, otp });
+      toast.success("Đăng ký thành công!");
       localStorage.clear();
       router.push("/login");
     } catch (err: any) {
@@ -67,9 +76,8 @@ export default function VerifyEmailPage() {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="Enter OTP"
-              className={`w-full h-12 px-4 rounded-xl border ${
-                error ? "border-red-300" : "border-gray-200"
-              } focus:outline-none focus:ring-2 focus:ring-brand`}
+              className={`w-full h-12 px-4 rounded-xl border ${error ? "border-red-300" : "border-gray-200"
+                } focus:outline-none focus:ring-2 focus:ring-brand`}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
 
