@@ -4,6 +4,7 @@ import { useCart } from "@/contexts/cart-context";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function CartDrawer({
   open,
@@ -21,6 +22,24 @@ export default function CartDrawer({
       router.push("/login");
     } else {
       router.push("/cart");
+    }
+  };
+
+  const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
+    try {
+      await updateQuantity(productId, newQuantity);
+      toast.success("Giỏ hàng đã được cập nhật");
+    } catch (error) {
+      toast.error("Không thể cập nhật số lượng");
+    }
+  };
+
+  const handleRemoveItem = async (productId: string) => {
+    try {
+      await removeFromCart(productId);
+      toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
+    } catch (error) {
+      toast.error("Không thể xóa sản phẩm");
     }
   };
 
@@ -74,26 +93,26 @@ export default function CartDrawer({
                   <div className="flex gap-2 items-center mt-1">
                     <button
                       onClick={() =>
-                        updateQuantity(item.product.id, item.quantity - 1)
+                        handleUpdateQuantity(item.product.id, item.quantity - 1)
                       }
-                      className="px-2 bg-gray-200 rounded"
+                      className="px-2 bg-gray-200 hover:bg-gray-300 rounded transition"
                     >
                       -
                     </button>
                     <span>{item.quantity}</span>
                     <button
                       onClick={() =>
-                        updateQuantity(item.product.id, item.quantity + 1)
+                        handleUpdateQuantity(item.product.id, item.quantity + 1)
                       }
-                      className="px-2 bg-gray-200 rounded"
+                      className="px-2 bg-gray-200 hover:bg-gray-300 rounded transition"
                     >
                       +
                     </button>
                   </div>
                 </div>
                 <button
-                  onClick={() => removeFromCart(item.product.id)}
-                  className="text-red-500 text-xs"
+                  onClick={() => handleRemoveItem(item.product.id)}
+                  className="text-red-500 hover:text-red-700 text-xs transition"
                 >
                   X
                 </button>
@@ -106,7 +125,7 @@ export default function CartDrawer({
           <p className="font-semibold">Tạm tính: {formatPrice(subtotal)}</p>
           <button
             onClick={handleViewCart}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded mt-2"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded mt-2 transition"
           >
             Xem giỏ hàng
           </button>
