@@ -9,7 +9,7 @@ export default function ShippingAddressSection({
   setShippingAddress,
 }: {
   defaultAddress: any;
-  createAddress: () => Promise<boolean>;
+  createAddress: (manualAddress?: string) => Promise<boolean>;
   shippingAddress: string;
   setShippingAddress: (v: string) => void;
 }) {
@@ -21,6 +21,21 @@ export default function ShippingAddressSection({
     (defaultAddress.line1?.trim() ||
       defaultAddress.city?.trim() ||
       defaultAddress.province?.trim());
+
+  const handleSaveAddress = async () => {
+    if (!shippingAddress || !shippingAddress.trim()) {
+      alert("Vui lòng nhập địa chỉ trước khi lưu!");
+      return;
+    }
+
+    const success = await createAddress(shippingAddress);
+
+    if (success) {
+      await refreshAddress();
+      alert("Đã lưu địa chỉ mặc định thành công!");
+      setShowMap(false);
+    }
+  };
 
   if (!hasDefaultAddress || showMap) {
     return (
@@ -39,15 +54,8 @@ export default function ShippingAddressSection({
 
           <div className="flex gap-2 mt-3">
             <button
-              onClick={async () => {
-                const success = await createAddress(shippingAddress);
-                if (success) {
-                  await refreshAddress();
-                  alert("Đã lưu địa chỉ mặc định!");
-                  setShowMap(false);
-                }
-              }}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded text-sm"
+              onClick={handleSaveAddress}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
             >
               Lưu làm địa chỉ mặc định
             </button>
@@ -55,7 +63,7 @@ export default function ShippingAddressSection({
             {hasDefaultAddress && (
               <button
                 onClick={() => setShowMap(false)}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm"
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium transition-colors"
               >
                 Hủy
               </button>
@@ -68,7 +76,7 @@ export default function ShippingAddressSection({
 
   return (
     <div className="p-3 border rounded-lg bg-white">
-      <p className="text-sm text-gray-700">
+      <p className="text-sm text-gray-700 font-medium">
         {[defaultAddress.line1, defaultAddress.city, defaultAddress.province]
           .filter((part) => part && part.trim() !== "")
           .join(", ")}
@@ -77,7 +85,7 @@ export default function ShippingAddressSection({
       <p className="text-xs text-gray-500 mt-1">(Địa chỉ mặc định của bạn)</p>
       <button
         onClick={() => setShowMap(true)}
-        className="mt-2 text-emerald-600 hover:underline text-sm"
+        className="mt-2 text-emerald-600 hover:text-emerald-700 hover:underline text-sm font-medium transition-colors"
       >
         Chọn địa chỉ khác
       </button>

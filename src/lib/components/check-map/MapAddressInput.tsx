@@ -15,7 +15,7 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [query, setQuery] = useState(address);
     const [coords, setCoords] = useState<[number, number] | null>(null);
-    const [detecting, setDetecting] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -34,60 +34,20 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
         };
     }, []);
 
-    useEffect(() => {
-        if ("geolocation" in navigator) {
-            setDetecting(true);
-            navigator.geolocation.getCurrentPosition(
-                async (pos) => {
-                    const { latitude, longitude } = pos.coords;
-                    setCoords([longitude, latitude]);
-
-                    if (mapRef.current) {
-                        mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15 });
-                    }
-
-                    if (markerRef.current) markerRef.current.remove();
-                    markerRef.current = new maplibregl.Marker()
-                        .setLngLat([longitude, latitude])
-                        .addTo(mapRef.current!);
-
-                    try {
-                        const res = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
-                        );
-                        const data = await res.json();
-                        const detected =
-                            data.display_name ||
-                            `${data.address.road || ""}, ${data.address.city || ""}, ${data.address.state || ""
-                            }`;
-                        setQuery(detected);
-                        onAddressChange(detected);
-                    } catch (e: any) {
-                        if (e.name !== "AbortError")
-                            console.error("Reverse geocode failed:", e);
-                    } finally {
-                        setDetecting(false);
-                    }
-                },
-                (err) => {
-                    console.warn("Không thể lấy vị trí:", err.message);
-                    setDetecting(false);
-                },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            console.warn("Trình duyệt không hỗ trợ geolocation");
-        }
-    }, []);
-
     const handleSearch = (text: string) => {
         setQuery(text);
+        onAddressChange(text);
         setSuggestions([]);
 
         if (debounceRef.current) clearTimeout(debounceRef.current);
         if (abortControllerRef.current) abortControllerRef.current.abort();
 
-        if (text.trim().length < 3) return;
+        if (text.trim().length < 3) {
+            setIsSearching(false);
+            return;
+        }
+
+        setIsSearching(true);
 
         debounceRef.current = setTimeout(async () => {
             abortControllerRef.current = new AbortController();
@@ -95,19 +55,24 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
 
             try {
                 const res = await fetch(
-                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-                        text
-                    )}`,
+                    `/api/geocode?q=${encodeURIComponent(text)}`,
                     { signal }
                 );
+
+                if (!res.ok) {
+                    throw new Error(`API error: ${res.status}`);
+                }
+
                 const data = await res.json();
                 setSuggestions(data.slice(0, 5));
             } catch (err: any) {
                 if (err.name !== "AbortError") {
                     console.error("Fetch search failed:", err);
                 }
+            } finally {
+                setIsSearching(false);
             }
-        }, 300);
+        }, 800);
     };
 
     const handleSelect = (item: any) => {
@@ -129,53 +94,6 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
             .addTo(mapRef.current!);
     };
 
-    const handleGetCurrentLocation = async () => {
-        if (!("geolocation" in navigator)) {
-            alert("Trình duyệt của bạn không hỗ trợ định vị vị trí");
-            return;
-        }
-
-        setDetecting(true);
-        navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-                const { latitude, longitude } = pos.coords;
-                setCoords([longitude, latitude]);
-
-                if (mapRef.current) {
-                    mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15 });
-                }
-
-                if (markerRef.current) markerRef.current.remove();
-                markerRef.current = new maplibregl.Marker()
-                    .setLngLat([longitude, latitude])
-                    .addTo(mapRef.current!);
-
-                try {
-                    const res = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
-                    );
-                    const data = await res.json();
-                    const detected =
-                        data.display_name ||
-                        `${data.address.road || ""}, ${data.address.city || ""}, ${data.address.state || ""
-                        }`;
-                    setQuery(detected);
-                    onAddressChange(detected);
-                } catch (e: any) {
-                    if (e.name !== "AbortError")
-                        console.error("Reverse geocode failed:", e);
-                } finally {
-                    setDetecting(false);
-                }
-            },
-            (err) => {
-                console.warn("Không thể lấy vị trí:", err.message);
-                setDetecting(false);
-            },
-            { enableHighAccuracy: true }
-        );
-    };
-
     return (
         <div className="space-y-3">
             <div className="relative">
@@ -185,13 +103,18 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
                     placeholder="Nhập địa chỉ..."
                     className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
+                {isSearching && (
+                    <div className="absolute right-3 top-3">
+                        <div className="animate-spin h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full" />
+                    </div>
+                )}
                 {suggestions.length > 0 && (
-                    <ul className="absolute z-10 bg-white border mt-1 w-full rounded-lg shadow-md">
+                    <ul className="absolute z-10 bg-white border mt-1 w-full rounded-lg shadow-md max-h-60 overflow-y-auto">
                         {suggestions.map((s) => (
                             <li
                                 key={s.place_id}
                                 onClick={() => handleSelect(s)}
-                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-b-0"
                             >
                                 {s.display_name}
                             </li>
@@ -200,19 +123,11 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
                 )}
             </div>
 
-            <button
-                onClick={handleGetCurrentLocation}
-                disabled={detecting}
-                className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-md disabled:opacity-50"
-            >
-                {detecting ? "Đang lấy vị trí..." : "Lấy vị trí hiện tại"}
-            </button>
-
             <div ref={mapContainer} className="w-full h-64 rounded-lg border" />
 
             {coords && (
                 <p className="text-xs text-gray-600">
-                    Vĩ độ: {coords[1].toFixed(5)} • Kinh độ: {coords[0].toFixed(5)}
+                    Vị trí: {coords[1].toFixed(5)}, {coords[0].toFixed(5)}
                 </p>
             )}
         </div>

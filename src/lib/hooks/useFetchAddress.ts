@@ -17,7 +17,7 @@ const initialFormState: AddressFormData = {
 };
 
 export const useFetchAddress = (isAuthenticated: boolean) => {
-  const { refreshAddress } = useAddressContext();
+  const { refreshAddress, defaultAddress: contextDefaultAddress } = useAddressContext();
   const refreshTriggerRef = useRef(0);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
@@ -61,7 +61,14 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
       loadAddresses();
       loadDefaultAddress();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loadAddresses, loadDefaultAddress]);
+
+  useEffect(() => {
+    if (isAuthenticated && contextDefaultAddress) {
+      setDefaultAddress(contextDefaultAddress);
+      loadAddresses();
+    }
+  }, [contextDefaultAddress, isAuthenticated, loadAddresses]);
 
   const loadProvinces = useCallback(async () => {
     if (provinces.length > 0) return;
@@ -174,7 +181,8 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
 
   const createAddress = useCallback(
     async (manualAddress?: string) => {
-      const finalLine1 = manualAddress || addressForm.line1;
+      const finalLine1 =
+        manualAddress !== undefined ? manualAddress.trim() : addressForm.line1;
 
       if (!finalLine1) {
         alert("Vui lòng điền hoặc chọn địa chỉ trước khi lưu");
@@ -183,13 +191,13 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
 
       setLoadingAddress(true);
       try {
-        await addressService.createAddress({
+        const newAddress = await addressService.createAddress({
           line1: finalLine1,
           province: addressForm.provinceName || "",
           city: addressForm.districtName || "",
           country: "Vietnam",
           postalCode: addressForm.wardName || "",
-          isDefault: addressForm.isDefault,
+          isDefault: true,
         });
 
         await loadAddresses();

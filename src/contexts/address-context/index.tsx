@@ -7,6 +7,7 @@ import { Address, AddressContextType } from "../../lib/interface/address";
 import { addressService } from "../../lib/service/address.service";
 
 const AddressContext = createContext<AddressContextType | undefined>(undefined);
+
 export function AddressProvider({ children }: { children: ReactNode }) {
     const { data: session } = useSession();
     const userRole = (session?.user as any)?.role;
@@ -14,7 +15,7 @@ export function AddressProvider({ children }: { children: ReactNode }) {
 
     const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [refreshKey, setRefreshKey] = useState(0);
     const loadDefaultAddress = useCallback(async () => {
         if (!session || !isCustomer) {
             setDefaultAddress(null);
@@ -31,7 +32,7 @@ export function AddressProvider({ children }: { children: ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    }, [session, isCustomer]);
+    }, [session, isCustomer, refreshKey]);
 
     useEffect(() => {
         loadDefaultAddress();
@@ -39,6 +40,7 @@ export function AddressProvider({ children }: { children: ReactNode }) {
 
     const refreshAddress = useCallback(async () => {
         await loadDefaultAddress();
+        setRefreshKey(prev => prev + 1);
     }, [loadDefaultAddress]);
 
     return (

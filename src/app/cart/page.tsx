@@ -37,6 +37,7 @@ export default function CartPage() {
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
   const [shippingAddress, setShippingAddress] = useState("");
+  const [isManualAddress, setIsManualAddress] = useState(false);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +57,8 @@ export default function CartPage() {
   const finalTotal = Math.max(0, subtotal - discountAmount);
 
   useEffect(() => {
+    if (isManualAddress) return;
+
     if (defaultAddress) {
       setShippingAddress(
         `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
@@ -89,7 +92,7 @@ export default function CartPage() {
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
-  }, [defaultAddress, shippingAddress, isAuthenticated]);
+  }, [defaultAddress, isAuthenticated, isManualAddress]);
 
   const handleApplyPromotion = async () => {
     if (!promoCode.trim()) {
@@ -143,6 +146,11 @@ export default function CartPage() {
   const handleClearPromotion = () => {
     clearPromotion();
     setPromoCode("");
+  };
+
+  const handleShippingAddressChange = (address: string) => {
+    setShippingAddress(address);
+    setIsManualAddress(true);
   };
 
   const handlePlaceOrder = async () => {
@@ -306,7 +314,7 @@ export default function CartPage() {
                 defaultAddress={defaultAddress}
                 createAddress={createAddress}
                 shippingAddress={shippingAddress}
-                setShippingAddress={setShippingAddress}
+                setShippingAddress={handleShippingAddressChange}
               />
             </div>
 
