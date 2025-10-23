@@ -11,7 +11,7 @@ class OtpService extends BaseApiService {
         .post("/otp/register", { email })
         .then(res => res.data);
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || "Failed to send OTP");
+      throw new Error(error.response?.data?.message || "Không thể gửi OTP");
     }
   }
 
@@ -27,7 +27,7 @@ class OtpService extends BaseApiService {
         .post("/auth/register", data)
         .then(res => res.data);
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || "Failed to register");
+      throw new Error(error.response?.data?.message || "Mã OTP không đúng hoặc đã hết hạn");
     }
   }
 
@@ -38,7 +38,7 @@ class OtpService extends BaseApiService {
         .then(res => res.data);
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || "Failed to send OTP for reset"
+        error.response?.data?.message || "Không thể gửi OTP đặt lại mật khẩu"
       );
     }
   }
@@ -53,17 +53,17 @@ class OtpService extends BaseApiService {
       const isValid = response.data?.data?.valid === true;
 
       if (!isValid) {
-        throw new Error("Invalid or expired OTP");
+        throw new Error("Mã OTP không đúng hoặc đã hết hạn");
       }
 
       return { valid: true };
     } catch (error: any) {
       if (error.response?.data?.data?.valid === false) {
-        throw new Error("Invalid or expired OTP");
+        throw new Error("Mã OTP không đúng hoặc đã hết hạn");
       }
 
       throw new Error(
-        error.response?.data?.message || "OTP verification failed"
+        error.response?.data?.message || "Mã OTP không đúng hoặc đã hết hạn"
       );
     }
   }
@@ -78,7 +78,7 @@ class OtpService extends BaseApiService {
         .post("/otp/reset-password", data)
         .then(res => res.data);
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || "Password reset failed");
+      throw new Error(error.response?.data?.message || "Đặt lại mật khẩu thất bại");
     }
   }
 }

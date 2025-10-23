@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { otpService } from "../../lib/service/otp.service";
 
 export default function RegisterPage() {
@@ -74,7 +75,11 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+
+    if (!validateForm()) {
+      toast.error("Vui lòng kiểm tra lại thông tin!");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -85,12 +90,18 @@ export default function RegisterPage() {
 
       await otpService.sendOtp(formData.email);
 
-      router.push("/verify-email");
+      toast.success("Mã OTP đã được gửi đến email của bạn!");
+
+      setTimeout(() => {
+        router.push("/verify-email");
+      }, 500);
     } catch (err: any) {
+      const errorMessage = err.message || "Đã có lỗi xảy ra, vui lòng thử lại!";
       setErrors((prev) => ({
         ...prev,
-        email: err.message,
+        email: errorMessage,
       }));
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -134,9 +145,8 @@ export default function RegisterPage() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className={`w-full h-12 px-4 rounded-xl border ${
-                  errors.name ? "border-red-300" : "border-gray-200"
-                } focus:outline-none focus:ring-2 focus:ring-brand`}
+                className={`w-full h-12 px-4 rounded-xl border ${errors.name ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand`}
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
             </div>
@@ -151,9 +161,8 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                className={`w-full h-12 px-4 rounded-xl border ${
-                  errors.email ? "border-red-300" : "border-gray-200"
-                } focus:outline-none focus:ring-2 focus:ring-brand`}
+                className={`w-full h-12 px-4 rounded-xl border ${errors.email ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand`}
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
@@ -168,9 +177,8 @@ export default function RegisterPage() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+84 123 456 789"
-                className={`w-full h-12 px-4 rounded-xl border ${
-                  errors.phone ? "border-red-300" : "border-gray-200"
-                } focus:outline-none focus:ring-2 focus:ring-brand`}
+                className={`w-full h-12 px-4 rounded-xl border ${errors.phone ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand`}
               />
               {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
             </div>
@@ -186,9 +194,8 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${
-                    errors.password ? "border-red-300" : "border-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-brand`}
+                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${errors.password ? "border-red-300" : "border-gray-200"
+                    } focus:outline-none focus:ring-2 focus:ring-brand`}
                 />
                 <button
                   type="button"
@@ -212,9 +219,8 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Re-enter your password"
-                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${
-                    errors.confirmPassword ? "border-red-300" : "border-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-brand`}
+                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${errors.confirmPassword ? "border-red-300" : "border-gray-200"
+                    } focus:outline-none focus:ring-2 focus:ring-brand`}
                 />
                 <button
                   type="button"
@@ -232,9 +238,9 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-brand text-white font-semibold rounded-xl hover:bg-emerald-600 disabled:opacity-50"
+              className="w-full h-12 bg-brand text-white font-semibold rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? "Sending OTP..." : "Create Account"}
+              {loading ? "Đang gửi OTP..." : "Create Account"}
             </button>
 
             <div className="text-center">

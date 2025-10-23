@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import React, { Suspense } from "react";
+import { Toaster } from "react-hot-toast";
 import { RefineContext } from "./_refine_context";
 import "./globals.css";
 import { CartProvider } from "../contexts/cart-context";
@@ -38,6 +39,33 @@ export default async function RootLayout({
               <CartProvider>
                 <AddressProvider>
                   <main className="min-h-screen">{children}</main>
+                  <Toaster
+                    position="top-center"
+                    toastOptions={{
+                      duration: 2000,
+                      style: {
+                        background: '#363636',
+                        color: '#fff',
+                        fontSize: '14px',
+                        borderRadius: '10px',
+                        padding: '12px 20px',
+                      },
+                      success: {
+                        duration: 2000,
+                        iconTheme: {
+                          primary: '#10b981',
+                          secondary: '#fff',
+                        },
+                      },
+                      error: {
+                        duration: 2000,
+                        iconTheme: {
+                          primary: '#ef4444',
+                          secondary: '#fff',
+                        },
+                      },
+                    }}
+                  />
                 </AddressProvider>
               </CartProvider>
             </RefineContext>

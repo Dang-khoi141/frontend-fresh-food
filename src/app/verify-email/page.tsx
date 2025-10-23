@@ -9,6 +9,7 @@ export default function VerifyEmailPage() {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const email =
     typeof window !== "undefined" ? localStorage.getItem("email") || "" : "";
@@ -25,6 +26,7 @@ export default function VerifyEmailPage() {
 
     if (!/^\d{6}$/.test(otp)) {
       setError("OTP must be a 6-digit number");
+      toast.error("Mã OTP phải là 6 chữ số!");
       return;
     }
 
@@ -33,27 +35,58 @@ export default function VerifyEmailPage() {
       const verifyResult = await otpService.verifyOtp(email, otp);
 
       if (!verifyResult.valid) {
-        setError("Invalid or expired OTP");
+        setError("OTP không đúng hoặc đã hết hạn");
+        toast.error("Mã OTP không đúng hoặc đã hết hạn!");
         setLoading(false);
         return;
       }
+
       await otpService.register({ email, name, password, phone, otp });
       toast.success("Đăng ký thành công!");
       localStorage.clear();
-      router.push("/login");
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
     } catch (err: any) {
-      setError(err.message || "OTP verification failed");
+      let errorMessage = "Xác minh OTP thất bại";
+
+      if (err.message) {
+        if (err.message.toLowerCase().includes("invalid") ||
+          err.message.toLowerCase().includes("expired") ||
+          err.message.toLowerCase().includes("wrong")) {
+          errorMessage = "Mã OTP không đúng hoặc đã hết hạn";
+        } else if (err.message.toLowerCase().includes("network") ||
+          err.message.toLowerCase().includes("connection")) {
+          errorMessage = "Lỗi kết nối mạng";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
+    if (resending) return;
+
+    setResending(true);
+    setError("");
+
     try {
       await otpService.sendOtp(email);
-      alert("📨 OTP sent again!");
+      toast.success("Đã gửi lại mã OTP thành công! Vui lòng kiểm tra email.");
+      setOtp("");
     } catch (err: any) {
-      setError(err.message || "Failed to resend OTP");
+      const errorMessage = err.message || "Không thể gửi lại OTP";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setResending(false);
     }
   };
 
@@ -71,31 +104,43 @@ export default function VerifyEmailPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="Enter OTP"
-              className={`w-full h-12 px-4 rounded-xl border ${error ? "border-red-300" : "border-gray-200"
-                } focus:outline-none focus:ring-2 focus:ring-brand`}
-            />
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+            <div>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => {
+                  setOtp(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="Enter 6-digit OTP"
+                maxLength={6}
+                className={`w-full h-12 px-4 rounded-xl border ${error ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand text-center text-2xl tracking-widest`}
+              />
+              {error && (
+                <p className="mt-2 text-sm text-red-600 text-center">{error}</p>
+              )}
+            </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-brand text-white font-semibold rounded-xl hover:bg-emerald-600 disabled:opacity-50"
+              disabled={loading || otp.length !== 6}
+              className="w-full h-12 bg-brand text-white font-semibold rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? "Verifying..." : "Verify"}
+              {loading ? "Đang xác minh..." : "Verify OTP"}
             </button>
 
             <div className="text-center">
+              <p className="text-gray-600 text-sm mb-2">
+                Didn't receive the code?
+              </p>
               <button
                 type="button"
                 onClick={handleResend}
-                className="text-sm text-brand font-medium hover:text-emerald-600"
+                disabled={resending}
+                className="text-sm text-brand font-medium hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Resend Code
+                {resending ? "Đang gửi lại..." : "Resend Code"}
               </button>
             </div>
           </form>
