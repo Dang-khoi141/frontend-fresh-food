@@ -20,17 +20,6 @@ export default function UserProfileForm({
                 </p>
             </div>
 
-            {message && (
-                <div
-                    className={`mx-7 mt-5 px-4 py-3 rounded text-sm ${message.type === "success"
-                        ? "bg-green-50 text-green-800 border border-green-200"
-                        : "bg-red-50 text-red-800 border border-red-200"
-                        }`}
-                >
-                    {message.text}
-                </div>
-            )}
-
             <form onSubmit={onSubmit} className="p-7">
                 <div className="grid grid-cols-12 gap-8">
                     <div className="col-span-12 lg:col-span-8 space-y-8">
