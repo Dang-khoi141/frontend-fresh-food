@@ -25,8 +25,8 @@ export const createAuthProvider = (): AuthProvider => {
         return {
           success: false,
           error: {
-            name: "Missing credentials",
-            message: "Email and password is required",
+            name: "Thiếu thông tin",
+            message: "Vui lòng nhập email và mật khẩu",
           },
         };
       }
@@ -42,8 +42,8 @@ export const createAuthProvider = (): AuthProvider => {
         return {
           success: false,
           error: {
-            name: "Login Error",
-            message: " Error",
+            name: "Lỗi đăng nhập",
+            message: " Email hoặc mật khẩu không đúng",
           },
         };
       }
@@ -55,8 +55,8 @@ export const createAuthProvider = (): AuthProvider => {
       return {
         success: false,
         error: {
-          name: "Login Error",
-          message: res.error?.toString() || "Login Error",
+          name: "Đăng nhập thất bại",
+          message: res.error?.toString() || "Email hoặc mật khẩu không đúng",
         },
       };
     },
@@ -73,8 +73,8 @@ export const createAuthProvider = (): AuthProvider => {
         return {
           success: false,
           error: {
-            name: "Missing fields",
-            message: "Email and password is required",
+            name: "Thiếu thông tin",
+            message: "Vui lòng điền đầy đủ thông tin",
           },
         };
       }
@@ -92,8 +92,8 @@ export const createAuthProvider = (): AuthProvider => {
         return {
           success: false,
           error: {
-            name: "Register Error",
-            message: "Error",
+            name: "Lỗi đăng ký",
+            message: "Đăng ký thất bại",
           },
         };
       }
@@ -105,8 +105,8 @@ export const createAuthProvider = (): AuthProvider => {
       return {
         success: false,
         error: {
-          name: "Register Error",
-          message: res.error?.toString() || "Register Error",
+          name: "Đăng ký thất bại",
+          message: res.error?.toString() || "Đăng ký thất bại",
         },
       };
     },
@@ -135,14 +135,14 @@ export const createAuthProvider = (): AuthProvider => {
             return {
               authenticated: false,
               redirectTo: "/login",
-              error: { message: "Invalid role", name: "AuthError" },
+              error: { message: "Quyền truy cập không hợp lệ", name: "Lỗi xác thực" },
             };
           }
         } catch (error) {
           return {
             authenticated: false,
             redirectTo: "/login",
-            error: { message: "Invalid token", name: "AuthError" },
+            error: { message: "Token không hợp lệ", name: "Lỗi xác thực" },
           };
         }
       }

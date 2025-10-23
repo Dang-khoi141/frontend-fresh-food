@@ -86,6 +86,7 @@ const authOptions: AuthOptions = {
           return null;
         } catch (err) {
           console.error("❌ Login failed", err);
+          throw new Error("Email hoặc mật khẩu không đúng");
           return null;
         }
       },
@@ -120,6 +121,7 @@ const authOptions: AuthOptions = {
           return null;
         } catch (err) {
           console.error("❌ Register failed", err);
+          throw new Error("Đăng ký thất bại");
           return null;
         }
       },
