@@ -1,43 +1,185 @@
 'use client';
 
-import React from 'react';
-import { Wrench } from 'lucide-react';
+import { Button, Modal, Spin, Table } from 'antd';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useFetchInventory } from '../../../../../lib/hooks/useFetchInventory';
+import { InventoryItem } from '../../../../../lib/interface/inventory';
+import { getInventoryColumns } from '../../../../../lib/components/stock-info/table';
+import PageHeader from '../../../../../lib/components/stock-info/page-header';
+import SearchBar from '../../../../../lib/components/stock-info/search';
 
 export default function StockInfoPage() {
+    const {
+        inventories,
+        lowStockProducts,
+        loading,
+        fetchAllInventory,
+        fetchLowStockProducts,
+        refetch,
+    } = useFetchInventory();
+
+    const [filteredData, setFilteredData] = useState<InventoryItem[]>([]);
+    const [searchText, setSearchText] = useState('');
+    const [filterModalOpen, setFilterModalOpen] = useState(false);
+
+    useEffect(() => {
+        fetchAllInventory();
+        fetchLowStockProducts();
+    }, []);
+
+    useEffect(() => {
+        setFilteredData(inventories);
+    }, [inventories]);
+
+    const handleSearch = (value: string) => {
+        setSearchText(value);
+        if (!value.trim()) {
+            setFilteredData(inventories);
+            return;
+        }
+
+        const filtered = inventories.filter(item => {
+            const searchLower = value.toLowerCase();
+            return (
+                item.productId.toLowerCase().includes(searchLower) ||
+                item.product?.name?.toLowerCase().includes(searchLower)
+            );
+        });
+        setFilteredData(filtered);
+    };
+
+    const handleExportExcel = () => {
+        const headers = ['Tên sản phẩm', 'Số lượng tồn kho', 'Ngưỡng cảnh báo'];
+        const rows = filteredData.map(item => [
+            item.product?.name || '',
+            item.stock,
+            item.lowStockThreshold,
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(',')),
+        ].join('\n');
+
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `inventory_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast.success('Đã xuất file Excel thành công!');
+    };
+
+    const handleResetFilter = () => {
+        setFilteredData(inventories);
+        setSearchText('');
+        setFilterModalOpen(false);
+    };
+
+    const totalProducts = inventories.length;
+    const lowStockCount = lowStockProducts.length;
+    const outOfStockCount = inventories.filter(item => item.stock === 0).length;
+    const totalStockValue = inventories.reduce((sum, item) => sum + item.stock, 0);
+
+    const columns = getInventoryColumns();
+
     return (
-        <div
-            style={{
-                background: 'white',
-                borderRadius: '12px',
-                padding: '60px 40px',
-                textAlign: 'center',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-            }}
-        >
+        <div style={{ padding: '24px', background: '#f8fafc', minHeight: '100vh' }}>
+            <PageHeader
+                onRefresh={refetch}
+                onExport={handleExportExcel}
+                loading={loading}
+            />
+
+            <SearchBar
+                searchText={searchText}
+                onSearch={handleSearch}
+                onFilterClick={() => setFilterModalOpen(true)}
+            />
+
             <div
                 style={{
-                    display: 'inline-flex',
-                    padding: '20px',
-                    background: '#f0fdf4',
-                    borderRadius: '50%',
-                    marginBottom: '20px',
+                    background: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+                    overflow: 'hidden',
                 }}
             >
-                <Wrench size={48} style={{ color: '#059669' }} />
+                <Spin spinning={loading}>
+                    <Table
+                        columns={columns}
+                        dataSource={filteredData}
+                        rowKey="productId"
+                        pagination={{
+                            position: ['bottomCenter'],
+                            pageSize: 10,
+                            showSizeChanger: true,
+                            pageSizeOptions: ['10', '20', '50', '100'],
+                            showTotal: (total, range) => `${range[0]}-${range[1]} trong số ${total} dòng`,
+                            style: { marginBottom: '16px' },
+                        }}
+                        scroll={{ x: 1000 }}
+                        style={{
+                            borderRadius: '12px',
+                        }}
+                        rowClassName={(record) => {
+                            if (record.stock === 0) return 'out-of-stock-row';
+                            if (record.stock <= record.lowStockThreshold) return 'low-stock-row';
+                            return '';
+                        }}
+                        locale={{
+                            emptyText: (
+                                <div style={{ padding: '40px 0' }}>
+                                    <div style={{ color: '#64748b', fontSize: '15px' }}>
+                                        Không có dữ liệu tồn kho
+                                    </div>
+                                </div>
+                            ),
+                        }}
+                    />
+                </Spin>
             </div>
-            <h2
-                style={{
-                    fontSize: '24px',
-                    fontWeight: 600,
-                    color: '#1e293b',
-                    marginBottom: '12px',
-                }}
+
+            <Modal
+                title="Bộ lọc nâng cao"
+                open={filterModalOpen}
+                onCancel={() => setFilterModalOpen(false)}
+                footer={[
+                    <Button key="reset" onClick={handleResetFilter}>
+                        Đặt lại
+                    </Button>,
+                    <Button
+                        key="apply"
+                        type="primary"
+                        style={{ background: '#059669' }}
+                        onClick={() => setFilterModalOpen(false)}
+                    >
+                        Áp dụng
+                    </Button>,
+                ]}
             >
-                Chức năng đang được phát triển
-            </h2>
-            <p style={{ fontSize: '15px', color: '#64748b', margin: 0 }}>
-                Tính năng Thông tin tồn kho đang trong quá trình phát triển và sẽ sớm có mặt.
-            </p>
+                <p style={{ color: '#64748b' }}>Chức năng bộ lọc nâng cao đang được phát triển</p>
+            </Modal>
+
+            <style jsx global>{`
+                .low-stock-row {
+                    background-color: #fefce8 !important;
+                }
+                .low-stock-row:hover td {
+                    background-color: #fef9c3 !important;
+                }
+                .out-of-stock-row {
+                    background-color: #fef2f2 !important;
+                }
+                .out-of-stock-row:hover td {
+                    background-color: #fee2e2 !important;
+                }
+            `}</style>
         </div>
     );
 }
