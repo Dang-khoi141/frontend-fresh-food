@@ -1,24 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Layout, Button, Input, Tooltip, Divider } from 'antd';
-import { useRouter, usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
+import { Button, Divider, Layout, Tooltip } from 'antd';
 import {
-  Users,
-  ShoppingCart,
-  Tag,
-  LineChart,
+  Bell,
+  Building2,
+  ChevronRight,
   Gift,
+  LineChart,
   LogOut,
   Menu,
-  Bell,
-  Settings,
-  Search,
-  ChevronRight,
   Package,
-  Building2,
+  Settings,
+  ShoppingCart,
+  Tag,
+  Users,
+  Warehouse
 } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 
 const { Header, Sider, Content } = Layout;
 
@@ -28,6 +28,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [inventoryOpen, setInventoryOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -37,6 +38,19 @@ export default function DashboardLayout({
     { key: '/products', label: 'Products', icon: Package },
     { key: '/categories', label: 'Categories', icon: Tag },
     { key: '/brands', label: 'Brands', icon: Building2 },
+    {
+      key: '/inventories',
+      label: 'Inventory',
+      icon: Warehouse,
+      hasSubmenu: true,
+      submenu: [
+        { key: '/inventories/warehouse/management', label: 'Danh sách kho' },
+        { key: '/inventories/warehouse/stock-info', label: 'Thông tin tồn kho' },
+        { key: '/inventories/stock-in', label: 'Nhập hàng' },
+        { key: '/inventories/stock-out', label: 'Chuyển kho' },
+        { key: '/inventories/warehouse/inventory-check', label: 'Kiểm kho' },
+      ]
+    },
     { key: '/statistics', label: 'Statistics', icon: LineChart },
     { key: '/promotions', label: 'Promotions', icon: Gift },
     { key: '/admin/orders', label: 'Orders', icon: ShoppingCart },
@@ -150,58 +164,121 @@ export default function DashboardLayout({
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.key);
+            const hasSubmenu = (item as any).hasSubmenu;
+            const submenu = (item as any).submenu;
+
             return (
-              <Tooltip
-                key={item.key}
-                title={collapsed ? item.label : ''}
-                placement="right"
-              >
-                <div
-                  onClick={() => router.push(item.key)}
-                  style={{
-                    padding: '14px 16px',
-                    margin: '6px 12px',
-                    color: active ? 'white' : 'rgba(255, 255, 255, 0.75)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    borderRadius: '10px',
-                    borderLeft: active ? '3px solid white' : '3px solid transparent',
-                    background: active
-                      ? 'rgba(255, 255, 255, 0.15)'
-                      : 'transparent',
-                    userSelect: 'none',
-                    fontWeight: active ? 600 : 500,
-                    backdropFilter: active ? 'blur(10px)' : 'none',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                      e.currentTarget.style.color = 'white';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)';
-                    }
-                  }}
+              <div key={item.key}>
+                <Tooltip
+                  title={collapsed ? item.label : ''}
+                  placement="right"
                 >
-                  <Icon size={20} style={{ minWidth: '20px', flexShrink: 0 }} />
-                  {!collapsed && (
-                    <>
-                      <span style={{ fontSize: '14px', flex: 1 }}>
-                        {item.label}
-                      </span>
-                      {active && (
-                        <ChevronRight size={16} style={{ opacity: 0.7 }} />
-                      )}
-                    </>
-                  )}
-                </div>
-              </Tooltip>
+                  <div
+                    onClick={() => {
+                      if (hasSubmenu) {
+                        setInventoryOpen(!inventoryOpen);
+                      } else {
+                        router.push(item.key);
+                      }
+                    }}
+                    style={{
+                      padding: '14px 16px',
+                      margin: '6px 12px',
+                      color: active ? 'white' : 'rgba(255, 255, 255, 0.75)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '14px',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      borderRadius: '10px',
+                      borderLeft: active ? '3px solid white' : '3px solid transparent',
+                      background: active
+                        ? 'rgba(255, 255, 255, 0.15)'
+                        : 'transparent',
+                      userSelect: 'none',
+                      fontWeight: active ? 600 : 500,
+                      backdropFilter: active ? 'blur(10px)' : 'none',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                        e.currentTarget.style.color = 'white';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)';
+                      }
+                    }}
+                  >
+                    <Icon size={20} style={{ minWidth: '20px', flexShrink: 0 }} />
+                    {!collapsed && (
+                      <>
+                        <span style={{ fontSize: '14px', flex: 1 }}>
+                          {item.label}
+                        </span>
+                        {hasSubmenu ? (
+                          <ChevronRight
+                            size={16}
+                            style={{
+                              opacity: 0.7,
+                              transform: inventoryOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.2s'
+                            }}
+                          />
+                        ) : active ? (
+                          <ChevronRight size={16} style={{ opacity: 0.7 }} />
+                        ) : null}
+                      </>
+                    )}
+                  </div>
+                </Tooltip>
+
+                {hasSubmenu && inventoryOpen && !collapsed && submenu && (
+                  <div style={{ marginLeft: '12px' }}>
+                    {submenu.map((subItem: any) => {
+                      const subActive = pathname.startsWith(subItem.key);
+                      return (
+                        <div
+                          key={subItem.key}
+                          onClick={() => router.push(subItem.key)}
+                          style={{
+                            padding: '10px 16px 10px 40px',
+                            margin: '4px 12px',
+                            color: subActive ? 'white' : 'rgba(255, 255, 255, 0.65)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            fontSize: '13px',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            borderRadius: '8px',
+                            background: subActive
+                              ? 'rgba(255, 255, 255, 0.1)'
+                              : 'transparent',
+                            userSelect: 'none',
+                            fontWeight: subActive ? 500 : 400,
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!subActive) {
+                              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!subActive) {
+                              e.currentTarget.style.background = 'transparent';
+                              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.65)';
+                            }
+                          }}
+                        >
+                          {subItem.label}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>

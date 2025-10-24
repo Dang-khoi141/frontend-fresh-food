@@ -119,7 +119,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname.startsWith("/inventory")) {
+  if (pathname.startsWith("/inventories")) {
     if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -141,6 +141,7 @@ export const config = {
     "/promotions/:path*",
     "/payment/:path*",
     "/inventory/:path*",
+    "/inventories/:path*",
     "/profile-page/:path*",
   ],
 };

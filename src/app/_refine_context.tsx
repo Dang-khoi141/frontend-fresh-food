@@ -97,6 +97,13 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
                 meta: { canDelete: true },
               },
               {
+                name: "inventories",
+                list: "/inventories",
+                meta: {
+                  label: "Inventory",
+                },
+              },
+              {
                 name: "statistics",
                 list: "/statistics",
                 meta: {
