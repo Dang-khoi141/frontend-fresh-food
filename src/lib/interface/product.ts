@@ -44,3 +44,13 @@ export interface ProductCardProps {
     brand?: { name: string };
   };
 }
+export interface ProductSelectionModalProps {
+  open: boolean;
+  products: Product[];
+  selectedProducts: Product[];
+  searchText: string;
+  onSearchChange: (value: string) => void;
+  onSelectionChange: (products: Product[]) => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+}
