@@ -29,6 +29,13 @@ class ProductService extends BaseApiService {
       totalPages: res.data?.totalPages ?? 1,
     };
   }
+
+  async importProducts(formData: FormData): Promise<any> {
+    const res = await this.axiosInstance.post("/products/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  }
 }
 
 export const productService = new ProductService();

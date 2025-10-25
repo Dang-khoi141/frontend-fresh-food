@@ -29,13 +29,24 @@ export default function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [productOpen, setProductOpen] = useState(false);
+
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
 
   const menuItems = [
     { key: '/users', label: 'Users', icon: Users },
-    { key: '/products', label: 'Products', icon: Package },
+    {
+      key: '/products',
+      label: 'Products',
+      icon: Package,
+      hasSubmenu: true,
+      submenu: [
+        { key: '/products', label: 'Danh sách sản phẩm' },
+        { key: '/products/import', label: 'Nhập Excel' },
+      ],
+    },
     { key: '/categories', label: 'Categories', icon: Tag },
     { key: '/brands', label: 'Brands', icon: Building2 },
     {
@@ -176,7 +187,11 @@ export default function DashboardLayout({
                   <div
                     onClick={() => {
                       if (hasSubmenu) {
-                        setInventoryOpen(!inventoryOpen);
+                        if (item.key === '/inventories') {
+                          setInventoryOpen(!inventoryOpen);
+                        } else if (item.key === '/products') {
+                          setProductOpen(!productOpen);
+                        }
                       } else {
                         router.push(item.key);
                       }
@@ -223,7 +238,11 @@ export default function DashboardLayout({
                             size={16}
                             style={{
                               opacity: 0.7,
-                              transform: inventoryOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                              transform:
+                                (item.key === '/inventories' && inventoryOpen) ||
+                                  (item.key === '/products' && productOpen)
+                                  ? 'rotate(90deg)'
+                                  : 'rotate(0deg)',
                               transition: 'transform 0.2s'
                             }}
                           />
@@ -235,7 +254,7 @@ export default function DashboardLayout({
                   </div>
                 </Tooltip>
 
-                {hasSubmenu && inventoryOpen && !collapsed && submenu && (
+                {hasSubmenu && inventoryOpen && item.key === '/inventories' && !collapsed && submenu && (
                   <div style={{ marginLeft: '12px' }}>
                     {submenu.map((subItem: any) => {
                       const subActive = pathname.startsWith(subItem.key);
@@ -259,17 +278,37 @@ export default function DashboardLayout({
                             userSelect: 'none',
                             fontWeight: subActive ? 500 : 400,
                           }}
-                          onMouseEnter={(e) => {
-                            if (!subActive) {
-                              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!subActive) {
-                              e.currentTarget.style.background = 'transparent';
-                              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.65)';
-                            }
+                        >
+                          {subItem.label}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {hasSubmenu && productOpen && item.key === '/products' && !collapsed && submenu && (
+                  <div style={{ marginLeft: '12px' }}>
+                    {submenu.map((subItem: any) => {
+                      const subActive = pathname.startsWith(subItem.key);
+                      return (
+                        <div
+                          key={subItem.key}
+                          onClick={() => router.push(subItem.key)}
+                          style={{
+                            padding: '10px 16px 10px 40px',
+                            margin: '4px 12px',
+                            color: subActive ? 'white' : 'rgba(255, 255, 255, 0.65)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            fontSize: '13px',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            borderRadius: '8px',
+                            background: subActive
+                              ? 'rgba(255, 255, 255, 0.1)'
+                              : 'transparent',
+                            userSelect: 'none',
+                            fontWeight: subActive ? 500 : 400,
                           }}
                         >
                           {subItem.label}
@@ -305,14 +344,6 @@ export default function DashboardLayout({
                 userSelect: 'none',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
                 fontWeight: 500,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
               }}
             >
               <LogOut size={18} style={{ flexShrink: 0 }} />
@@ -362,12 +393,6 @@ export default function DashboardLayout({
               borderRadius: '10px',
               padding: 0,
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#f0fdf4';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-            }}
           />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -386,16 +411,6 @@ export default function DashboardLayout({
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f0fdf4';
-                  const icon = e.currentTarget.querySelector('svg');
-                  if (icon) (icon as any).style.color = '#059669';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  const icon = e.currentTarget.querySelector('svg');
-                  if (icon) (icon as any).style.color = '#64748b';
-                }}
               />
             </Tooltip>
 
@@ -413,16 +428,6 @@ export default function DashboardLayout({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f0fdf4';
-                  const icon = e.currentTarget.querySelector('svg');
-                  if (icon) (icon as any).style.color = '#059669';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  const icon = e.currentTarget.querySelector('svg');
-                  if (icon) (icon as any).style.color = '#64748b';
                 }}
               />
             </Tooltip>
