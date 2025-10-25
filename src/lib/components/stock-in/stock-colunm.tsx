@@ -36,7 +36,7 @@ export const createStockInColumns = (
         ),
     },
     {
-        title: 'Người nhận',
+        title: 'Người nhập',
         dataIndex: 'receivedBy',
         key: 'receivedBy',
         width: 150,

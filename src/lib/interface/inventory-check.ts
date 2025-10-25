@@ -14,7 +14,8 @@ export interface InventoryCheck {
   checkDate: string;
   checkedBy: string;
   details: InventoryCheckDetail[];
-  note?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateCheckItemDto {
@@ -26,4 +27,12 @@ export interface CreateCheckItemDto {
 export interface CreateInventoryCheckDto {
   warehouseId: string;
   items: CreateCheckItemDto[];
+}
+
+export interface CheckItem {
+  key: string;
+  productId?: string;
+  productName?: string;
+  systemQuantity: number;
+  actualQuantity: number;
 }
