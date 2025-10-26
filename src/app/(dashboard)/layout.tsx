@@ -57,9 +57,9 @@ export default function DashboardLayout({
       submenu: [
         { key: '/inventories/warehouse/management', label: 'Danh sách kho' },
         { key: '/inventories/warehouse/stock-info', label: 'Thông tin tồn kho' },
-        { key: '/inventories/stock-in', label: 'Nhập hàng' },
-        { key: '/inventories/stock-out', label: 'Chuyển kho' },
-        { key: '/inventories/warehouse/inventory-check', label: 'Kiểm kho' },
+        { key: '/inventories/stock-in', label: 'Nhập kho' },
+        { key: '/inventories/stock-out', label: 'Xuất kho' },
+        { key: '/inventories/warehouse/inventory-check', label: 'Kiểm kê kho' },
       ]
     },
     { key: '/statistics', label: 'Statistics', icon: LineChart },

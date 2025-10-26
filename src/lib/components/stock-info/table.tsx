@@ -86,36 +86,4 @@ export const getInventoryColumns = (): ColumnsType<InventoryItem> => [
             </div>
         ),
     },
-    {
-        title: 'Số lượng chờ xuất',
-        dataIndex: 'pendingExport',
-        key: 'pendingExport',
-        width: 150,
-        align: 'center',
-        render: (value: number = 0) => (
-            <span style={{
-                fontWeight: 500,
-                color: value > 0 ? '#0ea5e9' : '#94a3b8',
-                fontSize: '15px',
-            }}>
-                {value}
-            </span>
-        ),
-    },
-    {
-        title: 'Số lượng chờ nhập',
-        dataIndex: 'pendingImport',
-        key: 'pendingImport',
-        width: 150,
-        align: 'center',
-        render: (value: number = 0) => (
-            <span style={{
-                fontWeight: 500,
-                color: value > 0 ? '#8b5cf6' : '#94a3b8',
-                fontSize: '15px',
-            }}>
-                {value}
-            </span>
-        ),
-    },
 ];
