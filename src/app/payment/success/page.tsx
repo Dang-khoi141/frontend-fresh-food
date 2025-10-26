@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import FreshNav from "../../../lib/components/landing-page/header/header-nav";
+import { useEffect, useState } from "react";
 import Footer from "../../../lib/components/landing-page/footer/footer";
+import FreshNav from "../../../lib/components/landing-page/header/header-nav";
+import ReviewForm from "../../../lib/components/reviews/ReviewForm";
+
 
 export default function PaymentSuccessPage() {
     const router = useRouter();
@@ -27,6 +29,7 @@ export default function PaymentSuccessPage() {
 
     const orderCode = searchParams.get("orderCode");
     const amount = searchParams.get("amount");
+    const productId = searchParams.get("productId");
 
     return (
         <>
@@ -75,7 +78,7 @@ export default function PaymentSuccessPage() {
                         </div>
                     )}
 
-                    <div className="space-y-3">
+                    <div className="space-y-3 mt-8">
                         <p className="text-sm text-gray-500">
                             Chuyển hướng đến trang đơn hàng trong {countdown} giây...
                         </p>
