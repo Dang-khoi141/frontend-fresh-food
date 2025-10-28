@@ -1,7 +1,7 @@
 "use client";
 
-import { use } from "react";
-import Link from "next/link";
+import { use, useState } from "react";
+import { useRouter } from "next/navigation";
 import Footer from "../../../lib/components/landing-page/footer/footer";
 import FreshNav from "../../../lib/components/landing-page/header/header-nav";
 import { usePaymentFlow } from "../../../lib/hooks/usePaymentFlow";
@@ -11,11 +11,25 @@ export default function PaymentPage({
 }: {
   params: Promise<{ orderId: string }>;
 }) {
+  const router = useRouter();
   const { orderId } = use(params);
-  const { order, paymentData, status, countdown, error, handleCopy } = usePaymentFlow(orderId);
+  const { order, paymentData, status, error, handleCopy, cancelPayment } = usePaymentFlow(orderId);
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  const formatTime = (s: number) =>
-    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const handleCancelPayment = async () => {
+    if (!confirm("Bạn có chắc chắn muốn hủy thanh toán này?")) {
+      return;
+    }
+
+    try {
+      setIsCancelling(true);
+      await cancelPayment();
+      router.push("/payment/cancel");
+    } catch (err: any) {
+      setIsCancelling(false);
+      alert(err.message || "Có lỗi xảy ra khi hủy thanh toán");
+    }
+  };
 
   if (status === "loading" || status === "idle")
     return (
@@ -36,18 +50,12 @@ export default function PaymentPage({
             <h2 className="text-2xl font-bold text-red-700 mb-4">Có lỗi xảy ra</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <div className="flex gap-4 justify-center">
-              <Link
-                href={`/orders/${orderId}`}
-                className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold"
-              >
-                Xem đơn hàng
-              </Link>
-              <Link
-                href="/cart"
+              <button
+                onClick={() => router.push("/cart")}
                 className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold"
               >
                 Quay lại giỏ hàng
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -65,36 +73,18 @@ export default function PaymentPage({
             <p className="text-gray-600 mb-6">
               Vui lòng thử lại hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp diễn.
             </p>
-            <Link
-              href="/cart"
+            <button
+              onClick={() => router.push("/cart")}
               className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold"
             >
               Quay lại giỏ hàng
-            </Link>
+            </button>
           </div>
         </div>
       </>
     );
 
   const paymentInfo = paymentData.payosResponse?.data;
-
-  if (status === "success")
-    return (
-      <>
-        <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-8">
-            <div className="text-green-600 text-6xl mb-4">✓</div>
-            <h2 className="text-2xl font-bold text-green-800 mb-4">
-              Thanh toán thành công!
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Đơn hàng của bạn đã được thanh toán. Chúng tôi sẽ xử lý và giao hàng sớm nhất.
-            </p>
-            <p className="text-sm text-gray-500">Đang chuyển hướng...</p>
-          </div>
-        </div>
-      </>
-    );
 
   return (
     <>
@@ -110,13 +100,7 @@ export default function PaymentPage({
           </p>
         </div>
 
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-4 py-2">
-            <span className="font-semibold text-orange-700">
-              Thời gian còn lại: {formatTime(countdown)}
-            </span>
-          </div>
-        </div>
+
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="border rounded-lg p-6 bg-white shadow-sm">
@@ -188,13 +172,20 @@ export default function PaymentPage({
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <Link
-            href={`/orders/${order.id}`}
-            className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium"
+        <div className="mt-6 bg-red-50 border-2 border-red-300 rounded-lg p-4">
+          <p className="text-red-600 font-semibold text-center text-sm md:text-base">
+            ⚠️ Yêu cầu copy chính xác số tiền và nội dung chuyển khoản. Hệ thống sẽ hủy giao dịch nếu không nhận được thanh toán trong vòng 15 phút. Thanh toán xong vui lòng chờ 1 phút.
+          </p>
+        </div>
+
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={handleCancelPayment}
+            disabled={isCancelling}
+            className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white px-8 py-3 rounded-lg font-medium transition-colors"
           >
-            Xem chi tiết đơn hàng
-          </Link>
+            {isCancelling ? "Đang hủy..." : "Hủy thanh toán"}
+          </button>
         </div>
       </section>
       <Footer />
