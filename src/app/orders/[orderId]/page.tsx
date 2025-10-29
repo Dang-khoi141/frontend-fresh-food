@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import FreshNav from "../../../lib/components/landing-page/header/header-nav";
 import Footer from "../../../lib/components/landing-page/footer/footer";
@@ -8,6 +8,9 @@ import { orderService } from "../../../lib/service/order.service";
 import Link from "next/link";
 import { useAddressContext } from "../../../contexts/address-context";
 import { Order } from "../../../lib/interface/order";
+import ReviewModal from "../../../lib/components/reviews/review-form";
+import { reviewService } from "../../../lib/service/review.service";
+import { IReview } from "../../../lib/interface/review";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
   const resolvedParams = use(params);
@@ -16,6 +19,50 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
   const [loading, setLoading] = useState(true);
   const [canceling, setCanceling] = useState(false);
   const { defaultAddress } = useAddressContext();
+
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<{
+    id: string;
+    name: string;
+    image?: string;
+  } | null>(null);
+  const [existingReview, setExistingReview] = useState<IReview | null>(null);
+  const [productReviews, setProductReviews] = useState<Record<string, IReview>>({});
+  const [loadingReviews, setLoadingReviews] = useState(false);
+
+  const fetchAllProductReviews = useCallback(async (orderData: Order) => {
+    if (orderData.status !== "DELIVERED") return;
+
+    setLoadingReviews(true);
+    try {
+      const res = await reviewService.getMyReviews();
+
+      const allUserReviews = Array.isArray(res.data) ? res.data : (res || []);
+
+      const orderProductIds = new Set(orderData.items.map(item => item.product.id));
+      const orderReviewsMap: Record<string, IReview> = {};
+
+      allUserReviews.forEach((review: any) => {
+        const productId = review.product?.id || review.productId;
+        if (productId && orderProductIds.has(productId)) {
+          orderReviewsMap[productId] = {
+            ...review,
+            productId,
+          };
+        }
+      });
+
+      setProductReviews(orderReviewsMap);
+    } catch (error: any) {
+      console.error("Error fetching user reviews:", error);
+      if (error.response?.status !== 404) {
+        console.warn("Could not load reviews, but continuing...");
+      }
+      setProductReviews({});
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -27,6 +74,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
         if (fromPayment === "true") {
           sessionStorage.removeItem(`from_payment_${resolvedParams.orderId}`);
         }
+
+        if (orderData.status === "DELIVERED") {
+          await fetchAllProductReviews(orderData);
+        }
       } catch (error) {
         console.error("Error fetching order:", error);
         router.push("/profile-page?tab=orders");
@@ -36,7 +87,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
     };
 
     fetchOrder();
-  }, [resolvedParams.orderId, router]);
+  }, [resolvedParams.orderId, router, fetchAllProductReviews]);
 
   const handleCancelOrder = async () => {
     if (!order) return;
@@ -58,6 +109,38 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
 
   const handlePayNow = () => {
     if (order) router.push(`/payment/${order.id}`);
+  };
+
+  const handleOpenReviewModal = (productId: string, productName: string, productImage?: string) => {
+    setSelectedProduct({ id: productId, name: productName, image: productImage });
+
+    const existingProductReview = productReviews[productId];
+    setExistingReview(existingProductReview || null);
+
+    setReviewModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setReviewModalOpen(false);
+    setSelectedProduct(null);
+    setExistingReview(null);
+  };
+
+  const handleReviewSuccess = async (updatedReview: IReview) => {
+    if (selectedProduct) {
+      setProductReviews(prev => ({
+        ...prev,
+        [selectedProduct.id]: updatedReview
+      }));
+    }
+
+    try {
+      const updatedOrder = await orderService.getOrderDetail(resolvedParams.orderId);
+      setOrder(updatedOrder);
+      await fetchAllProductReviews(updatedOrder);
+    } catch (error) {
+      console.error("Error refetching order after review:", error);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -84,9 +167,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
   if (loading) {
     return (
       <>
+        <FreshNav />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center mt-28">
-          <p>Đang tải thông tin đơn hàng...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang tải thông tin đơn hàng...</p>
         </div>
+        <Footer />
       </>
     );
   }
@@ -161,7 +247,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
           <div className="bg-gray-50 px-4 py-3 border-b">
             <h3 className="font-semibold">Sản phẩm đã đặt</h3>
           </div>
-          <div className="p-4">
+          <div className="p-4 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b">
                 <tr>
@@ -169,30 +255,57 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
                   <th className="text-center pb-2">Số lượng</th>
                   <th className="text-right pb-2">Đơn giá</th>
                   <th className="text-right pb-2">Thành tiền</th>
+                  {order.status === "DELIVERED" && (
+                    <th className="text-center pb-2">Đánh giá</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
-                {order.items.map((item) => (
-                  <tr key={item.id} className="border-b last:border-0">
-                    <td className="py-3">
-                      <div className="flex gap-3 items-center">
-                        <img
-                          src={item.product.image || "/placeholder.png"}
-                          alt={item.product.name}
-                          className="w-12 h-12 object-contain border rounded"
-                        />
-                        <span className="font-medium">{item.product.name}</span>
-                      </div>
-                    </td>
-                    <td className="text-center py-3">{item.quantity}</td>
-                    <td className="text-right py-3">
-                      {formatPrice(Number(item.unitPrice))}
-                    </td>
-                    <td className="text-right py-3 font-semibold">
-                      {formatPrice(Number(item.unitPrice) * item.quantity)}
-                    </td>
-                  </tr>
-                ))}
+                {order.items.map((item) => {
+                  const hasReview = !!productReviews[item.product.id];
+
+                  return (
+                    <tr key={item.id} className="border-b last:border-0">
+                      <td className="py-3">
+                        <div className="flex gap-3 items-center">
+                          <img
+                            src={item.product.image || "/placeholder.png"}
+                            alt={item.product.name}
+                            className="w-12 h-12 object-contain border rounded"
+                          />
+                          <span className="font-medium">{item.product.name}</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-3">{item.quantity}</td>
+                      <td className="text-right py-3">
+                        {formatPrice(Number(item.unitPrice))}
+                      </td>
+                      <td className="text-right py-3 font-semibold">
+                        {formatPrice(Number(item.unitPrice) * item.quantity)}
+                      </td>
+                      {order.status === "DELIVERED" && (
+                        <td className="text-center py-3">
+                          <button
+                            onClick={() =>
+                              handleOpenReviewModal(
+                                item.product.id,
+                                item.product.name,
+                                item.product.image
+                              )
+                            }
+                            disabled={loadingReviews}
+                            className={`${hasReview
+                              ? "text-blue-600 hover:text-blue-700 border-blue-600 hover:border-blue-700"
+                              : "text-emerald-600 hover:text-emerald-700 border-emerald-600 hover:border-emerald-700"
+                              } font-medium text-sm border px-3 py-1.5 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {loadingReviews ? "..." : (hasReview ? "Cập nhật đánh giá" : "Đánh giá")}
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -202,7 +315,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
           {order.status === "PENDING" && order.paymentMethod === "ONLINE" && (
             <button
               onClick={handlePayNow}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold transition"
             >
               Thanh toán ngay
             </button>
@@ -212,13 +325,25 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
             <button
               onClick={handleCancelOrder}
               disabled={canceling}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold disabled:opacity-50"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold disabled:opacity-50 transition"
             >
               {canceling ? "Đang hủy..." : "Hủy đơn hàng"}
             </button>
           )}
         </div>
       </section>
+
+      {reviewModalOpen && selectedProduct && (
+        <ReviewModal
+          productId={selectedProduct.id}
+          productName={selectedProduct.name}
+          productImage={selectedProduct.image}
+          existingReview={existingReview}
+          onClose={handleCloseReviewModal}
+          onSuccess={handleReviewSuccess}
+        />
+      )}
+
       <Footer />
     </>
   );

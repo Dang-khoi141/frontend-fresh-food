@@ -26,4 +26,16 @@ export const reviewService = {
     const res = await axiosInstance.delete(`/reviews/${id}`);
     return res.data;
   },
+
+  async getMyReview(productId: string) {
+    const res = await axiosInstance.get(
+      `/reviews/product/${productId}/my-review`
+    );
+    return res.data;
+  },
+
+  async getMyReviews() {
+    const res = await axiosInstance.get('/reviews/my-reviews');
+    return res.data;
+  },
 };

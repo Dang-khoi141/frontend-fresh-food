@@ -33,5 +33,18 @@ export function useReview(productId: string) {
     [productId, fetchReviews]
   );
 
-  return { reviews, loading, fetchReviews, createReview };
+  const updateReview = useCallback(
+    async (reviewId: string, data: Partial<IReview>) => {
+      try {
+        await reviewService.update(reviewId, data);
+        await fetchReviews();
+      } catch (error) {
+        console.error("❌ Failed to update review:", error);
+        throw error;
+      }
+    },
+    [fetchReviews]
+  );
+
+  return { reviews, loading, fetchReviews, createReview, updateReview };
 }
