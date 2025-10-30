@@ -1,0 +1,175 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Message } from "../../interface/ai";
+import { AIService } from "../../service/ai.service";
+import { MessageCircleMore } from "lucide-react";
+
+export default function AIChatWidget() {
+    const [open, setOpen] = useState(false);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [input, setInput] = useState("");
+    const [loading, setLoading] = useState(false);
+    const chatRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        chatRef.current?.scrollTo({
+            top: chatRef.current.scrollHeight,
+            behavior: "smooth",
+        });
+    }, [messages, loading]);
+
+    const sendMessage = async () => {
+        if (!input.trim()) return;
+        const userMsg: Message = { role: "user", text: input };
+        setMessages((prev) => [...prev, userMsg]);
+        setInput("");
+        setLoading(true);
+
+        try {
+            const data = await AIService.sendMessage(input);
+            const aiMessage: Message = {
+                role: "ai",
+                text: data.reply || "Xin lỗi, tôi không tìm thấy thông tin phù hợp.",
+                products: data.products || [],
+            };
+            setMessages((prev) => [...prev, aiMessage]);
+        } catch (error) {
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "ai",
+                    text: "⚠️ Lỗi kết nối tới hệ thống, vui lòng thử lại sau.",
+                },
+            ]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed bottom-6 right-6 z-50 font-roboto">
+            {!open && (
+                <button
+                    onClick={() => setOpen(true)}
+                    className="relative bg-brand w-16 h-16 rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-all duration-300"
+                >
+                    <div className="bg-gradient-to-tr from-green-400 to-emerald-500 text-white p-3 rounded-full shadow-md">
+                        <MessageCircleMore className="w-6 h-6" />
+                    </div>
+                    <span className="absolute -top-1 -right-1 bg-white text-brand text-[10px] font-semibold px-1 rounded-full shadow">
+                        Trợ lý AI
+                    </span>
+                </button>
+
+            )}
+
+            {open && (
+                <div className="animate-fadeIn bg-white w-96 h-[520px] flex flex-col rounded-2xl shadow-sl border border-gray-100 overflow-hidden">
+                    <div className="bg-gradient-to-r from-emerald-500 to-brand text-white px-4 py-3 flex justify-between items-center shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-white text-brand font-bold flex items-center justify-center w-8 h-8 rounded-full shadow-sm">
+                                FM
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold leading-none">FreshMart AI</p>
+                                <p className="text-xs opacity-90">Hỗ trợ mua sắm nhanh</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setOpen(false)}
+                            className="text-white hover:text-gray-100 text-lg"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    {/* Nội dung chat */}
+                    <div
+                        ref={chatRef}
+                        className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm"
+                    >
+                        {messages.length === 0 && !loading && (
+                            <div className="text-gray-400 text-center mt-10 italic">
+                                👋 Xin chào! Tôi là trợ lý AI của FreshMart.<br />
+                                Hãy hỏi tôi về sản phẩm, danh mục hoặc khuyến mãi nhé 💚
+                            </div>
+                        )}
+
+                        {messages.map((msg, i) => (
+                            <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                                <div
+                                    className={`p-3 max-w-[80%] whitespace-pre-line rounded-2xl shadow-soft ${msg.role === "user"
+                                        ? "bg-green-100 text-gray-800 rounded-br-none"
+                                        : "bg-white border border-gray-200 text-gray-700 rounded-bl-none"
+                                        }`}
+                                >
+                                    <div>{msg.text}</div>
+
+                                    {msg.products && msg.products.length > 0 && (
+                                        <div className="mt-3 grid grid-cols-1 gap-3">
+                                            {msg.products.map((p: any, idx: number) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl p-2 shadow-sm hover:shadow-md transition-all"
+                                                >
+                                                    <img
+                                                        src={p.image}
+                                                        alt={p.name}
+                                                        className="w-12 h-12 object-cover rounded-lg border"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium text-gray-800 line-clamp-1">{p.name}</p>
+                                                        <p className="text-green-600 text-xs font-semibold">
+                                                            {Number(p.price || 0).toLocaleString("vi-VN")}₫
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        className="bg-brand text-white text-xs px-2 py-1 rounded-lg hover:bg-emerald-600"
+                                                    >
+                                                        Mua
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+
+                        {loading && (
+                            <div className="flex items-center space-x-2 text-gray-400 text-sm italic">
+                                <div className="animate-bounce">●</div>
+                                <div className="animate-bounce delay-100">●</div>
+                                <div className="animate-bounce delay-200">●</div>
+                                <span>AI đang trả lời...</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="border-t p-3 bg-white flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <input
+                                className="flex-1 border rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                                placeholder="Nhập câu hỏi..."
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                            />
+                            <button
+                                onClick={sendMessage}
+                                disabled={loading}
+                                className="bg-brand text-white font-medium px-4 py-2 rounded-full hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60"
+                            >
+                                Gửi
+                            </button>
+                        </div>
+                        <p className="text-[11px] text-gray-400 text-center">
+                            💡 Mẹo: hỏi “Mã giảm giá hôm nay?” hoặc “Tìm Coca-Cola 1.5L”
+                        </p>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
