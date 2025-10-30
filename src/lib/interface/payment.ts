@@ -57,7 +57,6 @@ export interface PaymentFlowState {
   order: Order | null;
   paymentData: CreatePaymentResponse["data"] | null;
   status: "idle" | "loading" | "pending" | "success" | "failed";
-  countdown: number;
   error: string | null;
   handleCopy: (text: string, label: string) => void;
 }

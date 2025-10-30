@@ -18,6 +18,13 @@ class PaymentService extends BaseApiService {
     return res.data?.data ?? res.data;
   }
 
+  async cancelPayment(
+    orderId: string
+  ): Promise<{ message: string; orderId: string }> {
+    const res = await this.axiosInstance.patch(`/payments/cancel/${orderId}`);
+    return res.data;
+  }
+
   generateVietQRUrl(
     bin: string,
     accountNumber: string,

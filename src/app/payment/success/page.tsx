@@ -4,8 +4,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Footer from "../../../lib/components/landing-page/footer/footer";
 import FreshNav from "../../../lib/components/landing-page/header/header-nav";
-import ReviewForm from "../../../lib/components/reviews/ReviewForm";
-
 
 export default function PaymentSuccessPage() {
     const router = useRouter();
@@ -17,7 +15,6 @@ export default function PaymentSuccessPage() {
             setCountdown((prev) => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    router.push("/orders");
                     return 0;
                 }
                 return prev - 1;
@@ -25,11 +22,16 @@ export default function PaymentSuccessPage() {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [router]);
+    }, []);
+
+    useEffect(() => {
+        if (countdown === 0) {
+            router.push("/profile-page?tab=orders");
+        }
+    }, [countdown, router]);
 
     const orderCode = searchParams.get("orderCode");
     const amount = searchParams.get("amount");
-    const productId = searchParams.get("productId");
 
     return (
         <>
@@ -84,7 +86,7 @@ export default function PaymentSuccessPage() {
                         </p>
                         <div className="flex gap-3 justify-center">
                             <button
-                                onClick={() => router.push("/orders")}
+                                onClick={() => router.push("/profile-page?tab=orders")}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold"
                             >
                                 Xem đơn hàng

@@ -5,7 +5,23 @@ export interface IReview {
   user?: {
     id: string;
     name: string;
+    avatar?: string;
   };
-  productId: string;
+  product?: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+  productId?: string;
+  isVerifiedPurchase?: boolean;
   createdAt?: string;
+}
+
+export interface ReviewModalProps {
+  productId: string;
+  productName: string;
+  productImage?: string;
+  existingReview?: IReview | null;
+  onClose: () => void;
+  onSuccess?: (reviewData: IReview) => void;
 }

@@ -6,18 +6,21 @@ import {
   PaymentFlowState,
 } from "@/lib/interface/payment";
 import { orderService } from "@/lib/service/order.service";
+import { paymentService } from "@/lib/service/payment.service";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import useFetchPayment from "./useFetchPayment";
 
 /**
- * usePaymentFlow — hook quản lý toàn bộ vòng đời thanh toán online.
+ * usePaymentFlow – hook quản lý toàn bộ vòng đời thanh toán online.
  *  - Fetch order
  *  - Create payment link nếu chưa có
  *  - Poll trạng thái PayOS mỗi 5s
- *  - Redirect sau khi thanh toán thành công
+ *  - Redirect ngay lập tức khi thanh toán thành công hoặc bị hủy
  */
-export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
+export function usePaymentFlow(
+  orderId: string | undefined
+): PaymentFlowState & { cancelPayment: () => Promise<void> } {
   const router = useRouter();
   const { createPayment, checkPaymentStatus } = useFetchPayment();
   const [order, setOrder] = useState<Order | null>(null);
@@ -28,7 +31,6 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
     "idle" | "loading" | "pending" | "success" | "failed"
   >("idle");
   const [error, setError] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(600);
   const paymentCreated = useRef(false);
   const hasFetched = useRef(false);
 
@@ -47,7 +49,16 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
         setOrder(orderData);
 
         if (orderData.status === "PAID") {
-          setStatus("success");
+          const params = new URLSearchParams({
+            orderCode: orderData.payosOrderCode?.toString() || "",
+            amount: orderData.total.toString(),
+          });
+          router.replace(`/payment/success?${params.toString()}`);
+          return;
+        }
+
+        if (orderData.status === "CANCELED") {
+          router.replace("/payment/cancel");
           return;
         }
 
@@ -64,7 +75,7 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
           const resp = await createPayment({
             orderId: orderData.id,
             description: `DH-${orderData.id.slice(-8)}`,
-            items: orderData.items.map(i => ({
+            items: orderData.items.map((i) => ({
               name: i.product.name,
               price: Number(i.unitPrice),
               quantity: i.quantity,
@@ -90,16 +101,7 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
     };
 
     fetchOrder();
-  }, [orderId, createPayment]);
-
-  useEffect(() => {
-    if (status !== "pending") return;
-    const timer = setInterval(
-      () => setCountdown(c => (c > 0 ? c - 1 : 0)),
-      1000
-    );
-    return () => clearInterval(timer);
-  }, [status]);
+  }, [orderId, createPayment, router]);
 
   useEffect(() => {
     if (!paymentData || !order?.id || status !== "pending") return;
@@ -118,11 +120,24 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
           ["PAID", "SUCCESS", "COMPLETED"].includes(payosStatus || "") ||
           latestOrder.status === "PAID"
         ) {
-          setStatus("success");
           sessionStorage.removeItem(`payment_${order.id}`);
           sessionStorage.setItem(`from_payment_${order.id}`, "true");
           clearInterval(interval);
-          setTimeout(() => router.replace(`/orders/${order.id}`), 2000);
+
+          setTimeout(() => {
+            const params = new URLSearchParams({
+              orderCode: paymentData.payosResponse.data.orderCode.toString(),
+              amount: paymentData.payosResponse.data.amount.toString(),
+            });
+            router.replace(`/payment/success?${params.toString()}`);
+          }, 1500);
+        } else if (latestOrder.status === "CANCELED") {
+          sessionStorage.removeItem(`payment_${order.id}`);
+          clearInterval(interval);
+
+          setTimeout(() => {
+            router.replace("/payment/cancel");
+          }, 1500);
         }
       } catch (err) {
         console.error("Lỗi khi kiểm tra PayOS:", err);
@@ -140,5 +155,18 @@ export function usePaymentFlow(orderId: string | undefined): PaymentFlowState {
     alert(`Đã sao chép ${label}!`);
   };
 
-  return { order, paymentData, status, countdown, error, handleCopy };
+  const cancelPayment = async () => {
+    if (!order?.id) throw new Error("Không tìm thấy đơn hàng");
+
+    try {
+      await paymentService.cancelPayment(order.id);
+      sessionStorage.removeItem(`payment_${order.id}`);
+    } catch (err: any) {
+      throw new Error(
+        err.response?.data?.message || "Không thể hủy thanh toán"
+      );
+    }
+  };
+
+  return { order, paymentData, status, error, handleCopy, cancelPayment };
 }

@@ -215,7 +215,6 @@ export default function CartPage() {
             Tiếp tục mua hàng
           </Link>
         </div>
-        <Footer />
       </>
     );
   }
