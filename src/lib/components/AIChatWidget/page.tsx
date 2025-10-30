@@ -1,9 +1,10 @@
 "use client";
 
+import { MessageCircleMore } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Message } from "../../interface/ai";
 import { AIService } from "../../service/ai.service";
-import { MessageCircleMore } from "lucide-react";
 
 export default function AIChatWidget() {
     const [open, setOpen] = useState(false);
@@ -11,6 +12,7 @@ export default function AIChatWidget() {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const chatRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
 
     useEffect(() => {
         chatRef.current?.scrollTo({
@@ -84,7 +86,6 @@ export default function AIChatWidget() {
                         </button>
                     </div>
 
-                    {/* Nội dung chat */}
                     <div
                         ref={chatRef}
                         className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm"
@@ -125,6 +126,7 @@ export default function AIChatWidget() {
                                                         </p>
                                                     </div>
                                                     <button
+                                                        onClick={() => router.push(`/products/${p.id}`)}
                                                         className="bg-brand text-white text-xs px-2 py-1 rounded-lg hover:bg-emerald-600"
                                                     >
                                                         Mua
