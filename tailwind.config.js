@@ -126,6 +126,15 @@ module.exports = {
         ft: "64px",
       },
       lineHeight: {},
+      backgroundSize: { 200: "200% 200%" },
+      backgroundPosition: { 0: "0% 0%", 100: "100% 100%" },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: 0, transform: "translateY(8px)" },
+          "100%": { opacity: 1, transform: "translateY(0)" },
+        },
+      },
+      animation: { fadeIn: "fadeIn .25s ease" },
     },
   },
   variants: {

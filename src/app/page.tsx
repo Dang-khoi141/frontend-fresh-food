@@ -19,18 +19,12 @@ const LandingPage = () => (
   <div className="min-h-screen bg-gray-50">
     <main className="overflow-hidden">
       <FreshNav />
-
-      <HeroSlider />
-
-      <CategoryGrid />
-
-      <PromotionBanners />
-
-      <FlashSale />
-
-      <FeaturedProducts />
-
-      <Footer />
+      <CategoriesProduct />
+      {/* <Choose />
+      <TrendingProducts />
+      <Experience />
+      <TopCategories />
+      <Footer /> */}
     </main>
   </div>
 );

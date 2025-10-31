@@ -9,6 +9,7 @@ import { RefineContext } from "./_refine_context";
 import "./globals.css";
 import { CartProvider } from "../contexts/cart-context";
 import { AddressProvider } from "../contexts/address-context";
+import AIChatWidget from "../lib/components/AIChatWidget/page";
 
 const getstInter = Inter({
   subsets: ["latin"],
@@ -39,6 +40,7 @@ export default async function RootLayout({
               <CartProvider>
                 <AddressProvider>
                   <main className="min-h-screen">{children}</main>
+                  <AIChatWidget />
                   <Toaster
                     position="top-center"
                     toastOptions={{
