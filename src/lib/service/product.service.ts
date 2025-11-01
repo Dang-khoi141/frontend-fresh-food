@@ -16,10 +16,35 @@ class ProductService extends BaseApiService {
     return res.data?.data ?? res.data;
   }
 
+  async getProductsByCategory(categoryId: string): Promise<Product[]> {
+    const res = await this.axiosInstance.get(
+      `/products/category/${categoryId}`,
+      {
+        params: { categoryId },
+      }
+    );
+    return res.data?.data ?? res.data;
+  }
+
   async searchProducts(
     params: SearchProductParams
   ): Promise<SearchProductResponse> {
-    const res = await this.axiosInstance.get("/products/search", { params });
+    const cleanParams: any = {};
+
+    if (params.search) cleanParams.search = params.search;
+    if (params.categoryId) cleanParams.categoryId = params.categoryId;
+    if (params.brandId) cleanParams.brandId = params.brandId;
+    if (params.isActive !== undefined) cleanParams.isActive = params.isActive;
+    if (params.minPrice !== undefined) cleanParams.minPrice = params.minPrice;
+    if (params.maxPrice !== undefined) cleanParams.maxPrice = params.maxPrice;
+    if (params.minRating !== undefined) cleanParams.minRating = params.minRating;
+    if (params.sortBy) cleanParams.sortBy = params.sortBy;
+    if (params.page) cleanParams.page = params.page;
+    if (params.limit) cleanParams.limit = params.limit;
+
+    const res = await this.axiosInstance.get("/products/search", {
+      params: cleanParams
+    });
 
     return {
       data: res.data?.data ?? [],

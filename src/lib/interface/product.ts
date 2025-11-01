@@ -11,8 +11,20 @@ export interface Product {
   isActive?: boolean;
   brand?: Brand;
   category?: Category;
+  discountPercentage?: number;
+  finalPrice?: number;
+  avgRating?: number;
+  reviewCount?: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export enum SortBy {
+  NEWEST = "newest",
+  PRICE_ASC = "priceAsc",
+  PRICE_DESC = "priceDesc",
+  DISCOUNT = "discount",
+  RATING = "rating",
 }
 
 export interface SearchProductParams {
@@ -22,9 +34,10 @@ export interface SearchProductParams {
   isActive?: boolean;
   minPrice?: number;
   maxPrice?: number;
+  minRating?: number;
+  sortBy?: SortBy | string;
   page?: number;
   limit?: number;
-  sortBy?: "relevance" | "priceAsc" | "priceDesc" | "newest";
 }
 
 export interface SearchProductResponse {
@@ -36,14 +49,9 @@ export interface SearchProductResponse {
 }
 
 export interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    image?: string;
-    brand?: { name: string };
-  };
+  product: Product;
 }
+
 export interface ProductSelectionModalProps {
   open: boolean;
   products: Product[];

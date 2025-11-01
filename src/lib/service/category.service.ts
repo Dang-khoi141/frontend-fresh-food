@@ -11,6 +11,11 @@ class CategoryService extends BaseApiService {
     const res = await this.axiosInstance.get("/categories");
     return res.data?.data ?? res.data;
   }
+
+  async getCategoryById(id: string) {
+    const res = await this.axiosInstance.get(`/categories/${id}`);
+    return res.data?.data ?? res.data;
+  }
 }
 
 export const categoryService = new CategoryService();

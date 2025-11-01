@@ -22,9 +22,9 @@ const LandingPage = () => (
 
       <CategoryGrid />
 
-      <FlashSale />
+      {/* <FlashSale /> */}
 
-      <FeaturedProducts />
+      {/* <FeaturedProducts /> */}
 
       <Footer />
     </main>
