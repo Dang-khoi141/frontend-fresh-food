@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Category } from "@/lib/interface/category";
+import { Category } from "../interface/category";
 
 const useFetchCategories = () => {
   const [categories, setCategories] = useState<Category[] | null>(null);

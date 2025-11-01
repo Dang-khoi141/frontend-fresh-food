@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import useFetchCategories from "@/lib/hooks/useFetchCategories";
 import Link from "next/link";
+import useFetchCategories from "../../../hooks/useFetchCategories";
 
 const CategoryGrid = () => {
     const { categories, loading, error, fetchCategories } = useFetchCategories();
