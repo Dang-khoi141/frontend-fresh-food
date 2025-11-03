@@ -6,4 +6,5 @@ export interface AIResponse {
 export interface Message {
   role: "user" | "ai";
   text: string;
+  products?: any[];
 }

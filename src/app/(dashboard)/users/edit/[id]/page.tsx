@@ -1,8 +1,8 @@
 "use client";
 
 import { UploadOutlined } from "@ant-design/icons";
-import { Edit, useForm } from "@refinedev/antd";
 import { axiosInstance } from "@providers/data-provider";
+import { Edit, useForm } from "@refinedev/antd";
 import {
   App,
   Button,
@@ -21,14 +21,17 @@ export default function UserEdit() {
   const [uploading, setUploading] = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
-  const { formProps, saveButtonProps, queryResult } = useForm({
+  const formHook = useForm({
     resource: "users",
     queryOptions: {
-      select: (response: any) => {
-        return { data: response?.data?.data ?? {} };
-      },
+      select: (response: any) => ({
+        data: response?.data?.data ?? {},
+      }),
     },
   });
+
+  const { formProps, saveButtonProps } = formHook;
+  const queryResult = (formHook as any).queryResult;
 
   const currentAvatar: string = Form.useWatch("avatar", formProps.form);
 

@@ -1,8 +1,9 @@
 export interface Category {
-  id: string | number;
+  id: string;
   name: string;
   description?: string;
   imageUrl?: string;
+  totalProducts?: number;
   createdAt: Date;
   updatedAt: Date;
 }

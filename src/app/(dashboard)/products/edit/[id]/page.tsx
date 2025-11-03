@@ -25,7 +25,7 @@ export default function ProductEdit() {
   const [brands, setBrands] = useState<any[]>([]);
   const [ready, setReady] = useState(false);
 
-  const { formProps, saveButtonProps, queryResult } = useForm({
+  const { formProps, saveButtonProps, query } = useForm({
     resource: "products",
     queryOptions: {
       select: (response: any) => ({
@@ -54,7 +54,7 @@ export default function ProductEdit() {
   }, []);
 
   useEffect(() => {
-    const p = queryResult?.data?.data;
+    const p = query?.data?.data;
     if (!ready || !p) return;
 
     console.log("✅ Product data loaded:", p);
@@ -70,7 +70,7 @@ export default function ProductEdit() {
     });
 
     if (p.image) setPreviewImage(p.image);
-  }, [ready, queryResult?.data?.data]);
+  }, [ready, query?.data?.data]);
 
   const uploadProps: UploadProps = {
     name: "imageFile",
@@ -116,7 +116,7 @@ export default function ProductEdit() {
     };
 
     await formProps.onFinish?.(payload);
-    await queryResult?.refetch?.();
+    await query?.refetch?.();
 
     if (payload.imageUrl) setPreviewImage(payload.imageUrl);
   };
@@ -182,7 +182,7 @@ export default function ProductEdit() {
           )}
 
           <Form.Item label="Product Image" name="imageUrl">
-            <ImgCrop rotationSlider destroyOnHidden>
+            <ImgCrop rotationSlider {...({ destroyOnHidden: true } as any)}>
               <Upload {...uploadProps}>
                 <Button icon={<UploadOutlined />}>
                   {previewImage || currentImage ? "Change Image" : "Upload Image"}

@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Category, categoryService } from "../../../service/category.service";
+import { categoryService } from "../../../service/category.service";
+import { Category } from "../../../interface/category";
 
 const TopCategories = () => {
   const router = useRouter();

@@ -17,6 +17,7 @@ export interface OrderItem {
 export interface Order {
   id: string;
   orderNumber: string;
+  payosOrderCode?: string | number;
   status:
     | "PENDING"
     | "CONFIRMED"

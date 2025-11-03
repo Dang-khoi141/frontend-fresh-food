@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import {
-    AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip,
-    ResponsiveContainer, PieChart, Pie, Cell, Legend,
+    Area,
+    AreaChart,
+    CartesianGrid,
+    Cell, Legend,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis, YAxis,
 } from "recharts";
 import useOrderStatistics from "../../../lib/hooks/useOrderStatistics";
 
@@ -83,8 +90,8 @@ export default function StatisticsPage() {
                                 key={option.value}
                                 onClick={() => setPeriod(option.value as "day" | "week" | "month")}
                                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${period === option.value
-                                        ? "bg-white text-blue-600 shadow-sm"
-                                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                    ? "bg-white text-blue-600 shadow-sm"
+                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                                     }`}
                             >
                                 {option.label}
@@ -166,7 +173,7 @@ export default function StatisticsPage() {
                                     innerRadius={60}
                                     outerRadius={90}
                                     paddingAngle={5}
-                                    label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                                    label={(props) => `${((props as any).percent * 100).toFixed(0)}%`}
                                 >
                                     {statusData.map((_, index) => (
                                         <Cell key={index} fill={COLORS[index % COLORS.length]} />

@@ -1,21 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import { Product } from "@/lib/interface/product";
+import { useEffect, useState } from "react";
 import { productService } from "../../service/product.service";
 
+import Footer from "../landing-page/footer/footer";
+import FreshNav from "../landing-page/header/header-nav";
+import AddToCart from "./add-to-cart";
 import ProductGallery from "./product-gallery";
 import ProductInfo from "./product-info";
-import AddToCart from "./add-to-cart";
-import RelatedProducts from "./related-products";
 import ProductReview from "./product-review";
-import FreshNav from "../landing-page/header/header-nav";
-import Footer from "../landing-page/footer/footer";
 import ProductTab from "./product-tabs";
+import RelatedProducts from "./related-products";
 
-const ProductDetail = () => {
-  const { id } = useParams();
+type ProductDetailProps = {
+  id: string;
+};
+
+const ProductDetail: React.FC<ProductDetailProps> = ({ id }) => {
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -68,8 +71,8 @@ const ProductDetail = () => {
 
         {/* Sản phẩm liên quan */}
         <RelatedProducts
-          categoryId={product.category?.id || ""}
-          currentId={product.id}
+          categoryId={product.category?.id!.toString() || ""}
+          currentId={product.id.toString()}
         />
       </div>
       <Footer />

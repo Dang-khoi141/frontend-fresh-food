@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import ProductDetail from "@/lib/components/product/product-detail";
+import { useParams } from "next/navigation";
 
 export default function ProductDetailPage() {
   const { id } = useParams();

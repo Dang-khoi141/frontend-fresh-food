@@ -60,7 +60,7 @@ class PromotionService extends BaseApiService {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async deletePromotion(id: string): Promise<void> {
     try {
       await this.axiosInstance.delete(`/promotions/${id}`);
     } catch (error: any) {

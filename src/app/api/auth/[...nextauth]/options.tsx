@@ -144,7 +144,7 @@ const authOptions: AuthOptions = {
         return token;
       }
 
-      if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+      if (token.accessTokenExpires && Date.now() < (token.accessTokenExpires as number)) {
         return token;
       }
       return refreshAccessToken(token);
@@ -178,7 +178,7 @@ const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 14 * 60,
-    updateInterval: 5 * 60,
+    updateAge: 5 * 60,
   },
 };
 

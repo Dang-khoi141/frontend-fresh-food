@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useReview } from "../../hooks/useReview";
 import { ReviewModalProps } from "../../interface/review";
 
@@ -69,7 +69,7 @@ export default function ReviewModal({
                     rating,
                     comment: comment.trim(),
                     productId,
-                    ...result,
+                    ...(typeof result === "object" && result !== null ? result : {}),
                 };
                 alert("Cảm ơn bạn đã đánh giá sản phẩm! 🎉");
             }

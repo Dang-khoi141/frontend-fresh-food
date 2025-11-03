@@ -136,7 +136,7 @@ export const CreateInventoryCheckForm = ({ onSubmit }: Props) => {
                 </Button>
             </div>
 
-            <Table rowKey={(r, i) => i.toString()} columns={columns} dataSource={rows} pagination={false} />
+            <Table rowKey={(_, i) => (i ?? 0).toString()} columns={columns} dataSource={rows} pagination={false} />
 
             <Space className="mt-4" style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button htmlType="submit" type="primary">
