@@ -81,11 +81,6 @@ export default function StockInfoPage() {
         setFilterModalOpen(false);
     };
 
-    const totalProducts = inventories.length;
-    const lowStockCount = lowStockProducts.length;
-    const outOfStockCount = inventories.filter(item => item.stock === 0).length;
-    const totalStockValue = inventories.reduce((sum, item) => sum + item.stock, 0);
-
     const columns = getInventoryColumns();
 
     return (
