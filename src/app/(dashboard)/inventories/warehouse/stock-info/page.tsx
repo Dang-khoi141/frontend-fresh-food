@@ -3,11 +3,11 @@
 import { Button, Modal, Spin, Table } from 'antd';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useFetchInventory } from '../../../../../lib/hooks/useFetchInventory';
-import { InventoryItem } from '../../../../../lib/interface/inventory';
-import { getInventoryColumns } from '../../../../../lib/components/stock-info/table';
 import PageHeader from '../../../../../lib/components/stock-info/page-header';
 import SearchBar from '../../../../../lib/components/stock-info/search';
+import { getInventoryColumns } from '../../../../../lib/components/stock-info/table';
+import { useFetchInventory } from '../../../../../lib/hooks/useFetchInventory';
+import { InventoryItem } from '../../../../../lib/interface/inventory';
 
 export default function StockInfoPage() {
     const {
@@ -166,7 +166,7 @@ export default function StockInfoPage() {
                 <p style={{ color: '#64748b' }}>Chức năng bộ lọc nâng cao đang được phát triển</p>
             </Modal>
 
-            <style jsx global>{`
+            <style>{`
                 .low-stock-row {
                     background-color: #fefce8 !important;
                 }
