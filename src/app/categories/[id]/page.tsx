@@ -1,18 +1,19 @@
 "use client";
 
+import { ChevronRight, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import ProductCard from "../../../lib/components/common/product-card";
+import FilterSidebar from "../../../lib/components/filter-sidebar/filter-sidebar";
 import Footer from "../../../lib/components/landing-page/footer/footer";
 import FreshNav from "../../../lib/components/landing-page/header/header-nav";
-import useFetchProducts from "../../../lib/hooks/useFetchProducts";
-import { Category } from "../../../lib/interface/category";
-import { Brand } from "../../../lib/interface/brands";
-import { categoryService } from "../../../lib/service/category.service";
-import { brandService } from "../../../lib/service/brand.service";
-import FilterSidebar from "../../../lib/components/filter-sidebar/filter-sidebar";
 import SortBar, { SortOption } from "../../../lib/components/sort-bar/sort-bar";
-import { ChevronRight, Loader2 } from "lucide-react";
-import ProductCard from "../../../lib/components/common/product-card";
+import useFetchProducts from "../../../lib/hooks/useFetchProducts";
+import { Brand } from "../../../lib/interface/brands";
+import { Category } from "../../../lib/interface/category";
+import { brandService } from "../../../lib/service/brand.service";
+import { categoryService } from "../../../lib/service/category.service";
 
 export default function CategoryPage() {
   const { id } = useParams();
@@ -78,9 +79,9 @@ export default function CategoryPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <a href="/" className="hover:text-emerald-600">
+          <Link href="/" className="hover:text-emerald-600">
             Trang chủ
-          </a>
+          </Link >
           <ChevronRight className="h-4 w-4" />
           <span className="text-gray-900 font-medium">
             {category?.name || "Danh mục"}

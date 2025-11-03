@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import useFetchCategories from "../../../hooks/useFetchCategories";
 
 const CategoryGrid = () => {
@@ -159,7 +159,7 @@ const CategoryGrid = () => {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }

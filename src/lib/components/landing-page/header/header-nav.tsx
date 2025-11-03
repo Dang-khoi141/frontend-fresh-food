@@ -35,8 +35,9 @@ const FreshNav = () => {
   const [updatingDefault, setUpdatingDefault] = useState(false);
 
   const pathname = usePathname();
+  const { data: rawSession } = useSession();
   const isAuthPage = ["/login", "/register", "/forgot-password"].includes(pathname);
-  const { data: session } = isAuthPage ? { data: null } : useSession();
+  const session = isAuthPage ? null : rawSession;
   const { defaultAddress, refreshAddress } = useAddressContext();
 
   const searchRef = useRef<HTMLDivElement>(null);
