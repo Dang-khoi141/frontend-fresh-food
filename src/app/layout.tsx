@@ -11,6 +11,7 @@ import { CartProvider } from "../contexts/cart-context";
 import { AddressProvider } from "../contexts/address-context";
 import AIChatWidget from "../lib/components/AIChatWidget/page";
 
+
 const getstInter = Inter({
   subsets: ["latin"],
 });

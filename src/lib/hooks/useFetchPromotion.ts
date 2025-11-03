@@ -48,7 +48,7 @@ export const useFetchPromotion = (id: string) => {
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-
+  //eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPromotion = async () => {
     if (!id) return;
 
@@ -67,7 +67,7 @@ export const useFetchPromotion = (id: string) => {
 
   useEffect(() => {
     fetchPromotion();
-  }, [id]);
+  }, [id, fetchPromotion]);
 
   return { promotion, loading, error, refetch: fetchPromotion };
 };

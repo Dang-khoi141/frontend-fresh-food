@@ -3,6 +3,7 @@ import { District, Province, Ward } from "@/lib/interface/province";
 import { addressService } from "@/lib/service/address.service";
 import { provinceApiService } from "@/lib/service/province-api.service";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "react-hot-toast"; // ✅ dùng toast thay alert
 import { useAddressContext } from "../../contexts/address-context";
 
 const initialFormState: AddressFormData = {
@@ -17,7 +18,8 @@ const initialFormState: AddressFormData = {
 };
 
 export const useFetchAddress = (isAuthenticated: boolean) => {
-  const { refreshAddress, defaultAddress: contextDefaultAddress } = useAddressContext();
+  const { refreshAddress, defaultAddress: contextDefaultAddress } =
+    useAddressContext();
   const refreshTriggerRef = useRef(0);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
@@ -41,6 +43,7 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
     } catch (error: any) {
       if (error.response?.status !== 403) {
         console.error("Error loading addresses:", error);
+        toast.error("Không thể tải danh sách địa chỉ");
       }
     }
   }, []);
@@ -52,6 +55,7 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
     } catch (error: any) {
       if (error.response?.status !== 403) {
         console.error("Error loading default address:", error);
+        toast.error("Không thể tải địa chỉ mặc định");
       }
     }
   }, []);
@@ -78,7 +82,7 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
       setProvinces(data);
     } catch (error) {
       console.error("Error loading provinces:", error);
-      alert("Không thể tải danh sách Tỉnh/Thành phố");
+      toast.error("Không thể tải danh sách Tỉnh/Thành phố");
     } finally {
       setLoadingProvinces(false);
     }
@@ -93,7 +97,7 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
       setDistricts(data);
     } catch (error) {
       console.error("Error loading districts:", error);
-      alert("Không thể tải danh sách Quận/Huyện");
+      toast.error("Không thể tải danh sách Quận/Huyện");
     } finally {
       setLoadingDistricts(false);
     }
@@ -106,7 +110,7 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
       setWards(data);
     } catch (error) {
       console.error("Error loading wards:", error);
-      alert("Không thể tải danh sách Phường/Xã");
+      toast.error("Không thể tải danh sách Phường/Xã");
     } finally {
       setLoadingWards(false);
     }
@@ -179,13 +183,19 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
     []
   );
 
+  const resetForm = useCallback(() => {
+    setAddressForm(initialFormState);
+    setDistricts([]);
+    setWards([]);
+  }, []);
+
   const createAddress = useCallback(
     async (manualAddress?: string) => {
       const finalLine1 =
         manualAddress !== undefined ? manualAddress.trim() : addressForm.line1;
 
       if (!finalLine1) {
-        alert("Vui lòng điền hoặc chọn địa chỉ trước khi lưu");
+        toast.error("Vui lòng điền hoặc chọn địa chỉ trước khi lưu");
         return false;
       }
 
@@ -204,16 +214,17 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
         await loadDefaultAddress();
         await refreshAddress();
         resetForm();
+        toast.success("Tạo địa chỉ thành công!");
         return true;
       } catch (error) {
         console.error("Error creating address:", error);
-        alert("Không thể tạo địa chỉ. Vui lòng thử lại!");
+        toast.error("Không thể tạo địa chỉ. Vui lòng thử lại!");
         return false;
       } finally {
         setLoadingAddress(false);
       }
     },
-    [addressForm, loadAddresses, loadDefaultAddress, refreshAddress]
+    [addressForm, loadAddresses, loadDefaultAddress, refreshAddress, resetForm]
   );
 
   const setAsDefaultAddress = useCallback(
@@ -223,10 +234,11 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
         await loadAddresses();
         await loadDefaultAddress();
         await refreshAddress();
+        toast.success("Đặt địa chỉ mặc định thành công!");
         return true;
       } catch (error) {
         console.error("Error setting default address:", error);
-        alert("Không thể đặt địa chỉ mặc định. Vui lòng thử lại!");
+        toast.error("Không thể đặt địa chỉ mặc định. Vui lòng thử lại!");
         return false;
       }
     },
@@ -242,21 +254,16 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
         await loadAddresses();
         await loadDefaultAddress();
         await refreshAddress();
+        toast.success("Đã xóa địa chỉ thành công!");
         return true;
       } catch (error) {
         console.error("Error deleting address:", error);
-        alert("Không thể xóa địa chỉ. Vui lòng thử lại!");
+        toast.error("Không thể xóa địa chỉ. Vui lòng thử lại!");
         return false;
       }
     },
     [loadAddresses, loadDefaultAddress, refreshAddress]
   );
-
-  const resetForm = useCallback(() => {
-    setAddressForm(initialFormState);
-    setDistricts([]);
-    setWards([]);
-  }, []);
 
   const getDisplayAddress = useCallback(() => {
     if (!defaultAddress) return "Chọn vị trí giao hàng";

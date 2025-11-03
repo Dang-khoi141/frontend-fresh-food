@@ -8,7 +8,7 @@ export function useFetchUser(): UseFetchUserReturn {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  //eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
@@ -35,7 +35,7 @@ export function useFetchUser(): UseFetchUserReturn {
     } else if (status === "unauthenticated") {
       setLoading(false);
     }
-  }, [session?.user?.id, status]);
+  }, [session?.user?.id, status, fetchUserProfile]);
 
   return {
     userProfile,

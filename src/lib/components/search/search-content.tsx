@@ -49,17 +49,7 @@ export default function SearchPageContent() {
             }
         })();
     }, []);
-
-    useEffect(() => {
-        if (query) {
-            searchProducts();
-        } else {
-            setProducts([]);
-            setTotal(0);
-            setError(null);
-        }
-    }, [query]);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const searchProducts = async () => {
         setLoading(true);
         setError(null);
@@ -86,6 +76,17 @@ export default function SearchPageContent() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (query) {
+            searchProducts();
+        } else {
+            setProducts([]);
+            setTotal(0);
+            setError(null);
+        }
+    }, [query, searchProducts]);
+
 
     const handleFilterChange = (key: string, value: string) => {
         setFilters((prev) => ({ ...prev, [key]: value }));

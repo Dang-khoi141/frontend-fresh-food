@@ -7,7 +7,7 @@ export const useFetchReceipts = () => {
   const [receipts, setReceipts] = useState<StockReceipt[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-
+  //eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchReceipts = async () => {
     try {
       setLoading(true);
@@ -26,7 +26,7 @@ export const useFetchReceipts = () => {
 
   useEffect(() => {
     fetchReceipts();
-  }, []);
+  }, [fetchReceipts]);
 
   return {
     receipts,
