@@ -142,7 +142,7 @@ export default function ProductCreate() {
         </Form.Item>
 
         <Form.Item label="Image">
-          <ImgCrop rotationSlider destroyOnHidden>
+          <ImgCrop rotationSlider {...({ destroyOnHidden: true } as any)}>
             <Upload {...uploadProps}>
               <Button icon={<UploadOutlined />}>
                 {selectedFile ? "Change Image" : "Select Image"}

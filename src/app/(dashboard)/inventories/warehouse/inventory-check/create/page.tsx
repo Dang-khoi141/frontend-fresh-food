@@ -193,7 +193,7 @@ export default function CreateInventoryCheckPage() {
                         setRows(updated);
                     }}
                     formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                    parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                    parser={(value) => value!.replace(/\$\s?|(,*)/g, '') as any}
                 />
             ),
         },
