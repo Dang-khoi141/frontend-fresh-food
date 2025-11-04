@@ -40,7 +40,7 @@ class ReceiptService extends BaseApiService {
       const res = await this.get<ReceiptDetailResponse>(
         `/inventory/receipts/${id}`
       );
-      return res.data ?? res;
+      return (res.data ?? res) as StockReceipt;
     } catch (error) {
       if (this.isSilentError(error)) {
         throw error;
