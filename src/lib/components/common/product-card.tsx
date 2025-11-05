@@ -16,7 +16,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!session) return router.push("/login");
+    if (!session) return router.push("./login");
 
     await addToCart(product.id, 1);
     toast.success("Sản phẩm đã được thêm vào giỏ hàng");

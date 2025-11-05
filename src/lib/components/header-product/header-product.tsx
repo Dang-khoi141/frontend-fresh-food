@@ -1,5 +1,4 @@
 "use client";
-import Cookies from "js-cookie";
 import { Heart, LogOut, Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +9,7 @@ const ProductNav = () => {
   const router = useRouter();
 
   const handleLogout = () => {
-    router.push("/login");
+    router.push("./login");
   };
 
   return (

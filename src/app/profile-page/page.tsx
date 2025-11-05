@@ -10,7 +10,6 @@ import OrderList from "../../lib/components/profile-page/order/order-list";
 import ChangePassword from "../../lib/components/profile-page/password/change-password";
 import UserProfileForm from "../../lib/components/profile-page/user/profile-form";
 import ProfileSidebar, { TabId } from "../../lib/components/profile-page/user/profile-slidebar";
-import { useFetchAddress } from "../../lib/hooks/useFetchAddress";
 import { useFetchUser } from "../../lib/hooks/useFetchUser";
 import { useProfileForm } from "../../lib/hooks/useProfileForm";
 
@@ -48,7 +47,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (status === "unauthenticated") {
-            router.push("/login");
+            router.push("./login");
         }
     }, [status, router]);
 

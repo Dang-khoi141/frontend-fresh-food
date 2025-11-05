@@ -18,8 +18,11 @@ export default function CartDrawer({
   const router = useRouter();
 
   const handleViewCart = () => {
-    if (!session) router.push("/login");
-    else router.push("/cart");
+    if (!session) {
+      router.push("./login");
+    } else {
+      router.push("/cart");
+    }
   };
 
   const handleUpdateQuantity = async (productId: string, newQty: number) => {
