@@ -59,7 +59,8 @@ export default function CategoryPage() {
     };
 
     searchProducts(params);
-  }, [id, selectedBrand, priceRange, minRating, sortBy]);
+  }, [id, selectedBrand, priceRange, minRating, sortBy, searchProducts]);
+
 
   const handleClearFilters = () => {
     setSelectedBrand("");

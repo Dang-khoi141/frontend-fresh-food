@@ -4,12 +4,15 @@ export interface ProductInCart {
   id: string;
   name: string;
   image?: string;
-  price: string;
+  price: number;
+  finalPrice?: number;
+  discountPercentage?: number;
 }
 
 export interface CartItem {
   id: string;
   quantity: number;
+  unitPrice: number;
   product: ProductInCart;
 }
 

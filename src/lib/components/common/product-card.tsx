@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { ShoppingCart, Star } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { ShoppingCart, Star } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCardProps } from "../../interface/product";
 
@@ -38,9 +38,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       >
         {hasDiscount && (
           <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-            -{discountPercentage}%
+            -{Math.round(Math.abs(discountPercentage))}%
           </div>
         )}
+
 
         <div className="relative bg-gray-50 h-48 flex items-center justify-center overflow-hidden">
           {product.image ? (

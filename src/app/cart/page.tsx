@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAddressContext } from "../../contexts/address-context";
 import { useCart } from "../../contexts/cart-context";
 import Footer from "../../lib/components/landing-page/footer/footer";
@@ -49,30 +49,25 @@ export default function CartPage() {
     price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
   const subtotal = cart.reduce(
-    (sum, item) => sum + Number(item.product.price || 0) * item.quantity,
+    (sum, item) =>
+      sum + Number(item.unitPrice ?? item.product.finalPrice ?? item.product.price) * item.quantity,
     0
   );
 
   const discountAmount = Number(discount) || 0;
   const finalTotal = Math.max(0, subtotal - discountAmount);
 
-  useEffect(() => {
-    if (isManualAddress) return;
+  const detectLocation = useCallback(async () => {
+    if (!isAuthenticated || shippingAddress || isManualAddress) return;
 
-    if (defaultAddress) {
-      setShippingAddress(
-        `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
-      );
-    } else if (!shippingAddress && isAuthenticated && "geolocation" in navigator) {
+    if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const { latitude, longitude } = pos.coords;
+
           try {
             const res = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2`,
-              {
-                headers: { "Accept": "application/json" }
-              }
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2`
             );
 
             if (!res.ok) throw new Error("Reverse geocode failed");
@@ -82,9 +77,9 @@ export default function CartPage() {
               data.display_name ||
               `${data.address?.road || ""}, ${data.address?.city || ""}, ${data.address?.state || ""
               }`;
+
             setShippingAddress(detected.trim());
-          } catch (err) {
-            console.warn("Không thể lấy vị trí:", err);
+          } catch {
             setShippingAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
           }
         },
@@ -92,7 +87,19 @@ export default function CartPage() {
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
-  }, [defaultAddress, isAuthenticated, isManualAddress]);
+  }, [isAuthenticated, isManualAddress, shippingAddress]);
+
+  useEffect(() => {
+    if (isManualAddress) return;
+
+    if (defaultAddress) {
+      setShippingAddress(
+        `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
+      );
+    } else {
+      detectLocation();
+    }
+  }, [defaultAddress, isManualAddress, detectLocation]);
 
   const handleApplyPromotion = async () => {
     if (!promoCode.trim()) {
@@ -244,9 +251,13 @@ export default function CartPage() {
             </thead>
             <tbody>
               {cart.map((item) => {
-                const price = Number(item.product.price || 0);
+                const originalPrice = Number(item.product.price);
+                const discount = Number(item.product.discountPercentage || 0);
+                const finalPrice = Number(item.unitPrice ?? item.product.finalPrice ?? originalPrice);
+                const hasDiscount = discount > 0;
+
                 return (
-                  <tr key={item.id} className="border-b">
+                  <tr key={item.id} className="border-b hover:bg-gray-50 transition">
                     <td className="p-3 flex gap-3 items-center">
                       <img
                         src={item.product.image || "/placeholder.png"}
@@ -255,15 +266,33 @@ export default function CartPage() {
                       />
                       <span className="font-medium">{item.product.name}</span>
                     </td>
-                    <td className="p-3">{formatPrice(price)}</td>
+
+                    <td className="p-3">
+                      <div className="flex flex-col">
+
+                        {hasDiscount && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(originalPrice)}
+                          </span>
+                        )}
+
+                        <span className="font-semibold text-red-600">
+                          {formatPrice(finalPrice)}
+                        </span>
+
+                        {hasDiscount && (
+                          <span className="inline-block bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded mt-1 w-fit font-bold">
+                            -{Math.round(discount)}%
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
                     <td className="p-3 text-center">
                       <div className="flex justify-center items-center gap-2">
                         <button
                           onClick={() =>
-                            updateQuantity(
-                              item.product.id,
-                              Math.max(1, item.quantity - 1)
-                            )
+                            updateQuantity(item.product.id, Math.max(1, item.quantity - 1))
                           }
                           className="px-2 bg-gray-200 rounded hover:bg-gray-300"
                         >
@@ -271,18 +300,18 @@ export default function CartPage() {
                         </button>
                         <span className="w-8 text-center">{item.quantity}</span>
                         <button
-                          onClick={() =>
-                            updateQuantity(item.product.id, item.quantity + 1)
-                          }
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                           className="px-2 bg-gray-200 rounded hover:bg-gray-300"
                         >
                           +
                         </button>
                       </div>
                     </td>
-                    <td className="p-3 text-right font-semibold">
-                      {formatPrice(price * item.quantity)}
+
+                    <td className="p-3 text-right font-semibold text-emerald-700">
+                      {formatPrice(finalPrice * item.quantity)}
                     </td>
+
                     <td className="p-3 text-center">
                       <button
                         onClick={() => removeFromCart(item.product.id)}
@@ -295,6 +324,7 @@ export default function CartPage() {
                 );
               })}
             </tbody>
+
           </table>
         </div>
 
