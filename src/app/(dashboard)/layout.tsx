@@ -77,7 +77,7 @@ export default function DashboardLayout({
   };
 
   const handleLogout = () => {
-    signOut({ redirect: true, callbackUrl: '/login' });
+    signOut({ redirect: true, callbackUrl: './login' });
   };
 
   const userName = session?.user?.email?.split('@')[0] || 'User';

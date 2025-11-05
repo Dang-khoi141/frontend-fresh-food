@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { useCart } from "@/contexts/cart-context";
 import { Heart, ShoppingCart, Star } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useFetchProducts from "../../../hooks/useFetchProducts";
-import { useCart } from "@/contexts/cart-context";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 const TrendingProducts = () => {
   const { products, loading, error, fetchProducts } = useFetchProducts();
@@ -24,7 +24,7 @@ const TrendingProducts = () => {
   ) => {
     e.preventDefault();
     if (!session) {
-      router.push("/login");
+      router.push("./login");
       return;
     }
     await addToCart(productId, 1);

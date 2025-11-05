@@ -1,7 +1,6 @@
 "use client";
 
 import { useCart } from "@/contexts/cart-context";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -19,7 +18,7 @@ export default function CartDrawer({
 
   const handleViewCart = () => {
     if (!session) {
-      router.push("/login");
+      router.push("./login");
     } else {
       router.push("/cart");
     }

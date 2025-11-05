@@ -185,7 +185,7 @@ export default function CartPage() {
 
       if (err.response?.status === 401) {
         setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-        router.push("/login");
+        router.push("./login");
         return;
       }
 

@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { ShoppingCart, Star } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { ShoppingCart, Star } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCardProps } from "../../interface/product";
 
@@ -16,7 +16,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!session) return router.push("/login");
+    if (!session) return router.push("./login");
 
     await addToCart(product.id, 1);
     toast.success("Sản phẩm đã được thêm vào giỏ hàng");

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { CartContextType, CartItem } from "../../lib/interface/cart";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { UserRole } from "../../lib/enums/user-role.enum";
+import { CartContextType, CartItem } from "../../lib/interface/cart";
 import { cartService } from "../../lib/service/cart.service";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -35,7 +35,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = async (productId: string, quantity: number = 1) => {
     if (!isCustomer()) {
-      window.location.href = "/login";
+      window.location.href = "./login";
       return;
     }
     setIsLoading(true);
@@ -51,7 +51,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateQuantity = async (productId: string, quantity: number) => {
     if (!isCustomer()) {
-      window.location.href = "/login";
+      window.location.href = "./login";
       return;
     }
     setIsLoading(true);
@@ -67,7 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeFromCart = async (productId: string) => {
     if (!isCustomer()) {
-      window.location.href = "/login";
+      window.location.href = "./login";
       return;
     }
     setIsLoading(true);
@@ -83,7 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = async () => {
     if (!isCustomer()) {
-      window.location.href = "/login";
+      window.location.href = "./login";
       return;
     }
     setIsLoading(true);
