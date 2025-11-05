@@ -19,7 +19,7 @@ export default function CartDrawer({
 
   const handleViewCart = () => {
     if (!session) {
-      router.push("./login");
+      router.push("/login");
     } else {
       router.push("/cart");
     }

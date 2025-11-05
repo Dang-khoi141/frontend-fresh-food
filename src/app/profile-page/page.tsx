@@ -42,7 +42,7 @@ export default function ProfilePage() {
     }, [tabFromUrl]);
 
     useEffect(() => {
-        if (status === "unauthenticated") router.push("./login");
+        if (status === "unauthenticated") router.push("/login");
     }, [status, router]);
 
     useEffect(() => {

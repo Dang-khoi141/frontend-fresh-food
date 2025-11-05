@@ -24,7 +24,7 @@ const TrendingProducts = () => {
   ) => {
     e.preventDefault();
     if (!session) {
-      router.push("./login");
+      router.push("/login");
       return;
     }
     await addToCart(productId, 1);

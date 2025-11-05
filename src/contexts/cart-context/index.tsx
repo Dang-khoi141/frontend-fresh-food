@@ -35,7 +35,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = async (productId: string, quantity: number = 1) => {
     if (!isCustomer()) {
-      window.location.href = "./login";
+      window.location.href = "/login";
       return;
     }
     setIsLoading(true);
@@ -51,7 +51,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateQuantity = async (productId: string, quantity: number) => {
     if (!isCustomer()) {
-      window.location.href = "./login";
+      window.location.href = "/login";
       return;
     }
     setIsLoading(true);
@@ -67,7 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeFromCart = async (productId: string) => {
     if (!isCustomer()) {
-      window.location.href = "./login";
+      window.location.href = "/login";
       return;
     }
     setIsLoading(true);
@@ -83,7 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = async () => {
     if (!isCustomer()) {
-      window.location.href = "./login";
+      window.location.href = "/login";
       return;
     }
     setIsLoading(true);

@@ -27,7 +27,7 @@ export default function ResetPasswordPage() {
 
       toast.success(" Reset password thành công, vui lòng đăng nhập lại");
 
-      router.replace("./login");
+      router.replace("/login");
     } catch (err: any) {
       const msg = err.message || "Password reset failed";
       setError(msg);

@@ -36,7 +36,7 @@ const FreshNav = () => {
 
   const pathname = usePathname();
   const { data: rawSession } = useSession();
-  const isAuthPage = ["./login", "/register", "/forgot-password"].includes(pathname);
+  const isAuthPage = ["/login", "/register", "/forgot-password"].includes(pathname);
   const session = isAuthPage ? null : rawSession;
   const { defaultAddress, refreshAddress } = useAddressContext();
 
@@ -122,7 +122,7 @@ const FreshNav = () => {
   };
 
   const handleCartClick = () => {
-    if (!session) router.push("./login");
+    if (!session) router.push("/login");
     else setOpenCart(true);
   };
 
@@ -130,8 +130,8 @@ const FreshNav = () => {
     e?.stopPropagation();
 
     if (!session) {
-      if (pathname !== "./login") {
-        router.push("./login");
+      if (pathname !== "/login") {
+        router.push("/login");
       }
       return;
     }
@@ -203,7 +203,7 @@ const FreshNav = () => {
             <button
               onClick={(e) => {
                 if (session) handleOpenLocation(e);
-                else router.push("./login");
+                else router.push("/login");
               }}
               className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition"
             >
@@ -430,7 +430,7 @@ const FreshNav = () => {
                 )}
               </div>
             ) : (
-              <Link href="./login" className="hover:text-emerald-600 transition">
+              <Link href="/login" className="hover:text-emerald-600 transition">
                 <User className="h-6 w-6" />
               </Link>
             )}

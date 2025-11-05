@@ -46,7 +46,7 @@ export default function VerifyEmailPage() {
       localStorage.clear();
 
       setTimeout(() => {
-        router.push("./login");
+        router.push("/login");
       }, 1500);
     } catch (err: any) {
       let errorMessage = "Xác minh OTP thất bại";

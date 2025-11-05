@@ -21,13 +21,13 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/payment") ||
       pathname.startsWith("/profile-page")
     ) {
-      return NextResponse.redirect(new URL("./login", request.url));
+      return NextResponse.redirect(new URL("/login", request.url));
     }
     return NextResponse.next();
   }
 
   if (!userRole) {
-    return NextResponse.redirect(new URL("./login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   if (pathname.startsWith("/admin")) {

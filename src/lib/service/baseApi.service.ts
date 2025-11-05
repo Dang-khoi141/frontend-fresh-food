@@ -138,7 +138,7 @@ export abstract class BaseApiService {
           if (!session?.refreshToken) {
             console.warn("Missing refresh token, logging out...");
             this.clearSessionCache();
-            await signOut({ redirect: true, callbackUrl: "./login" });
+            await signOut({ redirect: true, callbackUrl: "/login" });
             return Promise.reject(error);
           }
 
@@ -159,7 +159,7 @@ export abstract class BaseApiService {
           console.error("Token refresh failed:", refreshError);
           this.processQueue(refreshError, null);
           this.clearSessionCache();
-          await signOut({ redirect: true, callbackUrl: "./login" });
+          await signOut({ redirect: true, callbackUrl: "/login" });
           return Promise.reject(refreshError);
         } finally {
           this.isRefreshing = false;

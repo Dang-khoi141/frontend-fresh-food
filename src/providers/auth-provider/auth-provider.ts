@@ -112,13 +112,13 @@ export const createAuthProvider = (): AuthProvider => {
     },
 
     logout: async () => {
-      await signOut({ redirect: true, callbackUrl: "./login" });
+      await signOut({ redirect: true, callbackUrl: "/login" });
       return { success: true };
     },
 
     check: async () => {
       if (status === "unauthenticated") {
-        return { authenticated: false, redirectTo: "./login" };
+        return { authenticated: false, redirectTo: "/login" };
       }
 
       if (session?.accessToken) {
@@ -134,7 +134,7 @@ export const createAuthProvider = (): AuthProvider => {
           if (!decoded.role || !validRoles.includes(decoded.role as UserRole)) {
             return {
               authenticated: false,
-              redirectTo: "./login",
+              redirectTo: "/login",
               error: {
                 message: "Quyền truy cập không hợp lệ",
                 name: "Lỗi xác thực",
@@ -144,7 +144,7 @@ export const createAuthProvider = (): AuthProvider => {
         } catch (error) {
           return {
             authenticated: false,
-            redirectTo: "./login",
+            redirectTo: "/login",
             error: { message: "Token không hợp lệ", name: "Lỗi xác thực" },
           };
         }
@@ -177,7 +177,7 @@ export const createAuthProvider = (): AuthProvider => {
 
     onError: async (error: any) => {
       if (error?.response?.status === 401) {
-        return { logout: true, redirectTo: "./login" };
+        return { logout: true, redirectTo: "/login" };
       }
       return { error };
     },

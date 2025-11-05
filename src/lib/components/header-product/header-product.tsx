@@ -9,7 +9,7 @@ const ProductNav = () => {
   const router = useRouter();
 
   const handleLogout = () => {
-    router.push("./login");
+    router.push("/login");
   };
 
   return (
