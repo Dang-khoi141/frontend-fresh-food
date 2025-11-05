@@ -15,7 +15,7 @@ export default function AddToCart({ product }: { product: Product }) {
 
   const handleAdd = async () => {
     if (!session) {
-      router.push("./login");
+      router.push("/login");
       return;
     }
     if (product.id) {
