@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Banner } from "../interface/banner";
 import { bannerService } from "../service/banner.service";
 
@@ -24,6 +24,8 @@ export function useFetchHeroSliderBanners() {
 
   useEffect(() => {
     fetchBanners();
+    const interval = setInterval(fetchBanners, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [fetchBanners]);
 
   return { banners, loading, error };

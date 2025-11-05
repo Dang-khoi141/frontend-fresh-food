@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UseFetchUserReturn, UserProfile } from "../interface/user";
 import { userService } from "../service/user.service";
 
@@ -8,8 +8,8 @@ export function useFetchUser(): UseFetchUserReturn {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  //eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchUserProfile = async () => {
+
+  const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -27,7 +27,7 @@ export function useFetchUser(): UseFetchUserReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (session?.user?.id && status === "authenticated") {

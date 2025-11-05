@@ -1,32 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Category } from "../interface/category";
 
-const useFetchCategories = () => {
+export default function useFetchCategories(autoFetch: boolean = true) {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchCategories = async (includeChildren: boolean = false) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/categories?includeChildren=${includeChildren}`
-      );
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+  const fetchCategories = useCallback(
+    async (includeChildren: boolean = false) => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/categories?includeChildren=${includeChildren}`
+        );
+
+        if (!response.ok) throw new Error("Không thể tải danh mục sản phẩm!");
+
+        const data: Category[] = await response.json();
+        setCategories(data);
+      } catch (err) {
+        const error = err as Error;
+        console.error("❌ Lỗi tải danh mục:", error);
+        setError(error);
+      } finally {
+        setLoading(false);
       }
-      const data: Category[] = await response.json();
-      setCategories(data);
-    } catch (err) {
-      setError(err as Error);
-    } finally {
-      setLoading(false);
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (autoFetch) {
+      fetchCategories();
     }
-  };
+  }, [autoFetch, fetchCategories]);
 
   return { categories, loading, error, fetchCategories };
-};
-
-export default useFetchCategories;
+}

@@ -120,6 +120,7 @@ export const useFetchWarehouse = (
 
   const deleteWarehouse = useCallback(
     async (id: string): Promise<void> => {
+      if (!confirm("Bạn có chắc chắn muốn xóa kho này?")) return;
       try {
         setLoading(true);
         await warehouseService.deleteWarehouse(id);
@@ -138,7 +139,6 @@ export const useFetchWarehouse = (
 
   useEffect(() => {
     if (!autoFetch) return;
-
     if (warehouseId) {
       fetchWarehouseDetail();
     } else {

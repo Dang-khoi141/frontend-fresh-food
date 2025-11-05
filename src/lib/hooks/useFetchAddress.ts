@@ -2,8 +2,8 @@ import { Address, AddressFormData } from "@/lib/interface/address";
 import { District, Province, Ward } from "@/lib/interface/province";
 import { addressService } from "@/lib/service/address.service";
 import { provinceApiService } from "@/lib/service/province-api.service";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "react-hot-toast"; // ✅ dùng toast thay alert
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { useAddressContext } from "../../contexts/address-context";
 
 const initialFormState: AddressFormData = {
@@ -20,7 +20,6 @@ const initialFormState: AddressFormData = {
 export const useFetchAddress = (isAuthenticated: boolean) => {
   const { refreshAddress, defaultAddress: contextDefaultAddress } =
     useAddressContext();
-  const refreshTriggerRef = useRef(0);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
@@ -62,8 +61,7 @@ export const useFetchAddress = (isAuthenticated: boolean) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      loadAddresses();
-      loadDefaultAddress();
+      Promise.all([loadAddresses(), loadDefaultAddress()]);
     }
   }, [isAuthenticated, loadAddresses, loadDefaultAddress]);
 
