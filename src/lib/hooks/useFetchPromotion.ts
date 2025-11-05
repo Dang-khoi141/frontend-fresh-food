@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { promotionService } from "../service/promotion.service";
+import { useCallback, useEffect, useState } from "react";
 import { Promotion } from "../interface/promotion";
+import { promotionService } from "../service/promotion.service";
 
 export const useFetchPromotions = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [isFetched, setIsFetched] = useState<boolean>(false);
+  const [isFetched, setIsFetched] = useState(false);
 
-  const fetchPromotions = async () => {
+  const fetchPromotions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -24,7 +24,11 @@ export const useFetchPromotions = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchPromotions();
+  }, [fetchPromotions]);
 
   const activePromotions = promotions.filter(promo => {
     if (!promo.isActive) return false;
@@ -46,12 +50,11 @@ export const useFetchPromotions = () => {
 
 export const useFetchPromotion = (id: string) => {
   const [promotion, setPromotion] = useState<Promotion | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  //eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchPromotion = async () => {
-    if (!id) return;
 
+  const fetchPromotion = useCallback(async () => {
+    if (!id) return;
     setLoading(true);
     setError(null);
     try {
@@ -63,47 +66,49 @@ export const useFetchPromotion = (id: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchPromotion();
-  }, [id, fetchPromotion]);
+  }, [fetchPromotion]);
 
   return { promotion, loading, error, refetch: fetchPromotion };
 };
 
 export const useApplyPromotion = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [discount, setDiscount] = useState<number>(0);
+  const [discount, setDiscount] = useState(0);
   const [appliedPromotion, setAppliedPromotion] = useState<Promotion | null>(
     null
   );
 
-  const applyPromotion = async (code: string, total: number) => {
+  const applyPromotion = useCallback(async (code: string, total: number) => {
     setLoading(true);
     setError(null);
     try {
       const result = await promotionService.apply({ code, total });
       setDiscount(result.discount);
       setAppliedPromotion(result.promotion);
-      return result;
-    } catch (err) {
+      return { success: true, ...result };
+    } catch (err: any) {
       console.error("Error applying promotion:", err);
-      setError(err as Error);
+      const msg =
+        err.response?.data?.message || "Không thể áp dụng mã khuyến mãi";
+      setError(new Error(msg));
       setDiscount(0);
       setAppliedPromotion(null);
-      throw err;
+      return { success: false, message: msg };
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const clearPromotion = () => {
+  const clearPromotion = useCallback(() => {
     setDiscount(0);
     setAppliedPromotion(null);
     setError(null);
-  };
+  }, []);
 
   return {
     applyPromotion,
@@ -116,11 +121,11 @@ export const useApplyPromotion = () => {
 };
 
 export const useValidatePromotion = () => {
-  const [validating, setValidating] = useState<boolean>(false);
+  const [validating, setValidating] = useState(false);
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const validateCode = async (code: string, total: number) => {
+  const validateCode = useCallback(async (code: string, total: number) => {
     if (!code || code.trim() === "") {
       setIsValid(false);
       setValidationError("Vui lòng nhập mã khuyến mãi");
@@ -142,12 +147,12 @@ export const useValidatePromotion = () => {
     } finally {
       setValidating(false);
     }
-  };
+  }, []);
 
-  const resetValidation = () => {
+  const resetValidation = useCallback(() => {
     setIsValid(null);
     setValidationError(null);
-  };
+  }, []);
 
   return {
     validateCode,

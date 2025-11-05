@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Product } from "@/lib/interface/product";
 import { Cart, CartItemDisplay } from "@/lib/interface/cart";
+import { Product } from "@/lib/interface/product";
 import { cartService } from "@/lib/service/cart.service";
+import { useCallback, useState } from "react";
 
 export default function useFetchCart() {
   const [cart, setCart] = useState<CartItemDisplay[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const mapCart = (serverCart: Cart): CartItemDisplay[] => {
+  const mapCart = useCallback((serverCart: Cart): CartItemDisplay[] => {
     return serverCart.items.map(i => ({
       product: {
         id: i.product.id,
@@ -20,9 +20,9 @@ export default function useFetchCart() {
       } as Product,
       quantity: i.quantity,
     }));
-  };
+  }, []);
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
       const serverCart = await cartService.getCart();
@@ -32,27 +32,55 @@ export default function useFetchCart() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mapCart]);
 
-  const addToCart = async (product: Product, quantity: number = 1) => {
-    const updated = await cartService.addToCart(String(product.id), quantity);
-    setCart(mapCart(updated));
-  };
+  const addToCart = useCallback(
+    async (product: Product, quantity: number = 1) => {
+      try {
+        const updated = await cartService.addToCart(
+          String(product.id),
+          quantity
+        );
+        setCart(mapCart(updated));
+      } catch (err) {
+        setError(err as Error);
+      }
+    },
+    [mapCart]
+  );
 
-  const updateQuantity = async (productId: string, quantity: number) => {
-    const updated = await cartService.updateQuantity(productId, quantity);
-    setCart(mapCart(updated));
-  };
+  const updateQuantity = useCallback(
+    async (productId: string, quantity: number) => {
+      try {
+        const updated = await cartService.updateQuantity(productId, quantity);
+        setCart(mapCart(updated));
+      } catch (err) {
+        setError(err as Error);
+      }
+    },
+    [mapCart]
+  );
 
-  const removeFromCart = async (productId: string) => {
-    const updated = await cartService.removeItem(productId);
-    setCart(mapCart(updated));
-  };
+  const removeFromCart = useCallback(
+    async (productId: string) => {
+      try {
+        const updated = await cartService.removeItem(productId);
+        setCart(mapCart(updated));
+      } catch (err) {
+        setError(err as Error);
+      }
+    },
+    [mapCart]
+  );
 
-  const clearCart = async () => {
-    await cartService.clearCart();
-    setCart([]);
-  };
+  const clearCart = useCallback(async () => {
+    try {
+      await cartService.clearCart();
+      setCart([]);
+    } catch (err) {
+      setError(err as Error);
+    }
+  }, []);
 
   return {
     cart,

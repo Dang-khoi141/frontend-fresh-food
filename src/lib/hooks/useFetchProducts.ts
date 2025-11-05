@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Product, SearchProductParams, SearchProductResponse } from "../interface/product";
+import { useCallback, useState } from "react";
+import {
+  Product,
+  SearchProductParams,
+  SearchProductResponse,
+} from "../interface/product";
 import { productService } from "../service/product.service";
 
 const useFetchProducts = () => {
@@ -12,8 +16,9 @@ const useFetchProducts = () => {
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch("/api/products");
       if (!response.ok) {
@@ -27,41 +32,45 @@ const useFetchProducts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchProductsByCategory = async (categoryId: string) => {
+  const fetchProductsByCategory = useCallback(async (categoryId: string) => {
     setLoading(true);
     setError(null);
     try {
       const data = await productService.getProductsByCategory(categoryId);
       setProducts(data);
       setTotal(data.length);
-      return data;
+      if (data.length === 0) return data;
     } catch (err) {
       setError(err as Error);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const searchProducts = async (params: SearchProductParams) => {
+  const searchProducts = useCallback(async (params: SearchProductParams) => {
     setLoading(true);
     setError(null);
     try {
-      const response: SearchProductResponse = await productService.searchProducts(params);
+      const response: SearchProductResponse =
+        await productService.searchProducts(params);
       setProducts(response.data);
       setTotal(response.total);
       setPage(response.page);
       setTotalPages(response.totalPages);
-      return response;
+
+      if (response.data.length === 0) return response;
     } catch (err) {
       setError(err as Error);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const refetch = useCallback(() => fetchProducts(), [fetchProducts]);
 
   return {
     products,
@@ -73,6 +82,7 @@ const useFetchProducts = () => {
     fetchProducts,
     fetchProductsByCategory,
     searchProducts,
+    refetch,
   };
 };
 

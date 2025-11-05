@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useEffect, useState, useCallback } from "react";
 import { StockReceipt } from "../interface/receipt";
 import { receiptService } from "../service/receipt.service";
 
@@ -7,8 +6,8 @@ export const useFetchReceipts = () => {
   const [receipts, setReceipts] = useState<StockReceipt[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  //eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchReceipts = async () => {
+
+  const fetchReceipts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -18,11 +17,10 @@ export const useFetchReceipts = () => {
       const error = err as Error;
       console.error("Error fetching receipts:", error);
       setError(error);
-      toast.error("Không thể tải danh sách phiếu nhập hàng");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchReceipts();
@@ -41,7 +39,7 @@ export const useFetchReceiptById = (id: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchReceipt = async () => {
+  const fetchReceipt = useCallback(async () => {
     if (!id) return;
 
     try {
@@ -53,15 +51,14 @@ export const useFetchReceiptById = (id: string) => {
       const error = err as Error;
       console.error(`Error fetching receipt ${id}:`, error);
       setError(error);
-      toast.error("Không thể tải thông tin phiếu nhập hàng");
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchReceipt();
-  }, [id]);
+  }, [fetchReceipt]);
 
   return {
     receipt,
