@@ -88,7 +88,7 @@ export default function CartDrawer({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-40">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {cart.length === 0 && (
                 <p className="text-gray-500 text-center py-10">
                   Chưa có sản phẩm nào.

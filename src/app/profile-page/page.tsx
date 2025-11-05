@@ -24,7 +24,6 @@ export default function ProfilePage() {
 
     const tabFromUrl = searchParams.get("tab") as TabId | null;
     const [activeTab, setActiveTab] = useState<TabId>(tabFromUrl || "profile");
-    const [openAddressModal, setOpenAddressModal] = useState(false);
     const [message, setMessage] = useState<Message>(null);
 
     const {
@@ -33,34 +32,29 @@ export default function ProfilePage() {
         isSaving,
         message: profileMessage,
         isUploadingAvatar,
-        setMessage: setProfileMessage,
         handleInputChange,
         handleAvatarUpload,
         handleSave,
     } = useProfileForm(userProfile, refetch);
 
     useEffect(() => {
-        if (tabFromUrl) {
-            setActiveTab(tabFromUrl);
-        }
+        if (tabFromUrl) setActiveTab(tabFromUrl);
     }, [tabFromUrl]);
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("./login");
-        }
+        if (status === "unauthenticated") router.push("./login");
     }, [status, router]);
 
     useEffect(() => {
-        if (profileMessage) {
-            setMessage(profileMessage);
-        }
+        if (profileMessage) setMessage(profileMessage);
     }, [profileMessage]);
 
     const handleTabChange = (tab: TabId) => {
         setActiveTab(tab);
+
         const params = new URLSearchParams(searchParams.toString());
         params.set("tab", tab);
+
         router.push(`/profile-page?${params.toString()}`, { scroll: false });
     };
 
@@ -97,14 +91,17 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 pt-32">
+        <div className="min-h-screen flex flex-col bg-gray-100">
             <FreshNav />
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-24">
                 {message && (
-                    <div className={`mb-4 p-4 rounded-lg ${message.type === "success"
-                        ? "bg-green-100 text-green-800 border border-green-200"
-                        : "bg-red-100 text-red-800 border border-red-200"
-                        }`}>
+                    <div
+                        className={`mb-4 p-4 rounded-lg ${message.type === "success"
+                            ? "bg-green-100 text-green-800 border border-green-200"
+                            : "bg-red-100 text-red-800 border border-red-200"
+                            }`}
+                    >
                         {message.text}
                     </div>
                 )}
@@ -140,6 +137,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </main>
+
             <Footer />
         </div>
     );
