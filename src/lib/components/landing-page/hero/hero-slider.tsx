@@ -36,9 +36,10 @@ const HeroSlider = () => {
   const currentBanner = banners[currentIndex];
 
   return (
-    <section className="relative bg-gray-50 py-4 mt-32">
-      <div className="relative max-w-7xl mx-auto rounded-2xl overflow-hidden shadow-md">
+    <section className="bg-gray-50 py-4 mt-32 z-0">
+      <div className="max-w-7xl mx-auto rounded-2xl overflow-hidden shadow-md relative z-0">
         <div className="relative w-full h-[360px] md:h-[340px]">
+
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -46,7 +47,7 @@ const HeroSlider = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-0 cursor-pointer"
+              className="absolute inset-0 cursor-pointer z-0"
               onClick={() => handleClick(currentBanner)}
             >
               <Image
@@ -58,18 +59,18 @@ const HeroSlider = () => {
             </motion.div>
           </AnimatePresence>
 
-
           {banners.length > 1 && (
             <>
               <button
                 onClick={() => setCurrentIndex((p) => (p === 0 ? banners.length - 1 : p - 1))}
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
+
               <button
                 onClick={() => setCurrentIndex((p) => (p + 1) % banners.length)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -83,8 +84,8 @@ const HeroSlider = () => {
                   key={i}
                   onClick={() => goToSlide(i)}
                   className={`transition-all duration-300 rounded-full ${i === currentIndex
-                    ? "bg-green-600 w-4 h-4 scale-110 shadow-md"
-                    : "bg-green-300 w-3 h-3 hover:bg-green-500"
+                      ? "bg-green-600 w-4 h-4 scale-110 shadow-md"
+                      : "bg-green-300 w-3 h-3 hover:bg-green-500"
                     }`}
                 />
               ))}
@@ -94,6 +95,7 @@ const HeroSlider = () => {
         </div>
       </div>
     </section>
+
   );
 };
 
