@@ -1,14 +1,14 @@
 "use client";
 
+import { PageHeader } from "@/lib/components/stock-in/page-header";
+import { SearchBar } from "@/lib/components/stock-in/search-bar";
 import { useFetchInventoryCheck } from "@/lib/hooks/useFetchInventoryCheck";
 import useFetchProducts from "@/lib/hooks/useFetchProducts";
 import { InventoryCheck } from "@/lib/interface/inventory-check";
-import { Button, Modal, Spin, Table, Tag, Descriptions } from "antd";
+import { Button, Descriptions, Modal, Spin, Table, Tag } from "antd";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { PageHeader } from "@/lib/components/stock-in/page-header";
-import { SearchBar } from "@/lib/components/stock-in/search-bar";
-import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function InventoryCheckPage() {
@@ -343,16 +343,6 @@ export default function InventoryCheckPage() {
                                             </div>
                                         </div>
                                     );
-                                }
-                            },
-                            {
-                                title: 'Đơn vị',
-                                dataIndex: 'unit',
-                                key: 'unit',
-                                width: 100,
-                                align: 'center' as const,
-                                render: (text, item: any) => {
-                                    return item.product?.unit || text || 'Cái';
                                 }
                             },
                             {
