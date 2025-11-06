@@ -205,24 +205,26 @@ const FreshNav = () => {
                 if (session) handleOpenLocation(e);
                 else router.push("/login");
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-full border border-gray-200 transition max-w-[260px]"
             >
-              <MapPin className="h-5 w-5 text-emerald-600" />
+              <MapPin className="h-5 w-5 text-emerald-600 shrink-0" />
               <div className="text-left">
                 <p className="text-xs text-gray-500">Giao hàng đến</p>
-                <p className="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                  {session
-                    ? defaultAddress
-                      ? defaultAddress.line1
-                      : "Nhấn để chọn vị trí"
-                    : "Nhấn để chọn vị trí"}
-                  <ChevronDown className="h-4 w-4" />
-                </p>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-semibold text-gray-800 max-w-[150px] block truncate whitespace-nowrap overflow-hidden">
+                    {session
+                      ? defaultAddress
+                        ? defaultAddress.line1
+                        : "Nhấn để chọn vị trí"
+                      : "Nhấn để chọn vị trí"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0" />
+                </div>
               </div>
             </button>
 
             {openLocationMenu && session && (
-              <div className="absolute top-full mt-2 left-0 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-50">
+              <div className="absolute top-full mt-2 left-0 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
                 <div className="p-4 bg-gradient-to-r from-emerald-50 to-white border-b flex items-center justify-between">
                   <p className="font-bold text-gray-800 text-lg">Địa chỉ giao hàng</p>
                   <button

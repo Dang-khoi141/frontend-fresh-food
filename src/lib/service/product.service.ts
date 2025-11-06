@@ -37,13 +37,14 @@ class ProductService extends BaseApiService {
     if (params.isActive !== undefined) cleanParams.isActive = params.isActive;
     if (params.minPrice !== undefined) cleanParams.minPrice = params.minPrice;
     if (params.maxPrice !== undefined) cleanParams.maxPrice = params.maxPrice;
-    if (params.minRating !== undefined) cleanParams.minRating = params.minRating;
+    if (params.minRating !== undefined)
+      cleanParams.minRating = params.minRating;
     if (params.sortBy) cleanParams.sortBy = params.sortBy;
     if (params.page) cleanParams.page = params.page;
     if (params.limit) cleanParams.limit = params.limit;
 
     const res = await this.axiosInstance.get("/products/search", {
-      params: cleanParams
+      params: cleanParams,
     });
 
     return {
@@ -60,6 +61,11 @@ class ProductService extends BaseApiService {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
+  }
+
+  async getFeaturedProducts(): Promise<Product[]> {
+    const res = await this.axiosInstance.get("/products/featured");
+    return res.data?.data ?? res.data;
   }
 }
 

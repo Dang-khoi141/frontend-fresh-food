@@ -24,10 +24,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     toast.success("Sản phẩm đã được thêm vào giỏ hàng");
   };
 
-  const discountPercentage = (product as any).discountPercentage || 0;
-  const originalPrice = Number(product.price);
-  const finalPrice = (product as any).finalPrice || originalPrice;
-  const hasDiscount = discountPercentage > 0;
+  const discount = Number(product.discountPercentage ?? 0);
+  const price = Number(product.price);
+  const finalPrice = Number(product.finalPrice ?? price);
+  const hasDiscount = discount > 0;
 
   const avgRating = (product as any).avgRating || 0;
   const reviewCount = (product as any).reviewCount || 0;
@@ -39,7 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     >
       {hasDiscount && (
         <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-          -{Math.round(Math.abs(discountPercentage))}%
+          -{Math.round(Math.abs(discount))}%
         </div>
       )}
 
@@ -83,7 +83,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {hasDiscount ? (
           <div className="flex flex-col gap-1 mb-3">
             <span className="text-xs text-gray-400 line-through">
-              {originalPrice.toLocaleString("vi-VN")}₫
+              {price.toLocaleString("vi-VN")}₫
             </span>
             <span className="text-base font-bold text-red-600">
               {Math.round(finalPrice).toLocaleString("vi-VN")}₫
@@ -91,7 +91,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         ) : (
           <span className="text-base font-bold text-emerald-700 mb-3 block">
-            {originalPrice.toLocaleString("vi-VN")}₫
+            {finalPrice.toLocaleString("vi-VN")}₫
           </span>
         )}
 
