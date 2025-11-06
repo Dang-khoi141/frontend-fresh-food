@@ -7,8 +7,9 @@ export default function ProductInfo({ product }: { product: Product }) {
     value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
   const originalPrice = Number(product.price);
-  const finalPrice = Number(product.finalPrice ?? originalPrice);
   const discount = Number(product.discountPercentage || 0);
+  const finalPrice = originalPrice * (1 - discount / 100);
+
 
   const hasDiscount = discount > 0;
 

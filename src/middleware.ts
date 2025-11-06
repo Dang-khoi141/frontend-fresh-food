@@ -60,6 +60,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname.startsWith("/featured")) {
+    if (![UserRole.CUSTOMER].includes(userRole)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (pathname.startsWith("/addresses")) {
     if (![UserRole.CUSTOMER].includes(userRole)) {
       return NextResponse.redirect(new URL("/", request.url));
@@ -143,5 +149,6 @@ export const config = {
     "/inventory/:path*",
     "/inventories/:path*",
     "/profile-page/:path*",
+    "/featured/:path*",
   ],
 };

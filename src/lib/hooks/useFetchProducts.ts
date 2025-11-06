@@ -70,6 +70,20 @@ const useFetchProducts = () => {
     }
   }, []);
 
+  const fetchFeaturedProducts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await productService.getFeaturedProducts();
+      setProducts(data);
+      setTotal(data.length);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const refetch = useCallback(() => fetchProducts(), [fetchProducts]);
 
   return {
@@ -82,6 +96,7 @@ const useFetchProducts = () => {
     fetchProducts,
     fetchProductsByCategory,
     searchProducts,
+    fetchFeaturedProducts,
     refetch,
   };
 };
