@@ -10,6 +10,7 @@ import { getInventoryColumns } from '../../../../../lib/components/stock-info/ta
 import { useFetchInventory } from '../../../../../lib/hooks/useFetchInventory';
 import { InventoryItem } from '../../../../../lib/interface/inventory';
 import { inventoryService } from '../../../../../lib/service/inventory.service';
+import { ColumnsType } from 'antd/es/table';
 
 export default function StockInfoPage() {
     const {
@@ -83,7 +84,7 @@ export default function StockInfoPage() {
         setFilterModalOpen(false);
     };
 
-    const columns = [
+    const columns: ColumnsType<InventoryItem> = [
         ...getInventoryColumns(),
         {
             title: "Hành động",
