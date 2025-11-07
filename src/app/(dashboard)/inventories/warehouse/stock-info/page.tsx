@@ -1,6 +1,7 @@
 'use client';
 
-import { Button, Modal, Spin, Table } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
+import { Button, Modal, Popconfirm, Spin, Table } from 'antd';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import PageHeader from '../../../../../lib/components/stock-info/page-header';
@@ -8,6 +9,7 @@ import SearchBar from '../../../../../lib/components/stock-info/search';
 import { getInventoryColumns } from '../../../../../lib/components/stock-info/table';
 import { useFetchInventory } from '../../../../../lib/hooks/useFetchInventory';
 import { InventoryItem } from '../../../../../lib/interface/inventory';
+import { inventoryService } from '../../../../../lib/service/inventory.service';
 
 export default function StockInfoPage() {
     const {
@@ -81,7 +83,41 @@ export default function StockInfoPage() {
         setFilterModalOpen(false);
     };
 
-    const columns = getInventoryColumns();
+    const columns = [
+        ...getInventoryColumns(),
+        {
+            title: "Hành động",
+            key: "actions",
+            align: "center",
+            render: (record: InventoryItem) => (
+                <Popconfirm
+                    title="Xác nhận xóa"
+                    description="Bạn có chắc muốn xóa sản phẩm này khỏi tồn kho?"
+                    okText="Xóa"
+                    cancelText="Hủy"
+                    okButtonProps={{ danger: true }}
+                    onConfirm={async () => {
+                        try {
+                            await inventoryService.deleteInventory(record.productId);
+                            toast.success("Đã xóa sản phẩm khỏi tồn kho!");
+                            refetch();
+                        } catch (error) {
+                            toast.error("Không thể xóa sản phẩm này!");
+                        }
+                    }}
+                >
+                    <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        size="small"
+                        title="Xóa sản phẩm"
+                    />
+                </Popconfirm>
+            ),
+        },
+    ];
+
 
     return (
         <div style={{ padding: '24px', background: '#f8fafc', minHeight: '100vh' }}>

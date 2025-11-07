@@ -61,6 +61,21 @@ class InventoryService extends BaseApiService {
       throw error;
     }
   }
+
+  async deleteInventory(productId: string): Promise<void> {
+    try {
+      await this.delete(`/inventory/${productId}`);
+    } catch (error) {
+      if (this.isSilentError(error)) {
+        throw error;
+      }
+      console.error(
+        `Error deleting inventory for product ${productId}:`,
+        error
+      );
+      throw error;
+    }
+  }
 }
 
 export const inventoryService = new InventoryService();
