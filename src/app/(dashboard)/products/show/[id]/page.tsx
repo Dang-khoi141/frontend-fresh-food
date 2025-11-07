@@ -39,6 +39,19 @@ export default function ProductShow() {
               "-"
             )}
           </Descriptions.Item>
+          <Descriptions.Item label="Discount (%)">
+            {record?.discountPercentage !== undefined ? (
+              <Tag
+                color={record.discountPercentage > 0 ? "blue" : "default"}
+                style={{ fontSize: "14px" }}
+              >
+                {record.discountPercentage}%
+              </Tag>
+            ) : (
+              "-"
+            )}
+          </Descriptions.Item>
+
 
           <Descriptions.Item label="Stock">
             <TextField value={record?.stock ?? "-"} />

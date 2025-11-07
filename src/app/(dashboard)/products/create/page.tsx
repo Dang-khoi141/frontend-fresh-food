@@ -100,6 +100,21 @@ export default function ProductCreate() {
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
 
+        <Form.Item
+          label="Discount (%)"
+          name="discountPercentage"
+          tooltip="Nhập phần trăm giảm giá (0 - 100)"
+        >
+          <InputNumber<number>
+            style={{ width: "100%" }}
+            min={0}
+            max={100}
+            step={1}
+            formatter={(value) => `${value}%`}
+            parser={(value): number => Number((value || "").replace("%", "")) || 0}
+          />
+        </Form.Item>
+
         <Form.Item label="Description" name="description">
           <Input.TextArea rows={4} />
         </Form.Item>

@@ -63,6 +63,7 @@ export default function ProductEdit() {
       name: p.name,
       price: p.price,
       description: p.description,
+      discountPercentage: p.discountPercentage,
       isActive: p.isActive,
       brandId: p.brand?.id?.toString(),
       categoryId: p.category?.id?.toString(),
@@ -134,6 +135,23 @@ export default function ProductEdit() {
           <Form.Item label="Price" name="price" rules={[{ required: true }]}>
             <InputNumber style={{ width: "100%" }} min={0} />
           </Form.Item>
+
+          <Form.Item
+            label="Discount (%)"
+            name="discountPercentage"
+            tooltip="Nhập phần trăm giảm giá (0 - 100)"
+          >
+            <InputNumber<number>
+              style={{ width: "100%" }}
+              min={0}
+              max={100}
+              step={1}
+              formatter={(value) => `${value}%`}
+              parser={(value) => Number((value || '').replace('%', '')) || 0}
+            />
+          </Form.Item>
+
+
 
           <Form.Item label="Description" name="description">
             <Input.TextArea rows={4} />

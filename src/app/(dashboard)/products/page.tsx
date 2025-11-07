@@ -7,7 +7,7 @@ import {
   ShowButton,
   useTable,
 } from "@refinedev/antd";
-import { Table, Image  } from "antd";
+import { Image, Table } from "antd";
 
 export default function ProductList() {
   const { tableProps } = useTable({
@@ -22,7 +22,7 @@ export default function ProductList() {
   return (
     <List title="Products">
       <Table {...tableProps} rowKey="id">
-          <Table.Column
+        <Table.Column
           dataIndex="image"
           title="Image"
           render={(value: string) =>
@@ -41,6 +41,15 @@ export default function ProductList() {
         />
         <Table.Column dataIndex="name" title="Name" />
         <Table.Column dataIndex="price" title="Price" />
+        <Table.Column
+          dataIndex="discount_percentage"
+          title="Discount (%)"
+          render={(value: number) => (
+            <span style={{ color: value > 0 ? "#16a34a" : "#64748b", fontWeight: 500 }}>
+              {value || 0}%
+            </span>
+          )}
+        />
         <Table.Column
           dataIndex="isActive"
           title="Active"
