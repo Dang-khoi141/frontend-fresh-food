@@ -44,6 +44,9 @@ export default function ProductCreate() {
       formData.append("name", values.name);
       formData.append("price", values.price.toString());
 
+      if (values.discountPercentage !== undefined) {
+        formData.append("discountPercentage", values.discountPercentage.toString());
+      }
       if (values.description) formData.append("description", values.description);
       if (values.isActive !== undefined)
         formData.append("isActive", String(values.isActive));

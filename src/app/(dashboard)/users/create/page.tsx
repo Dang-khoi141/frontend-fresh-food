@@ -90,8 +90,21 @@ export default function UserCreate() {
           <Input.Password />
         </Form.Item>
 
-        <Form.Item label="Phone" name="phone">
-          <Input />
+        <Form.Item
+          label="Phone"
+          name="phone"
+          rules={[
+            {
+              required: true,
+              message: "Please enter phone number",
+            },
+            {
+              pattern: /^(0|\+84)\d{9}$/,
+              message: "Invalid Vietnamese phone number format",
+            },
+          ]}
+        >
+          <Input placeholder="e.g. 0912345678 or +84912345678" />
         </Form.Item>
 
         <Form.Item label="Role" name="role" initialValue="CUSTOMER">
