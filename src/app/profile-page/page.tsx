@@ -61,26 +61,26 @@ export default function ProfilePage() {
     if (status === "loading" || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent" />
+                <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-emerald-600 border-t-transparent" />
             </div>
         );
     }
 
     if (error || !userProfile) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <p className="text-gray-600 mb-4">{error || "Không thể tải hồ sơ"}</p>
-                    <div className="flex gap-3 justify-center">
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+                <div className="text-center max-w-md w-full">
+                    <p className="text-sm sm:text-base text-gray-600 mb-4">{error || "Không thể tải hồ sơ"}</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <button
                             onClick={refetch}
-                            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+                            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 active:bg-emerald-800 transition text-sm sm:text-base"
                         >
                             Thử lại
                         </button>
                         <button
                             onClick={() => router.push("/")}
-                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition text-sm sm:text-base"
                         >
                             Quay lại trang chủ
                         </button>
@@ -94,19 +94,19 @@ export default function ProfilePage() {
         <div className="min-h-screen flex flex-col bg-gray-100">
             <FreshNav />
 
-            <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-24">
+            <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 mt-20 sm:mt-24">
                 {message && (
                     <div
-                        className={`mb-4 p-4 rounded-lg ${message.type === "success"
-                            ? "bg-green-100 text-green-800 border border-green-200"
-                            : "bg-red-100 text-red-800 border border-red-200"
+                        className={`mb-4 p-3 sm:p-4 rounded-lg text-xs sm:text-sm ${message.type === "success"
+                                ? "bg-green-100 text-green-800 border border-green-200"
+                                : "bg-red-100 text-red-800 border border-red-200"
                             }`}
                     >
                         {message.text}
                     </div>
                 )}
 
-                <div className="grid grid-cols-12 gap-6">
+                <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
                     <ProfileSidebar
                         activeTab={activeTab}
                         onTabChange={handleTabChange}

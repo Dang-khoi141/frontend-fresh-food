@@ -4,9 +4,9 @@ import { SendOtpStepProps } from "../../../interface/user";
 
 export function SendOtp({ userEmail, loading, error, onSendOtp }: SendOtpStepProps) {
     return (
-        <div className="space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
+        <div className="space-y-5 sm:space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                <div className="flex items-start gap-2 sm:gap-3">
                     <svg
                         className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"
                         fill="currentColor"
@@ -18,20 +18,20 @@ export function SendOtp({ userEmail, loading, error, onSendOtp }: SendOtpStepPro
                             clipRule="evenodd"
                         />
                     </svg>
-                    <div>
-                        <p className="text-sm font-medium text-blue-800 mb-1">
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm font-medium text-blue-800 mb-1">
                             Xác thực tài khoản
                         </p>
-                        <p className="text-sm text-blue-700">
+                        <p className="text-xs sm:text-sm text-blue-700 break-words">
                             Để bảo mật tài khoản, chúng tôi sẽ gửi mã xác thực đến email{" "}
-                            <span className="font-semibold">{userEmail}</span>
+                            <span className="font-semibold break-all">{userEmail}</span>
                         </p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
                     {error}
                 </div>
             )}
@@ -39,7 +39,7 @@ export function SendOtp({ userEmail, loading, error, onSendOtp }: SendOtpStepPro
             <button
                 onClick={onSendOtp}
                 disabled={loading}
-                className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-emerald-600 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-emerald-700 active:bg-emerald-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {loading ? "Đang gửi..." : "Gửi mã xác thực"}
             </button>

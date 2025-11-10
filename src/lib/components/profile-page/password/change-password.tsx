@@ -189,8 +189,8 @@ export default function ChangePassword({ userEmail }: ChangePasswordProps) {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm p-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-5 sm:mb-6">
                 Đổi Mật Khẩu
             </h2>
 
