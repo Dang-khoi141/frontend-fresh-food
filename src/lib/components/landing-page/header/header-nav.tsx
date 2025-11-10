@@ -2,7 +2,10 @@
 
 import { productService } from "@/lib/service/product.service";
 import {
-  Heart,
+  ChevronDown,
+  MapPin,
+  Menu,
+  Plus,
   Search,
   ShoppingCart,
   User,
@@ -22,6 +25,7 @@ import AddressFormModal from "../../profile-page/address/address-from-model";
 const FreshNav = () => {
   const [openCart, setOpenCart] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
+  const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const [openLocationMenu, setOpenLocationMenu] = useState(false);
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,8 +178,7 @@ const FreshNav = () => {
 
   return (
     <header className="w-full fixed z-30 top-0 bg-white shadow-md">
-      {/* Top banner - ẩn trên mobile */}
-      <div className="w-full bg-emerald-600 text-white text-xs md:text-sm hidden sm:block">
+      <div className="hidden md:block w-full bg-emerald-600 text-white text-xs md:text-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
           <p>Miễn phí giao hàng tại TP.HCM</p>
           <p>
@@ -184,46 +187,139 @@ const FreshNav = () => {
         </div>
       </div>
 
-      {/* Navbar chính */}
       <div className="w-full bg-white">
-        <div
-          className="mx-auto max-w-7xl flex items-center justify-between px-4 py-4 gap-6 flex-wrap sm:flex-nowrap"
-        >
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-center sm:justify-start"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white font-bold text-2xl shadow-lg">
+        <div className="mx-auto max-w-7xl flex items-center justify-between px-4 py-3 md:py-4 gap-2 md:gap-6">
+          <Link href="/" className="flex items-center gap-2 md:gap-3 shrink-0">
+            <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white font-bold text-xl md:text-2xl shadow-lg">
               F
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+            <span className="hidden sm:block text-xl md:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
               FreshMart
             </span>
           </Link>
 
-          {/* Search bar */}
-          <div
-            className="flex-1 relative max-w-2xl w-full sm:w-auto order-3 sm:order-none mt-3 sm:mt-0"
-            ref={searchRef}
-          >
+          <div className="hidden lg:block relative flex-shrink-0" ref={locationRef}>
+            <button
+              onClick={(e) => {
+                if (session) handleOpenLocation(e);
+                else router.push("/login");
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-full border border-gray-200 transition max-w-[260px]"
+            >
+              <MapPin className="h-5 w-5 text-emerald-600 shrink-0" />
+              <div className="text-left">
+                <p className="text-xs text-gray-500">Giao hàng đến</p>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-semibold text-gray-800 max-w-[150px] block truncate whitespace-nowrap overflow-hidden">
+                    {session
+                      ? defaultAddress
+                        ? defaultAddress.line1
+                        : "Nhấn để chọn vị trí"
+                      : "Nhấn để chọn vị trí"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0" />
+                </div>
+              </div>
+            </button>
+
+            {openLocationMenu && session && (
+              <div className="absolute top-full mt-2 left-0 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                <div className="p-4 bg-gradient-to-r from-emerald-50 to-white border-b flex items-center justify-between">
+                  <p className="font-bold text-gray-800 text-lg">Địa chỉ giao hàng</p>
+                  <button
+                    onClick={() => {
+                      setOpenAddressModal(true);
+                      setOpenLocationMenu(false);
+                    }}
+                    className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-semibold text-sm"
+                  >
+                    <Plus className="h-4 w-4" /> Thêm mới
+                  </button>
+                </div>
+
+                <div className="max-h-96 overflow-y-auto p-2">
+                  {addresses.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-600 mb-4">Chưa có địa chỉ nào</p>
+                      <button
+                        onClick={() => {
+                          setOpenAddressModal(true);
+                          setOpenLocationMenu(false);
+                        }}
+                        className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition"
+                      >
+                        Thêm địa chỉ mới
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {addresses.map((address) => (
+                        <div
+                          key={address.id}
+                          className={`p-4 mb-2 rounded-lg border-2 cursor-pointer transition ${address.isDefault
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-gray-200 hover:border-emerald-300"
+                            }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div
+                              className="flex-1"
+                              onClick={() => handleSetDefault(address.id)}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <MapPin className="h-4 w-4 text-emerald-600" />
+                                {address.isDefault && (
+                                  <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                                    Mặc định
+                                  </span>
+                                )}
+                              </div>
+                              <p className="font-semibold text-gray-900">{address.line1}</p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {address.postalCode && `${address.postalCode}, `}
+                                {address.city}, {address.province}
+                              </p>
+                            </div>
+                            {!address.isDefault && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteAddress(address.id);
+                                }}
+                                className="text-red-500 hover:text-red-700 text-sm font-medium ml-2"
+                              >
+                                Xóa
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 relative max-w-2xl" ref={searchRef}>
             <form onSubmit={handleSearchSubmit}>
-              <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3 border-2 border-gray-200 focus-within:border-emerald-500 transition">
-                <Search className="h-5 w-5 text-gray-400" />
+              <div className="flex items-center gap-2 md:gap-3 rounded-lg bg-gray-50 px-3 md:px-4 py-2 md:py-3 border-2 border-gray-200 focus-within:border-emerald-500 transition">
+                <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400 flex-shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm sản phẩm tươi sống, thực phẩm..."
-                  className="w-full bg-transparent text-gray-700 outline-none placeholder-gray-400"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="w-full bg-transparent text-sm md:text-base text-gray-700 outline-none placeholder-gray-400"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={clearSearch}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 flex-shrink-0"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4 md:h-5 md:w-5" />
                   </button>
                 )}
               </div>
@@ -286,16 +382,7 @@ const FreshNav = () => {
             )}
           </div>
 
-          {/* Location (ẩn trên mobile) */}
-          <div className="hidden md:block relative flex-shrink-0" ref={locationRef}>
-            {/* giữ nguyên code location */}
-          </div>
-
-          {/* Navigation icons */}
-          <nav className="flex items-center gap-6 order-2 sm:order-none w-full sm:w-auto justify-center sm:justify-end">
-            <button aria-label="Wishlist" className="hover:text-emerald-600 transition">
-              <Heart className="h-6 w-6" />
-            </button>
+          <nav className="hidden md:flex items-center gap-4 lg:gap-6">
             <button
               aria-label="Cart"
               className="hover:text-emerald-600 transition relative"
@@ -348,10 +435,109 @@ const FreshNav = () => {
               </Link>
             )}
           </nav>
+
+          <div className="md:hidden flex items-center gap-3">
+            <button
+              aria-label="Cart"
+              className="relative"
+              onClick={handleCartClick}
+            >
+              <ShoppingCart className="h-6 w-6" />
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                  {cart.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setOpenMobileMenu(true)}
+              className="p-1"
+              aria-label="Menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Modals giữ nguyên */}
+      {openMobileMenu && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setOpenMobileMenu(false)}>
+          <div
+            className="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-bold">Menu</h2>
+              <button onClick={() => setOpenMobileMenu(false)}>
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {session ? (
+                <>
+                  <Link
+                    href="/profile-page?tab=profile"
+                    className="flex items-center gap-3 p-3 hover:bg-emerald-50 rounded-lg"
+                    onClick={() => setOpenMobileMenu(false)}
+                  >
+                    <User className="h-5 w-5" />
+                    Hồ sơ cá nhân
+                  </Link>
+                  <Link
+                    href="/profile-page?tab=orders"
+                    className="flex items-center gap-3 p-3 hover:bg-emerald-50 rounded-lg"
+                    onClick={() => setOpenMobileMenu(false)}
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    Đơn hàng đã mua
+                  </Link>
+
+                  <div className="border-t pt-4">
+                    <button
+                      onClick={(e) => {
+                        handleOpenLocation(e);
+                        setOpenMobileMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-emerald-50 rounded-lg text-left"
+                    >
+                      <MapPin className="h-5 w-5 text-emerald-600" />
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-500">Giao hàng đến</p>
+                        <p className="text-sm font-semibold truncate">
+                          {defaultAddress?.line1 || "Chọn địa chỉ"}
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setOpenMobileMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-lg text-red-600"
+                  >
+                    <X className="h-5 w-5" />
+                    Đăng xuất
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-3 p-3 bg-emerald-600 text-white rounded-lg justify-center font-semibold"
+                  onClick={() => setOpenMobileMenu(false)}
+                >
+                  <User className="h-5 w-5" />
+                  Đăng nhập
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <AddressFormModal
         isOpen={openAddressModal}
         onClose={handleCloseModal}
