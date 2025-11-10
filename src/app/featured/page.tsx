@@ -1,13 +1,13 @@
 "use client";
 
+import ProductCard from "@/lib/components/common/product-card";
 import useFetchProducts from "@/lib/hooks/useFetchProducts";
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
-import ProductCard from "@/lib/components/common/product-card";
+import { useEffect } from "react";
 
-import FreshNav from "@/lib/components/landing-page/header/header-nav";
 import Footer from "@/lib/components/landing-page/footer/footer";
+import FreshNav from "@/lib/components/landing-page/header/header-nav";
 
 export default function FeaturedPage() {
     const { products, loading, fetchFeaturedProducts } = useFetchProducts();
@@ -20,7 +20,7 @@ export default function FeaturedPage() {
         <div className="min-h-screen flex flex-col bg-gray-50">
             <FreshNav />
 
-            <main className="flex-1 mt-32">
+            <main className="flex-1 mt-44 sm:mt-36 md:mt-32">
                 <section className="max-w-7xl mx-auto px-6 py-10">
 
                     <div className="flex items-center gap-3 mb-10">

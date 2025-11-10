@@ -74,7 +74,15 @@ export default function CartDrawer({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.35 }}
-            className="relative w-[50vw] max-w-[430px] h-[70vh] mt-[15vh] mb-4 bg-white shadow-xl z-50 flex flex-col rounded-l-2xl rounded-tl-2xl overflow-hidden"
+            className="
+  relative
+  w-full sm:w-[70vw] md:w-[50vw] lg:w-[430px]
+  h-[75vh] mt-[12vh] mb-4
+  bg-white shadow-xl z-50
+  flex flex-col rounded-l-2xl rounded-tl-2xl
+  overflow-hidden
+"
+
           >
             <div className="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-20 rounded-tl-2xl">
               <h2 className="font-bold text-lg">
@@ -109,7 +117,7 @@ export default function CartDrawer({
                 return (
                   <div
                     key={item.id}
-                    className="flex gap-3 border rounded-xl p-3 bg-white hover:shadow-md transition"
+                    className="relative flex gap-3 border rounded-xl p-3 bg-white hover:shadow-md transition"
                   >
                     <img
                       src={item.product.image || "/placeholder.png"}
@@ -162,7 +170,8 @@ export default function CartDrawer({
 
                     <button
                       onClick={() => handleRemove(item.product.id)}
-                      className="text-red-500 hover:text-red-700 text-sm px-1"
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-600 transition p-1 rounded-full hover:bg-red-50"
+                      aria-label="Xóa sản phẩm"
                     >
                       X
                     </button>

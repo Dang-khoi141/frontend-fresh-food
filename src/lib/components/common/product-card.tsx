@@ -35,16 +35,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="group relative bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
+      className="group relative bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full min-h-[380px]"
     >
+      {/* Tag giảm giá */}
       {hasDiscount && (
         <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
           -{Math.round(Math.abs(discount))}%
         </div>
       )}
 
-      <Link href={`/products/${product.id}`}>
-        <div className="relative bg-gray-50 h-48 flex items-center justify-center overflow-hidden">
+      {/* Ảnh sản phẩm */}
+      <Link href={`/products/${product.id}`} className="flex flex-col flex-1">
+        <div className="relative bg-gray-50 h-56 flex items-center justify-center overflow-hidden">
           {product.image ? (
             <img
               src={product.image}
@@ -58,17 +60,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        <div className="p-4 pb-0">
+        <div className="p-4 pb-0 flex-1 flex flex-col">
           <p className="text-xs text-gray-500 mb-1 truncate">
             {product.brand?.name || "Thực phẩm"}
           </p>
 
-          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug h-[40px] mb-2">
+          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug mb-2 h-[40px]">
             {product.name}
           </h3>
         </div>
       </Link>
 
+      {/* Đánh giá sao */}
       {reviewCount > 0 && (
         <div className="px-4 flex items-center gap-1 mb-2">
           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -79,6 +82,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       )}
 
+      {/* Giá và nút thêm giỏ hàng */}
       <div className="p-4 mt-auto">
         {hasDiscount ? (
           <div className="flex flex-col gap-1 mb-3">
@@ -95,13 +99,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </span>
         )}
 
-        <button
-          onClick={handleAddToCart}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2"
-        >
-          <ShoppingCart className="h-4 w-4" />
-          <span className="text-sm font-medium">Thêm giỏ hàng</span>
-        </button>
+        <div className="mt-auto">
+          <button
+            onClick={handleAddToCart}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 text-sm font-medium"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            <span>Thêm giỏ hàng</span>
+          </button>
+        </div>
       </div>
     </motion.div>
   );

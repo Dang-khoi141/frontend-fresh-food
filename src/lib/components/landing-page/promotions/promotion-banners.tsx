@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { motion } from "framer-motion";
 import { useFetchPromotions } from "@/lib/hooks/useFetchPromotion";
-import { Tag, Gift, Percent } from "lucide-react";
+import { motion } from "framer-motion";
+import { Gift, Percent, Tag } from "lucide-react";
+import { useEffect } from "react";
 
 const PromotionBanners = () => {
     const { activePromotions, loading, refetch } = useFetchPromotions();
@@ -56,10 +56,10 @@ const PromotionBanners = () => {
                                 className="group relative overflow-hidden rounded-xl bg-gradient-to-br p-[2px] hover:scale-105 transition-transform cursor-pointer"
                                 style={{
                                     background: `linear-gradient(135deg, ${index === 0
-                                            ? "#10b981, #14b8a6"
-                                            : index === 1
-                                                ? "#3b82f6, #6366f1"
-                                                : "#a855f7, #ec4899"
+                                        ? "#10b981, #14b8a6"
+                                        : index === 1
+                                            ? "#3b82f6, #6366f1"
+                                            : "#a855f7, #ec4899"
                                         })`,
                                 }}
                             >

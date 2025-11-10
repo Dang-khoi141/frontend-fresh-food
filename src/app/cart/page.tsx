@@ -229,7 +229,7 @@ export default function CartPage() {
   return (
     <>
       <FreshNav />
-      <section className="max-w-5xl mx-auto px-4 py-10 mt-28">
+      <section className="max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-10 mt-20 sm:mt-28">
         <h1 className="text-2xl font-bold mb-6">Giỏ hàng</h1>
 
         {error && (
@@ -238,8 +238,9 @@ export default function CartPage() {
           </div>
         )}
 
-        <div className="overflow-x-auto border rounded-lg shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto border rounded-lg shadow-sm w-full max-w-full">
+
+          <table className="w-full text-xs sm:text-sm">
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left p-3">Sản phẩm</th>
@@ -328,7 +329,8 @@ export default function CartPage() {
           </table>
         </div>
 
-        <div className="mt-6 flex flex-col md:flex-row justify-between items-start gap-6">
+        <div className="mt-6 flex flex-col md:flex-row justify-between items-start gap-6 w-full max-w-full overflow-hidden">
+
           <button
             onClick={clearCart}
             className="text-red-600 hover:underline text-sm"
@@ -336,7 +338,7 @@ export default function CartPage() {
             Xóa toàn bộ giỏ hàng
           </button>
 
-          <div className="flex-1 max-w-md space-y-6">
+          <div className="flex-1 w-full md:max-w-md space-y-6">
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-3">Địa chỉ giao hàng</h3>
               <ShippingAddressSection
