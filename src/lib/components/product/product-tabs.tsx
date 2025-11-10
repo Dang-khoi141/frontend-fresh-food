@@ -13,10 +13,10 @@ export default function ProductTab({
     const [active, setActive] = useState<"description" | "review">("description");
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-            <div className="flex border-b mb-6">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-6">
+            <div className="flex border-b mb-4 sm:mb-6 overflow-x-auto">
                 <button
-                    className={`px-5 py-2 font-semibold ${active === "description"
+                    className={`px-3 sm:px-5 py-2 font-semibold text-sm sm:text-base whitespace-nowrap ${active === "description"
                             ? "text-emerald-600 border-b-2 border-emerald-500"
                             : "text-gray-500 hover:text-emerald-600"
                         }`}
@@ -25,7 +25,7 @@ export default function ProductTab({
                     Mô tả sản phẩm
                 </button>
                 <button
-                    className={`px-5 py-2 font-semibold ${active === "review"
+                    className={`px-3 sm:px-5 py-2 font-semibold text-sm sm:text-base whitespace-nowrap ${active === "review"
                             ? "text-emerald-600 border-b-2 border-emerald-500"
                             : "text-gray-500 hover:text-emerald-600"
                         }`}
@@ -36,7 +36,7 @@ export default function ProductTab({
             </div>
 
             {active === "description" ? (
-                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                <div className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
                     {product.description || "Chưa có mô tả cho sản phẩm này."}
                 </div>
             ) : (

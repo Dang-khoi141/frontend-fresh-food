@@ -54,22 +54,19 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ id }) => {
   return (
     <>
       <FreshNav />
-      <div className="max-w-7xl mx-auto px-4 py-10 space-y-10 mt-28">
-        {/* Thông tin chính */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-10 space-y-6 sm:space-y-10 mt-20 sm:mt-28">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
           <ProductGallery image={product.image} name={product.name} />
-          <div className="flex flex-col space-y-6">
+          <div className="flex flex-col space-y-4 sm:space-y-6">
             <ProductInfo product={product} />
             <AddToCart product={product} />
           </div>
         </div>
 
-        {/* Tabs mô tả & đánh giá */}
         <ProductTab product={product}>
           <ProductReview productId={product.id} />
         </ProductTab>
 
-        {/* Sản phẩm liên quan */}
         <RelatedProducts
           categoryId={product.category?.id!.toString() || ""}
           currentId={product.id.toString()}

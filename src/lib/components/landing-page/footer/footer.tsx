@@ -143,32 +143,6 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 sm:mt-10 pt-6 border-t border-footer-border">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs text-slate-400 mb-2">Phương thức thanh toán</p>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="bg-white rounded px-3 py-1.5 text-[10px] font-semibold text-gray-800">VISA</div>
-                <div className="bg-white rounded px-3 py-1.5 text-[10px] font-semibold text-gray-800">MASTERCARD</div>
-                <div className="bg-white rounded px-3 py-1.5 text-[10px] font-semibold text-gray-800">MOMO</div>
-                <div className="bg-white rounded px-3 py-1.5 text-[10px] font-semibold text-gray-800">ZALOPAY</div>
-                <div className="bg-white rounded px-3 py-1.5 text-[10px] font-semibold text-gray-800">COD</div>
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-2">Chứng nhận</p>
-              <div className="flex items-center gap-2">
-                <div className="bg-white rounded px-3 py-1.5">
-                  <ShieldCheck className="h-5 w-5 text-green-600" />
-                </div>
-                <div className="bg-white rounded px-2 py-1">
-                  <span className="text-[10px] font-bold text-gray-800">DMCA</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="mt-6 sm:mt-8 pt-6 border-t border-footer-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="space-y-1">
             <p className="text-xs text-slate-400">
