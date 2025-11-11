@@ -50,8 +50,66 @@ const App = ({ children, defaultMode }: React.PropsWithChildren<AppProps>) => {
   const to = usePathname();
   const authProvider = createAuthProvider();
   if (status === "loading") {
-    return <span>loading...</span>;
-  }
+  return (
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#f9fafb",
+        color: "#374151",
+      }}
+    >
+      <div className="spinner-wrapper">
+        <div className="spinner-ring"></div>
+      </div>
+
+      <p style={{ fontSize: 16, fontWeight: 500, marginTop: 24 }}>
+        Đang tải dữ liệu...
+      </p>
+
+      <style>{`
+        .spinner-wrapper {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 8px;
+        }
+
+        .spinner-ring {
+          position: absolute;
+          width: 80px;
+          height: 80px;
+          border: 5px solid #e5e7eb;
+          border-top-color: #10b981;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        .spinner-logo {
+          width: 42px;
+          height: 42px;
+          z-index: 1;
+          position: relative;
+        }
+
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
   return (
     <>
       <RefineKbarProvider>
