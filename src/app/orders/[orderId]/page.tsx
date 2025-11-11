@@ -88,8 +88,10 @@ export default function OrderDetailPage({
     load();
   }, [resolvedParams.orderId, router, fetchAllProductReviews]);
 
-  const formatPrice = (price: number) =>
-    `${price.toLocaleString("vi-VN")}đ`;
+  const formatPrice = (price: number | string) => {
+    const numPrice = typeof price === "string" ? parseFloat(price) : price;
+    return `${Math.round(numPrice).toLocaleString("vi-VN")} đ`;
+  };
 
   const getStatusText = (status: string) => {
     const statusMap: Record<string, string> = {
