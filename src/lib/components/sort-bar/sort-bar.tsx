@@ -31,46 +31,47 @@ export default function SortBar({
   onFilterToggle,
 }: SortBarProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onFilterToggle}
-            className="lg:hidden flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            <span className="text-sm font-medium">Bộ lọc</span>
-          </button>
-          <p className="text-sm text-gray-600">
-            Tìm thấy <span className="font-semibold text-gray-900">{totalProducts}</span> sản phẩm
-          </p>
-        </div>
+    <div className="mb-4 sm:mb-6">
+      <div className="lg:hidden mb-3">
+        <button
+          onClick={onFilterToggle}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition shadow-sm active:scale-[0.98]"
+        >
+          <SlidersHorizontal className="h-5 w-5 text-gray-700" />
+          <span className="text-sm font-semibold">Bộ lọc</span>
+        </button>
+      </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+      <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4">
+        <div className="flex items-center gap-2 mb-3">
           <ArrowUpDown className="h-4 w-4 text-gray-500 hidden sm:block" />
-          <span className="text-sm text-gray-600 whitespace-nowrap hidden sm:block">
-            Sắp xếp:
+          <span className="text-sm font-medium text-gray-700">
+            Sắp xếp theo:
           </span>
-          <div className="flex gap-2">
-            {SORT_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => onSortChange(option.value)}
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap
-                  transition-all duration-200
-                  ${sortBy === option.value
-                    ? "bg-emerald-600 text-white shadow-md"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }
-                `}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+        </div>
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+          {SORT_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => onSortChange(option.value)}
+              className={`
+                px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap
+                transition-all duration-200 flex-shrink-0
+                ${sortBy === option.value
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300"
+                }
+              `}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       </div>
+
+      <p className="hidden sm:block text-sm text-gray-600 mt-3 px-1">
+        Tìm thấy <span className="font-semibold text-gray-900">{totalProducts}</span> sản phẩm
+      </p>
     </div>
   );
 }
