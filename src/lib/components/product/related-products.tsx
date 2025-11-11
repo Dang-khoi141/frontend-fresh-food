@@ -30,11 +30,11 @@ export default function RelatedProducts({
   if (!products.length) return null;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <h2 className="text-lg font-bold text-emerald-700 mb-4">
+    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+      <h2 className="text-base sm:text-lg font-bold text-emerald-700 mb-3 sm:mb-4">
         Sản phẩm liên quan
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}

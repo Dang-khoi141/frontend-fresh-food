@@ -78,40 +78,32 @@ export default function CategoryPage() {
     <div className="min-h-screen bg-gray-50">
       <FreshNav />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <Link href="/" className="hover:text-emerald-600">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 mt-[100px] md:mt-[130px]">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide">
+          <Link href="/" className="hover:text-emerald-600 whitespace-nowrap">
             Trang chủ
-          </Link >
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-gray-900 font-medium">
+          </Link>
+          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+          <span className="text-gray-900 font-medium truncate">
             {category?.name || "Danh mục"}
           </span>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          {category?.name || "Danh mục sản phẩm"}
-        </h1>
-
         <div className="flex gap-6">
-          <div className="hidden lg:block w-80 flex-shrink-0">
-            <div className="sticky top-6">
-              <FilterSidebar
-                brands={brands}
-                selectedBrand={selectedBrand}
-                priceRange={priceRange}
-                minRating={minRating}
-                onBrandChange={setSelectedBrand}
-                onPriceChange={(min, max) => setPriceRange({ min, max })}
-                onRatingChange={setMinRating}
-                onClearAll={handleClearFilters}
-                isOpen={isFilterOpen}
-                onClose={() => setIsFilterOpen(false)}
-              />
-            </div>
-          </div>
+          <FilterSidebar
+            brands={brands}
+            selectedBrand={selectedBrand}
+            priceRange={priceRange}
+            minRating={minRating}
+            onBrandChange={setSelectedBrand}
+            onPriceChange={(min, max) => setPriceRange({ min, max })}
+            onRatingChange={setMinRating}
+            onClearAll={handleClearFilters}
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+          />
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <SortBar
               sortBy={sortBy}
               onSortChange={setSortBy}
@@ -120,27 +112,27 @@ export default function CategoryPage() {
             />
 
             {hasActiveFilters && (
-              <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+              <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm text-gray-600">Đang lọc:</span>
+                  <span className="text-xs sm:text-sm text-gray-600">Đang lọc:</span>
                   {selectedBrand && (
-                    <span className="bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full">
+                    <span className="bg-emerald-100 text-emerald-700 text-xs px-2 sm:px-3 py-1 rounded-full">
                       {brands.find((b) => String(b.id) === selectedBrand)?.name}
                     </span>
                   )}
                   {(priceRange.min > 0 || priceRange.max < 999999999) && (
-                    <span className="bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full">
+                    <span className="bg-emerald-100 text-emerald-700 text-xs px-2 sm:px-3 py-1 rounded-full">
                       {priceRange.min.toLocaleString()}đ - {priceRange.max === 999999999 ? "∞" : priceRange.max.toLocaleString() + "đ"}
                     </span>
                   )}
                   {minRating > 0 && (
-                    <span className="bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full">
+                    <span className="bg-emerald-100 text-emerald-700 text-xs px-2 sm:px-3 py-1 rounded-full">
                       {minRating}⭐ trở lên
                     </span>
                   )}
                   <button
                     onClick={handleClearFilters}
-                    className="text-xs text-emerald-600 hover:text-emerald-700 font-medium ml-2"
+                    className="text-xs text-emerald-600 hover:text-emerald-700 font-medium ml-auto sm:ml-2"
                   >
                     Xóa tất cả
                   </button>
@@ -149,35 +141,43 @@ export default function CategoryPage() {
             )}
 
             {loading && (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-                <span className="ml-3 text-gray-600">Đang tải sản phẩm...</span>
+              <div className="flex items-center justify-center py-16 sm:py-20">
+                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-emerald-600" />
+                <span className="ml-3 text-sm sm:text-base text-gray-600">Đang tải sản phẩm...</span>
               </div>
             )}
 
             {error && !loading && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-                <p className="text-red-600">Lỗi tải sản phẩm. Vui lòng thử lại!</p>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 sm:p-6 text-center">
+                <p className="text-red-600 text-sm sm:text-base">Lỗi tải sản phẩm. Vui lòng thử lại!</p>
               </div>
             )}
 
             {!loading && !error && (
               <>
                 {products.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {products.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                      {products.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+
+                    <div className="sm:hidden mt-6 text-center">
+                      <p className="text-sm text-gray-600 bg-white border border-gray-200 rounded-xl py-3 px-4">
+                        Tìm thấy <span className="font-semibold text-gray-900">{total}</span> sản phẩm
+                      </p>
+                    </div>
+                  </>
                 ) : (
-                  <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-                    <p className="text-gray-600 text-lg">
+                  <div className="bg-white border border-gray-200 rounded-xl p-8 sm:p-12 text-center">
+                    <p className="text-gray-600 text-base sm:text-lg">
                       Không tìm thấy sản phẩm nào phù hợp
                     </p>
                     {hasActiveFilters && (
                       <button
                         onClick={handleClearFilters}
-                        className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+                        className="mt-4 px-5 sm:px-6 py-2 sm:py-3 bg-emerald-600 text-white text-sm sm:text-base rounded-lg hover:bg-emerald-700 transition active:scale-[0.98]"
                       >
                         Xóa bộ lọc
                       </button>

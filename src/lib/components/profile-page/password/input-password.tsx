@@ -13,11 +13,11 @@ export function InputPassword({
     onBack,
 }: InputPasswordStepProps) {
     return (
-        <div className="space-y-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="space-y-5 sm:space-y-6">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-2">
                     <svg
-                        className="w-5 h-5 text-green-600"
+                        className="w-5 h-5 text-green-600 flex-shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                     >
@@ -27,15 +27,15 @@ export function InputPassword({
                             clipRule="evenodd"
                         />
                     </svg>
-                    <p className="text-sm font-medium text-green-800">
+                    <p className="text-xs sm:text-sm font-medium text-green-800">
                         Xác thực thành công! Bây giờ bạn có thể đổi mật khẩu mới
                     </p>
                 </div>
             </div>
 
-            <form onSubmit={onSubmit} className="space-y-6">
+            <form onSubmit={onSubmit} className="space-y-5 sm:space-y-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                         Mật khẩu mới
                     </label>
                     <input
@@ -43,7 +43,7 @@ export function InputPassword({
                         value={newPassword}
                         onChange={(e) => onNewPasswordChange(e.target.value)}
                         placeholder="Nhập mật khẩu mới"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     />
                     <p className="mt-2 text-xs text-gray-500">
                         Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số
@@ -51,7 +51,7 @@ export function InputPassword({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                         Xác nhận mật khẩu mới
                     </label>
                     <input
@@ -59,28 +59,28 @@ export function InputPassword({
                         value={confirmPassword}
                         onChange={(e) => onConfirmPasswordChange(e.target.value)}
                         placeholder="Nhập lại mật khẩu mới"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     />
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
                         {error}
                     </div>
                 )}
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                     <button
                         type="button"
                         onClick={onBack}
-                        className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition"
+                        className="w-full sm:flex-1 border border-gray-300 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-50 active:bg-gray-100 transition"
                     >
                         Quay lại
                     </button>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:flex-1 bg-emerald-600 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-emerald-700 active:bg-emerald-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
                     </button>

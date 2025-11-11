@@ -31,14 +31,14 @@ const HeroSlider = () => {
   };
 
   if (loading)
-    return <section className="relative w-full h-[360px] bg-gray-100 animate-pulse" />;
+    return <section className="relative w-full h-[200px] sm:h-[280px] md:h-[340px] lg:h-[360px] bg-gray-100 animate-pulse" />;
 
   const currentBanner = banners[currentIndex];
 
   return (
-    <section className="bg-gray-50 py-4 mt-32 z-0">
-      <div className="max-w-7xl mx-auto rounded-2xl overflow-hidden shadow-md relative z-0">
-        <div className="relative w-full h-[360px] md:h-[340px]">
+    <section className="bg-gray-50 py-4 md:py-6">
+      <div className="max-w-7xl mx-auto px-4 rounded-2xl overflow-hidden shadow-md relative z-0">
+        <div className="relative w-full h-[200px] sm:h-[280px] md:h-[340px] lg:h-[360px]">
 
           <AnimatePresence mode="wait">
             <motion.div

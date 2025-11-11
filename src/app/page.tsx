@@ -13,9 +13,8 @@ import HeroSlider from "../lib/components/landing-page/hero/hero-slider";
 
 const LandingPage = () => (
   <div className="min-h-screen bg-gray-50">
-    <main className="overflow-hidden">
-      <FreshNav />
-
+    <FreshNav />
+    <main className="overflow-hidden pt-[106px] md:pt-[140px]">
       <HeroSlider />
 
       <CategoryGrid />

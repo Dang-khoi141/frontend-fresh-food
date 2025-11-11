@@ -66,55 +66,58 @@ export default function FilterSidebar({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
           onClick={onClose}
         />
       )}
 
       <div
         className={`
-        fixed lg:sticky top-0 left-0 h-full lg:h-auto
-        w-80 bg-white border-r lg:border-r-0 lg:border border-gray-200
-        rounded-none lg:rounded-xl
-        overflow-y-auto z-50 lg:z-0
-        transform transition-transform duration-300 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      `}
+          fixed lg:sticky top-0 left-0 h-full
+          lg:h-[calc(100vh-180px)] lg:top-4
+          w-[85vw] sm:w-80 bg-white border-r lg:border-r-0 lg:border border-gray-200
+          rounded-none lg:rounded-xl
+          z-50 lg:z-0 transform transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          shadow-2xl lg:shadow-none flex flex-col
+        `}
       >
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="font-bold text-lg text-gray-900">Bộ lọc</h2>
-            {hasActiveFilters && (
-              <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full">
-                {(selectedBrand !== "" ? 1 : 0) +
-                  (priceRange.min > 0 || priceRange.max < 999999999 ? 1 : 0) +
-                  (minRating > 0 ? 1 : 0)}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {hasActiveFilters && (
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="font-bold text-lg text-gray-900">Bộ lọc</h2>
+              {hasActiveFilters && (
+                <span className="bg-emerald-100 text-emerald-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {(selectedBrand !== "" ? 1 : 0) +
+                    (priceRange.min > 0 || priceRange.max < 999999999 ? 1 : 0) +
+                    (minRating > 0 ? 1 : 0)}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {hasActiveFilters && (
+                <button
+                  onClick={onClearAll}
+                  className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                >
+                  Xóa tất cả
+                </button>
+              )}
               <button
-                onClick={onClearAll}
-                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                onClick={onClose}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition"
               >
-                Xóa tất cả
+                <X className="h-5 w-5" />
               </button>
-            )}
-            <button
-              onClick={onClose}
-              className="lg:hidden p-1 hover:bg-gray-100 rounded-lg"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            </div>
           </div>
         </div>
 
-        <div className="p-4 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-20 lg:pb-4">
           <div className="border-b border-gray-200 pb-4">
             <button
               onClick={() => toggleSection("price")}
-              className="w-full flex items-center justify-between mb-3"
+              className="w-full flex items-center justify-between mb-3 py-1"
             >
               <h3 className="font-semibold text-gray-900">Khoảng giá</h3>
               {expandedSections.price ? (
@@ -128,14 +131,14 @@ export default function FilterSidebar({
                 {PRICE_RANGES.map((range) => (
                   <label
                     key={range.label}
-                    className="flex items-center gap-2 cursor-pointer group"
+                    className="flex items-center gap-3 cursor-pointer group py-1 px-2 rounded-lg hover:bg-gray-50 transition"
                   >
                     <input
                       type="radio"
                       name="priceRange"
                       checked={isPriceRangeSelected(range.min, range.max)}
                       onChange={() => onPriceChange(range.min, range.max)}
-                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                     <span className="text-sm text-gray-700 group-hover:text-gray-900">
                       {range.label}
@@ -149,7 +152,7 @@ export default function FilterSidebar({
           <div className="border-b border-gray-200 pb-4">
             <button
               onClick={() => toggleSection("rating")}
-              className="w-full flex items-center justify-between mb-3"
+              className="w-full flex items-center justify-between mb-3 py-1"
             >
               <h3 className="font-semibold text-gray-900">Đánh giá</h3>
               {expandedSections.rating ? (
@@ -163,22 +166,22 @@ export default function FilterSidebar({
                 {RATINGS.map((rating) => (
                   <label
                     key={rating}
-                    className="flex items-center gap-2 cursor-pointer group"
+                    className="flex items-center gap-3 cursor-pointer group py-1 px-2 rounded-lg hover:bg-gray-50 transition"
                   >
                     <input
                       type="radio"
                       name="rating"
                       checked={minRating === rating}
                       onChange={() => onRatingChange(rating)}
-                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
                           className={`h-4 w-4 ${i < rating
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
                             }`}
                         />
                       ))}
@@ -188,13 +191,13 @@ export default function FilterSidebar({
                     </div>
                   </label>
                 ))}
-                <label className="flex items-center gap-2 cursor-pointer group">
+                <label className="flex items-center gap-3 cursor-pointer group py-1 px-2 rounded-lg hover:bg-gray-50 transition">
                   <input
                     type="radio"
                     name="rating"
                     checked={minRating === 0}
                     onChange={() => onRatingChange(0)}
-                    className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                    className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                   />
                   <span className="text-sm text-gray-700 group-hover:text-gray-900">
                     Tất cả
@@ -207,7 +210,7 @@ export default function FilterSidebar({
           <div>
             <button
               onClick={() => toggleSection("brand")}
-              className="w-full flex items-center justify-between mb-3"
+              className="w-full flex items-center justify-between mb-3 py-1"
             >
               <h3 className="font-semibold text-gray-900">Thương hiệu</h3>
               {expandedSections.brand ? (
@@ -219,18 +222,18 @@ export default function FilterSidebar({
             {expandedSections.brand && (
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {brands.length === 0 ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 px-2 py-1">
                     Không có thương hiệu
                   </p>
                 ) : (
                   <>
-                    <label className="flex items-center gap-2 cursor-pointer group">
+                    <label className="flex items-center gap-3 cursor-pointer group py-1 px-2 rounded-lg hover:bg-gray-50 transition">
                       <input
                         type="radio"
                         name="brand"
                         checked={selectedBrand === ""}
                         onChange={() => onBrandChange("")}
-                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                       />
                       <span className="text-sm text-gray-700 group-hover:text-gray-900">
                         Tất cả
@@ -239,14 +242,14 @@ export default function FilterSidebar({
                     {brands.map((brand) => (
                       <label
                         key={brand.id}
-                        className="flex items-center gap-2 cursor-pointer group"
+                        className="flex items-center gap-3 cursor-pointer group py-1 px-2 rounded-lg hover:bg-gray-50 transition"
                       >
                         <input
                           type="radio"
                           name="brand"
                           checked={selectedBrand === String(brand.id)}
                           onChange={() => onBrandChange(String(brand.id))}
-                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                         />
                         <span className="text-sm text-gray-700 group-hover:text-gray-900">
                           {brand.name}
@@ -258,6 +261,15 @@ export default function FilterSidebar({
               </div>
             )}
           </div>
+        </div>
+
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+          <button
+            onClick={onClose}
+            className="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition active:scale-[0.98]"
+          >
+            Áp dụng bộ lọc
+          </button>
         </div>
       </div>
     </>
