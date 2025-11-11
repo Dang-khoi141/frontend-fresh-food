@@ -122,19 +122,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-12">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-gray-900 mb-2 text-h2_simple_box font-semibold">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-6 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-gray-900 mb-2 text-2xl sm:text-3xl font-semibold">
               Create Account
             </h1>
-            <p className="text-gray-600 text-base">
+            <p className="text-gray-600 text-sm sm:text-base">
               Join FreshMart for fresh groceries delivered
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
               <label className="block text-gray-700 font-medium text-sm mb-2">
                 Full Name
@@ -145,10 +145,10 @@ export default function RegisterPage() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className={`w-full h-12 px-4 rounded-xl border ${errors.name ? "border-red-300" : "border-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-brand`}
+                className={`w-full h-11 sm:h-12 px-4 rounded-lg sm:rounded-xl border text-sm sm:text-base ${errors.name ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand placeholder-gray-400`}
               />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+              {errors.name && <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.name}</p>}
             </div>
 
             <div>
@@ -161,10 +161,10 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                className={`w-full h-12 px-4 rounded-xl border ${errors.email ? "border-red-300" : "border-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-brand`}
+                className={`w-full h-11 sm:h-12 px-4 rounded-lg sm:rounded-xl border text-sm sm:text-base ${errors.email ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand placeholder-gray-400`}
               />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.email}</p>}
             </div>
 
             <div>
@@ -177,10 +177,10 @@ export default function RegisterPage() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+84 123 456 789"
-                className={`w-full h-12 px-4 rounded-xl border ${errors.phone ? "border-red-300" : "border-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-brand`}
+                className={`w-full h-11 sm:h-12 px-4 rounded-lg sm:rounded-xl border text-sm sm:text-base ${errors.phone ? "border-red-300" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-brand placeholder-gray-400`}
               />
-              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+              {errors.phone && <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.phone}</p>}
             </div>
 
             <div>
@@ -194,18 +194,18 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${errors.password ? "border-red-300" : "border-gray-200"
-                    } focus:outline-none focus:ring-2 focus:ring-brand`}
+                  className={`w-full h-11 sm:h-12 px-4 pr-12 rounded-lg sm:rounded-xl border text-sm sm:text-base ${errors.password ? "border-red-300" : "border-gray-200"
+                    } focus:outline-none focus:ring-2 focus:ring-brand placeholder-gray-400`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={18} className="sm:w-5 sm:h-5" /> : <Eye size={18} className="sm:w-5 sm:h-5" />}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              {errors.password && <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.password}</p>}
             </div>
 
             <div>
@@ -219,36 +219,36 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Re-enter your password"
-                  className={`w-full h-12 px-4 pr-12 rounded-xl border ${errors.confirmPassword ? "border-red-300" : "border-gray-200"
-                    } focus:outline-none focus:ring-2 focus:ring-brand`}
+                  className={`w-full h-11 sm:h-12 px-4 pr-12 rounded-lg sm:rounded-xl border text-sm sm:text-base ${errors.confirmPassword ? "border-red-300" : "border-gray-200"
+                    } focus:outline-none focus:ring-2 focus:ring-brand placeholder-gray-400`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
                 >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showConfirmPassword ? <EyeOff size={18} className="sm:w-5 sm:h-5" /> : <Eye size={18} className="sm:w-5 sm:h-5" />}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.confirmPassword}</p>
               )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-brand text-white font-semibold rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full h-11 sm:h-12 bg-brand text-white font-semibold text-sm sm:text-base rounded-lg sm:rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
             >
               {loading ? "Đang gửi OTP..." : "Create Account"}
             </button>
 
-            <div className="text-center">
-              <p className="text-gray-600 text-sm">
+            <div className="text-center pt-2">
+              <p className="text-gray-600 text-xs sm:text-sm">
                 Already have an account?{" "}
                 <Link
                   href="/login"
-                  className="text-brand font-semibold hover:text-emerald-600"
+                  className="text-brand font-semibold hover:text-emerald-600 transition-colors"
                 >
                   Sign in here
                 </Link>
