@@ -95,26 +95,26 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
     };
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
             <div className="relative">
                 <input
                     value={query}
                     onChange={(e) => handleSearch(e.target.value)}
                     placeholder="Nhập địa chỉ..."
-                    className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full border rounded-lg p-2.5 md:p-3 text-xs md:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
                 {isSearching && (
-                    <div className="absolute right-3 top-3">
-                        <div className="animate-spin h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full" />
+                    <div className="absolute right-2 md:right-3 top-2.5 md:top-3">
+                        <div className="animate-spin h-4 w-4 md:h-5 md:w-5 border-2 border-emerald-500 border-t-transparent rounded-full" />
                     </div>
                 )}
                 {suggestions.length > 0 && (
-                    <ul className="absolute z-10 bg-white border mt-1 w-full rounded-lg shadow-md max-h-60 overflow-y-auto">
+                    <ul className="absolute z-10 bg-white border mt-1 w-full rounded-lg shadow-md max-h-48 md:max-h-60 overflow-y-auto">
                         {suggestions.map((s) => (
                             <li
                                 key={s.place_id}
                                 onClick={() => handleSelect(s)}
-                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-b-0"
+                                className="px-2.5 md:px-3 py-2 hover:bg-gray-100 cursor-pointer text-xs md:text-sm border-b last:border-b-0"
                             >
                                 {s.display_name}
                             </li>
@@ -123,10 +123,10 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
                 )}
             </div>
 
-            <div ref={mapContainer} className="w-full h-64 rounded-lg border" />
+            <div ref={mapContainer} className="w-full h-48 md:h-64 rounded-lg border" />
 
             {coords && (
-                <p className="text-xs text-gray-600">
+                <p className="text-[10px] md:text-xs text-gray-600">
                     Vị trí: {coords[1].toFixed(5)}, {coords[0].toFixed(5)}
                 </p>
             )}
