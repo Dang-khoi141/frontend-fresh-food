@@ -46,9 +46,12 @@ export default function CartPage() {
   const router = useRouter();
   const normalizedAddress = shippingAddress.trim();
 
+  const invalidPatterns = ["undefined", "undefine", "null", "unknown", "nan"];
+
   const isAddressInvalid =
     !normalizedAddress ||
-    normalizedAddress.length < 5;
+    normalizedAddress.length < 5
+    || invalidPatterns.some(p => normalizedAddress.toLowerCase().includes(p));
 
   const formatPrice = (price: number) =>
     price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
@@ -85,7 +88,9 @@ export default function CartPage() {
 
             setShippingAddress(detected.trim());
           } catch {
-            setShippingAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+            setError("Không thể xác định vị trí, vui lòng nhập địa chỉ thủ công.");
+            setShippingAddress("");
+            setIsManualAddress(true);
           }
         },
         (err) => console.warn("Không thể lấy vị trí:", err.message),
