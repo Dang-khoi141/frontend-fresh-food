@@ -50,8 +50,9 @@ export default function CartPage() {
 
   const isAddressInvalid =
     !normalizedAddress ||
-    normalizedAddress.length < 5
-    || invalidPatterns.some(p => normalizedAddress.toLowerCase().includes(p));
+    normalizedAddress.length < 5 ||
+    /^[\s,]+$/.test(normalizedAddress) ||
+    invalidPatterns.some(p => normalizedAddress.toLowerCase().includes(p));
 
   const formatPrice = (price: number) =>
     price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
@@ -111,7 +112,7 @@ export default function CartPage() {
         .filter((part) => part && part.trim().length > 0)
         .join(", ");
 
-      if (combined) {
+      if (combined && combined.replace(/[, ]/g, "").length >= 5) {
         setShippingAddress(combined);
       } else {
         setShippingAddress("");
