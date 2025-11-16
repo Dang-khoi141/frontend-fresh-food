@@ -44,6 +44,11 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState("");
   const [showPromoList, setShowPromoList] = useState(false);
   const router = useRouter();
+  const normalizedAddress = shippingAddress.trim();
+
+  const isAddressInvalid =
+    !normalizedAddress ||
+    normalizedAddress.length < 5;
 
   const formatPrice = (price: number) =>
     price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
@@ -93,10 +98,21 @@ export default function CartPage() {
     if (isManualAddress) return;
 
     if (defaultAddress) {
-      setShippingAddress(
-        `${defaultAddress.line1}, ${defaultAddress.city}, ${defaultAddress.province}`
-      );
+      const line1 = defaultAddress.line1 || "";
+      const city = defaultAddress.city || "";
+      const province = defaultAddress.province || "";
+
+      const combined = [line1, city, province]
+        .filter((part) => part && part.trim().length > 0)
+        .join(", ");
+
+      if (combined) {
+        setShippingAddress(combined);
+      } else {
+        setShippingAddress("");
+      }
     } else {
+      setShippingAddress("");
       detectLocation();
     }
   }, [defaultAddress, isManualAddress, detectLocation]);
@@ -161,8 +177,8 @@ export default function CartPage() {
   };
 
   const handlePlaceOrder = async () => {
-    if (!shippingAddress.trim()) {
-      setError("Vui lòng chọn hoặc nhập địa chỉ giao hàng");
+    if (isAddressInvalid) {
+      setError("Vui lòng nhập địa chỉ giao hàng chi tiết hơn");
       return;
     }
 
@@ -172,7 +188,7 @@ export default function CartPage() {
 
       const orderData = {
         paymentMethod,
-        shippingAddress,
+        shippingAddress: normalizedAddress,
         notes,
         promotionCode: appliedPromotion?.code,
       };
@@ -416,6 +432,11 @@ export default function CartPage() {
                   setShippingAddress={handleShippingAddressChange}
                 />
               </div>
+              {!shippingAddress.trim() && (
+                <p className="mt-1 text-xs text-red-500">
+                  Vui lòng chọn hoặc nhập địa chỉ giao hàng trước khi đặt hàng.
+                </p>
+              )}
 
               {isAuthenticated && (
                 <div className="border rounded-lg p-3 md:p-4 bg-gray-50">
@@ -639,11 +660,12 @@ export default function CartPage() {
                 </Link>
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={loading || !shippingAddress.trim()}
+                  disabled={loading || isAddressInvalid}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 md:px-5 py-3 rounded-lg font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Đang xử lý..." : "Đặt hàng"}
                 </button>
+
               </div>
             </div>
           </div>

@@ -15,7 +15,8 @@ import {
     Tag,
 } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useFetchOrder } from "../../../../../../lib/hooks/useFetchOrder";
 
 const ORDER_STATUS_COLORS: Record<string, string> = {
@@ -58,6 +59,12 @@ export default function OrderEdit() {
         autoFetch: true,
         isAdmin: true,
     });
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error.message || "Error loading order");
+        }
+    }, [error]);
 
     const currentStatus = order?.status || "";
     const paymentMethod = order?.paymentMethod || "";
@@ -114,12 +121,8 @@ export default function OrderEdit() {
     if (error) {
         return (
             <div style={{ padding: "20px" }}>
-                <Alert
-                    message="Error loading order"
-                    description={error.message}
-                    type="error"
-                    showIcon
-                />
+                <h3>Error loading order</h3>
+                <p>{error.message}</p>
                 <Button
                     type="primary"
                     style={{ marginTop: "20px" }}

@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchOutlined } from "@ant-design/icons";
 import {
     DateField,
     EditButton,
@@ -7,9 +8,9 @@ import {
     ShowButton,
 } from "@refinedev/antd";
 import { type BaseRecord } from "@refinedev/core";
-import { Space, Table, Tag, Input, Select, Spin, Alert } from "antd";
-import { useState, useMemo, useEffect } from "react";
-import { SearchOutlined } from "@ant-design/icons";
+import { Input, Select, Space, Spin, Table, Tag } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useFetchOrder } from "../../../../lib/hooks/useFetchOrder";
 
 const ORDER_STATUS_COLORS: Record<string, string> = {
@@ -58,18 +59,12 @@ export default function AdminOrdersList() {
         return filteredOrders.slice(startIndex, startIndex + pageSize);
     }, [filteredOrders, currentPage, pageSize]);
 
-    if (error) {
-        return (
-            <List>
-                <Alert
-                    message="Error loading orders"
-                    description={error.message}
-                    type="error"
-                    showIcon
-                />
-            </List>
-        );
-    }
+    useEffect(() => {
+        if (error) {
+            toast.error(error.message || "Error loading orders");
+        }
+    }, [error]);
+
 
     return (
         <List>
