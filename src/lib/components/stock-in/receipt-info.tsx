@@ -1,13 +1,11 @@
-import { DatePicker, Select } from 'antd';
+import { Select } from 'antd';
 import { ReceiptFormInfoProps } from '../../interface/receipt';
 
 
 export const ReceiptFormInfo = ({
     warehouses,
     selectedWarehouse,
-    receiptDate,
     onWarehouseChange,
-    onDateChange,
 }: ReceiptFormInfoProps) => {
     return (
         <div
@@ -30,59 +28,29 @@ export const ReceiptFormInfo = ({
                 Thông tin phiếu nhập hàng
             </h3>
 
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '16px',
-                }}
-            >
-                <div>
-                    <label
-                        style={{
-                            display: 'block',
-                            marginBottom: '8px',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            color: '#475569',
-                        }}
-                    >
-                        Kho nhập hàng <span style={{ color: '#ef4444' }}>*</span>
-                    </label>
-                    <Select
-                        placeholder="Chọn kho nhập hàng"
-                        size="large"
-                        style={{ width: '100%' }}
-                        value={selectedWarehouse || undefined}
-                        onChange={onWarehouseChange}
-                        options={warehouses.map(warehouse => ({
-                            label: warehouse.name,
-                            value: warehouse.id,
-                        }))}
-                    />
-                </div>
-
-                <div>
-                    <label
-                        style={{
-                            display: 'block',
-                            marginBottom: '8px',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            color: '#475569',
-                        }}
-                    >
-                        Ngày nhập hàng <span style={{ color: '#ef4444' }}>*</span>
-                    </label>
-                    <DatePicker
-                        value={receiptDate}
-                        onChange={onDateChange}
-                        size="large"
-                        style={{ width: '100%' }}
-                        format="DD/MM/YYYY"
-                        placeholder="Chọn ngày nhập hàng"
-                    />
-                </div>
+            <div>
+                <label
+                    style={{
+                        display: 'block',
+                        marginBottom: '8px',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        color: '#475569',
+                    }}
+                >
+                    Kho nhập hàng <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <Select
+                    placeholder="Chọn kho nhập hàng"
+                    size="large"
+                    style={{ width: '100%' }}
+                    value={selectedWarehouse || undefined}
+                    onChange={onWarehouseChange}
+                    options={warehouses.map(warehouse => ({
+                        label: warehouse.name,
+                        value: warehouse.id,
+                    }))}
+                />
             </div>
 
             <div style={{ marginTop: '16px' }}>
@@ -95,7 +63,7 @@ export const ReceiptFormInfo = ({
                     }}
                 >
                     <span style={{ color: '#ef4444', marginRight: '4px' }}>*</span>
-                    Sản phẩm sẽ được nhập vào kho đã chọn sau khi lưu phiếu
+                    Sản phẩm sẽ được nhập vào kho đã chọn ngay sau khi lưu phiếu
                 </p>
             </div>
         </div>

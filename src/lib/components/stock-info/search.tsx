@@ -4,46 +4,26 @@ import { SearchBarProps } from '../../interface/inventory';
 
 const { Search: AntSearch } = Input;
 
-export default function SearchBar({ searchText, onSearch, onFilterClick }: SearchBarProps) {
+export default function SearchBar({ searchText, onSearch, onFilterClick, isMobile }: SearchBarProps) {
     return (
-        <div
-            style={{
-                background: 'white',
-                padding: '20px 24px',
-                borderRadius: '12px',
-                marginBottom: '20px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-            }}
-        >
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className={`bg-white ${isMobile ? 'p-4 rounded-lg' : 'px-6 py-5 rounded-xl'} mb-5 shadow-sm`}>
+            <div className="flex gap-3 items-center">
                 <AntSearch
                     placeholder="Tìm kiếm theo Tên sản phẩm"
                     allowClear
-                    size="large"
-                    prefix={<Search size={18} style={{ color: '#94a3b8' }} />}
+                    size={isMobile ? 'middle' : 'large'}
+                    prefix={<Search size={isMobile ? 16 : 18} className="text-slate-400" />}
                     value={searchText}
                     onChange={(e) => onSearch(e.target.value)}
                     onSearch={onSearch}
-                    style={{
-                        flex: 1,
-                        borderRadius: '8px',
-                    }}
+                    className="flex-1 rounded-lg"
                 />
                 <Button
-                    icon={<Filter size={16} />}
+                    icon={<Filter size={isMobile ? 14 : 16} />}
                     onClick={onFilterClick}
-                    style={{
-                        borderRadius: '8px',
-                        height: '40px',
-                        border: '1px solid #10b981',
-                        color: '#059669',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        fontWeight: 500,
-                    }}
+                    className={`rounded-lg ${isMobile ? 'h-9 px-3' : 'h-10'} border border-emerald-500 text-emerald-600 flex items-center gap-1.5 font-medium hover:bg-emerald-50`}
                 >
-                    Bộ lọc khác
+                    {!isMobile && 'Bộ lọc khác'}
                 </Button>
             </div>
         </div>

@@ -67,11 +67,13 @@ export default function AIChatWidget() {
             )}
 
             {open && (
-                <div className="animate-fadeIn bg-white
-                    w-[calc(100vw-2rem)] h-[calc(100vh-2rem)]
-                    md:w-[360px] md:h-[480px]
-                    max-w-md
-                    flex flex-col rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+                <div
+                    className="animate-fadeIn bg-white
+      w-[calc(100vw-3rem)] max-w-sm
+      h-[65vh] max-h-[520px]
+      md:w-[360px] md:h-[480px]
+      flex flex-col rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
+                >
                     <div className="bg-gradient-to-r from-emerald-500 to-brand text-white px-3 py-2.5 md:px-4 md:py-3 flex justify-between items-center shadow-sm">
                         <div className="flex items-center gap-2">
                             <div className="bg-white text-brand font-bold flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full shadow-sm text-xs md:text-sm">

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { useAddressContext } from "../../contexts/address-context";
 import { useCart } from "../../contexts/cart-context";
 import Footer from "../../lib/components/landing-page/footer/footer";
@@ -89,7 +90,8 @@ export default function CartPage() {
 
             setShippingAddress(detected.trim());
           } catch {
-            setError("Không thể xác định vị trí, vui lòng nhập địa chỉ thủ công.");
+            const msg = "Không thể xác định vị trí, vui lòng nhập địa chỉ thủ công.";
+            toast.error(msg);
             setShippingAddress("");
             setIsManualAddress(true);
           }
@@ -125,7 +127,8 @@ export default function CartPage() {
 
   const handleApplyPromotion = async () => {
     if (!promoCode.trim()) {
-      setError("Vui lòng nhập mã khuyến mãi");
+      const msg = "Vui lòng nhập mã khuyến mãi";
+      toast.error(msg);
       return;
     }
 
@@ -135,9 +138,8 @@ export default function CartPage() {
 
     if (matchingPromo) {
       if (matchingPromo.minOrderValue && subtotal < matchingPromo.minOrderValue) {
-        setError(
-          `Mã này yêu cầu tối thiểu ${formatPrice(matchingPromo.minOrderValue)}`
-        );
+        const msg = `Mã này yêu cầu tối thiểu ${formatPrice(matchingPromo.minOrderValue)}`;
+        toast.error(msg);
         return;
       }
     }
@@ -147,9 +149,11 @@ export default function CartPage() {
       await applyPromotion(promoCode, subtotal);
       setPromoCode("");
       setShowPromoList(false);
+      toast.success("Áp dụng mã khuyến mãi thành công!");
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || "Mã khuyến mãi không hợp lệ hoặc đã hết hạn";
       setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -159,9 +163,11 @@ export default function CartPage() {
       await applyPromotion(code, subtotal);
       setPromoCode("");
       setShowPromoList(false);
+      toast.success("Áp dụng mã khuyến mãi thành công!");
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || "Không thể áp dụng mã này";
       setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -175,6 +181,7 @@ export default function CartPage() {
   const handleClearPromotion = () => {
     clearPromotion();
     setPromoCode("");
+    toast.success("Đã xóa mã khuyến mãi");
   };
 
   const handleShippingAddressChange = (address: string) => {
@@ -184,7 +191,8 @@ export default function CartPage() {
 
   const handlePlaceOrder = async () => {
     if (isAddressInvalid) {
-      setError("Vui lòng nhập địa chỉ giao hàng chi tiết hơn");
+      const msg = "Vui lòng nhập địa chỉ giao hàng chi tiết hơn";
+      setError(msg);
       return;
     }
 
@@ -203,26 +211,27 @@ export default function CartPage() {
 
       if (order?.id) {
         clearCart();
+        toast.success("Đặt hàng thành công!");
         router.push(`/orders/${order.id}`);
       } else throw new Error("Order ID không hợp lệ");
     } catch (err: any) {
+      let errorMsg = err.response?.data?.message || err.message || "Có lỗi xảy ra khi đặt hàng";
+
       if (err.response?.status === 403) {
-        setError("Bạn không có quyền đặt hàng");
+        errorMsg = "Bạn không có quyền đặt hàng";
+        toast.error(errorMsg);
         setTimeout(() => router.push("/"), 1000);
         return;
       }
 
       if (err.response?.status === 401) {
-        setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        errorMsg = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+        setError(errorMsg);
+        toast.error(errorMsg);
         router.push("/login");
         return;
       }
-
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Có lỗi xảy ra khi đặt hàng"
-      );
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -255,8 +264,11 @@ export default function CartPage() {
         <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Giỏ hàng</h1>
 
         {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 md:px-4 py-2 md:py-3 rounded-lg">
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 md:px-4 py-2 md:py-3 rounded-lg flex items-center justify-between">
             <p className="font-medium text-xs md:text-sm">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700">
+              <i className="fa-solid fa-xmark"></i>
+            </button>
           </div>
         )}
 

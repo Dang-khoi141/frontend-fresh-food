@@ -1,6 +1,5 @@
 import { Product } from "./product";
 import { Warehouse } from "./warehouse";
-import { Dayjs } from "dayjs";
 
 export interface StockReceiptDetail {
   id: string;
@@ -52,9 +51,7 @@ export interface ReceiptItem extends CreateReceiptItemDto {
 export interface ReceiptFormInfoProps {
   warehouses: Warehouse[];
   selectedWarehouse: string;
-  receiptDate: Dayjs;
   onWarehouseChange: (value: string) => void;
-  onDateChange: (date: Dayjs | null) => void;
 }
 
 export interface ReceiptItemsTableProps {

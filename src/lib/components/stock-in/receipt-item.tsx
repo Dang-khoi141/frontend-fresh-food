@@ -53,7 +53,7 @@ export const ReceiptItemsTable = ({
                     onChange={(value) => onUpdateItem(record.key, 'quantity', value || 0)}
                     style={{ width: '100%' }}
                     formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                    parser={(value) => Number(value?.replace(/\$\s?|(,*)/g, '') || 0)}
+                    parser={(value) => Number(value?.replace(/,/g, '') || 0)}
                 />
             ),
         },
@@ -71,8 +71,7 @@ export const ReceiptItemsTable = ({
                     formatter={(value) =>
                         `₫ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
                     }
-                    parser={(value) => Number(value?.replace(/\$\s?|(,*)/g, '') || 0)}
-
+                    parser={(value) => Number(value?.replace(/₫\s?|,/g, '') || 0)}
                 />
             ),
         },

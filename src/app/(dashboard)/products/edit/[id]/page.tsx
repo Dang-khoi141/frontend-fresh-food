@@ -1,14 +1,17 @@
 "use client";
+
 import { UploadOutlined } from "@ant-design/icons";
 import { axiosInstance } from "@providers/data-provider";
 import { Edit, useForm } from "@refinedev/antd";
 import {
   App,
   Button,
+  Col,
   Form,
   Image,
   Input,
   InputNumber,
+  Row,
   Select,
   Switch,
   Upload,
@@ -24,6 +27,17 @@ export default function ProductEdit() {
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [ready, setReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { formProps, saveButtonProps, query } = useForm({
     resource: "products",
@@ -50,14 +64,12 @@ export default function ProductEdit() {
         setBrands(brandData);
         setReady(true);
       })
-      .catch((err) => console.error("❌ Lỗi load brands/categories:", err));
+      .catch((err) => console.error("Error loading brands/categories:", err));
   }, []);
 
   useEffect(() => {
     const p = query?.data?.data;
     if (!ready || !p) return;
-
-    console.log("✅ Product data loaded:", p);
 
     formProps.form?.setFieldsValue({
       name: p.name,
@@ -123,91 +135,191 @@ export default function ProductEdit() {
   };
 
   return (
-    <Edit saveButtonProps={{ ...saveButtonProps, disabled: uploading }}>
+    <Edit
+      saveButtonProps={{ ...saveButtonProps, disabled: uploading }}
+      footerButtons={({ defaultButtons }) => (
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          flexDirection: isMobile ? 'column' : 'row',
+          width: isMobile ? '100%' : 'auto',
+        }}>
+          {defaultButtons}
+        </div>
+      )}
+    >
       {!ready ? (
-        <div style={{ marginBottom: 16 }}>Loading brand & category...</div>
+        <div style={{
+          padding: '24px',
+          textAlign: 'center',
+          color: '#64748b',
+        }}>
+          Loading brand & category...
+        </div>
       ) : (
-        <Form {...formProps} layout="vertical" onFinish={handleFinish}>
-          <Form.Item label="Name" name="name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Price" name="price" rules={[{ required: true }]}>
-            <InputNumber style={{ width: "100%" }} min={0} />
-          </Form.Item>
-
-          <Form.Item
-            label="Discount (%)"
-            name="discountPercentage"
-            tooltip="Nhập phần trăm giảm giá (0 - 100)"
-          >
-            <InputNumber<number>
-              style={{ width: "100%" }}
-              min={0}
-              max={100}
-              step={1}
-              formatter={(value) => `${value}%`}
-              parser={(value) => Number((value || '').replace('%', '')) || 0}
-            />
-          </Form.Item>
-
-
-
-          <Form.Item label="Description" name="description">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-
-          <Form.Item label="Active" name="isActive" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-
-          <Form.Item
-            label="Brand"
-            name="brandId"
-            rules={[{ required: true, message: "Please select brand" }]}
-          >
-            <Select
-              placeholder="Select brand"
-              options={brands.map((b: any) => ({
-                label: b.name,
-                value: b.id.toString(),
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Category"
-            name="categoryId"
-            rules={[{ required: true, message: "Please select category" }]}
-          >
-            <Select
-              placeholder="Select category"
-              options={categories.map((c: any) => ({
-                label: c.name,
-                value: c.id.toString(),
-              }))}
-            />
-          </Form.Item>
-
+        <Form
+          {...formProps}
+          layout="vertical"
+          onFinish={handleFinish}
+          style={{
+            maxWidth: isMobile ? '100%' : '900px',
+            margin: '0 auto',
+          }}
+        >
           {(previewImage || currentImage) && (
-            <Form.Item label="Current Product Image">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '24px',
+            }}>
               <Image
                 src={`${previewImage || currentImage}?t=${Date.now()}`}
                 alt="Product Image"
-                style={{ maxWidth: 200, maxHeight: 200 }}
+                style={{
+                  maxWidth: isMobile ? 200 : 250,
+                  maxHeight: isMobile ? 200 : 250,
+                  borderRadius: '12px',
+                  objectFit: 'cover',
+                }}
               />
-            </Form.Item>
+            </div>
           )}
 
-          <Form.Item label="Product Image" name="imageUrl">
-            <ImgCrop rotationSlider {...({ destroyOnHidden: true } as any)}>
-              <Upload {...uploadProps}>
-                <Button icon={<UploadOutlined />}>
-                  {previewImage || currentImage ? "Change Image" : "Upload Image"}
-                </Button>
-              </Upload>
-            </ImgCrop>
-          </Form.Item>
+          <Row gutter={isMobile ? [0, 0] : [16, 0]}>
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item
+                label="Product Name"
+                name="name"
+                rules={[{ required: true, message: "Please enter product name" }]}
+              >
+                <Input
+                  size={isMobile ? "large" : "middle"}
+                  placeholder="Enter product name"
+                  style={{ borderRadius: '8px' }}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item
+                label="Price (đ)"
+                name="price"
+                rules={[{ required: true, message: "Please enter price" }]}
+              >
+                <InputNumber
+                  style={{ width: "100%", borderRadius: '8px' }}
+                  size={isMobile ? "large" : "middle"}
+                  min={0}
+                  formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value!.replace(/\$\s?|(,*)/g, '')}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item
+                label="Discount (%)"
+                name="discountPercentage"
+                tooltip="Enter discount percentage (0 - 100)"
+              >
+                <InputNumber<number>
+                  style={{ width: "100%", borderRadius: '8px' }}
+                  size={isMobile ? "large" : "middle"}
+                  min={0}
+                  max={100}
+                  step={1}
+                  formatter={(value) => `${value}%`}
+                  parser={(value) => Number((value || '').replace('%', '')) || 0}
+                  placeholder="0%"
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item
+                label="Active Status"
+                name="isActive"
+                valuePropName="checked"
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: isMobile ? '48px' : '40px',
+                  padding: '0 12px',
+                  background: '#f8fafc',
+                  borderRadius: '8px',
+                }}>
+                  <Switch />
+                  <span style={{ marginLeft: '12px', color: '#64748b' }}>
+                    Active product
+                  </span>
+                </div>
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item
+                label="Brand"
+                name="brandId"
+                rules={[{ required: true, message: "Please select brand" }]}
+              >
+                <Select
+                  size={isMobile ? "large" : "middle"}
+                  placeholder="Select brand"
+                  style={{ borderRadius: '8px' }}
+                  options={brands.map((b: any) => ({
+                    label: b.name,
+                    value: b.id.toString(),
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item
+                label="Category"
+                name="categoryId"
+                rules={[{ required: true, message: "Please select category" }]}
+              >
+                <Select
+                  size={isMobile ? "large" : "middle"}
+                  placeholder="Select category"
+                  style={{ borderRadius: '8px' }}
+                  options={categories.map((c: any) => ({
+                    label: c.name,
+                    value: c.id.toString(),
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24}>
+              <Form.Item label="Description" name="description">
+                <Input.TextArea
+                  rows={isMobile ? 3 : 4}
+                  placeholder="Enter product description"
+                  style={{ borderRadius: '8px' }}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24}>
+              <Form.Item label="Product Image" name="imageUrl">
+                <ImgCrop rotationSlider {...({ destroyOnHidden: true } as any)}>
+                  <Upload {...uploadProps} listType={isMobile ? "picture-card" : "picture"}>
+                    <Button
+                      icon={<UploadOutlined />}
+                      size={isMobile ? "large" : "middle"}
+                      block={isMobile}
+                      style={{ borderRadius: '8px' }}
+                    >
+                      {previewImage || currentImage ? "Change Image" : "Upload Image"}
+                    </Button>
+                  </Upload>
+                </ImgCrop>
+              </Form.Item>
+            </Col>
+          </Row>
         </Form>
       )}
     </Edit>

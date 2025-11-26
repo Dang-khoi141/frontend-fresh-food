@@ -2,6 +2,7 @@
 
 import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Modal, Popconfirm, Spin, Table } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import PageHeader from '../../../../../lib/components/stock-info/page-header';
@@ -10,7 +11,6 @@ import { getInventoryColumns } from '../../../../../lib/components/stock-info/ta
 import { useFetchInventory } from '../../../../../lib/hooks/useFetchInventory';
 import { InventoryItem } from '../../../../../lib/interface/inventory';
 import { inventoryService } from '../../../../../lib/service/inventory.service';
-import { ColumnsType } from 'antd/es/table';
 
 export default function StockInfoPage() {
     const {
@@ -25,6 +25,18 @@ export default function StockInfoPage() {
     const [filteredData, setFilteredData] = useState<InventoryItem[]>([]);
     const [searchText, setSearchText] = useState('');
     const [filterModalOpen, setFilterModalOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         fetchAllInventory();
@@ -85,12 +97,14 @@ export default function StockInfoPage() {
     };
 
     const columns: ColumnsType<InventoryItem> = [
-        ...getInventoryColumns(),
+        ...getInventoryColumns(isMobile),
         {
             title: "Hành động",
             key: "actions",
             align: "center",
-            render: (record: InventoryItem) => (
+            width: isMobile ? 80 : 120,
+            fixed: isMobile ? undefined : 'right',
+            render: (_, record: InventoryItem) => (
                 <Popconfirm
                     title="Xác nhận xóa"
                     description="Bạn có chắc muốn xóa sản phẩm này khỏi tồn kho?"
@@ -111,7 +125,7 @@ export default function StockInfoPage() {
                         type="text"
                         danger
                         icon={<DeleteOutlined />}
-                        size="small"
+                        size={isMobile ? "middle" : "small"}
                         title="Xóa sản phẩm"
                     />
                 </Popconfirm>
@@ -119,29 +133,23 @@ export default function StockInfoPage() {
         },
     ];
 
-
     return (
-        <div style={{ padding: '24px', background: '#f8fafc', minHeight: '100vh' }}>
+        <div className={`${isMobile ? 'p-3' : 'p-6'} bg-slate-50 min-h-screen`}>
             <PageHeader
                 onRefresh={refetch}
                 onExport={handleExportExcel}
                 loading={loading}
+                isMobile={isMobile}
             />
 
             <SearchBar
                 searchText={searchText}
                 onSearch={handleSearch}
                 onFilterClick={() => setFilterModalOpen(true)}
+                isMobile={isMobile}
             />
 
-            <div
-                style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                    overflow: 'hidden',
-                }}
-            >
+            <div className={`bg-white ${isMobile ? 'rounded-lg' : 'rounded-xl'} shadow-sm overflow-hidden`}>
                 <Spin spinning={loading}>
                     <Table
                         columns={columns}
@@ -149,16 +157,19 @@ export default function StockInfoPage() {
                         rowKey="productId"
                         pagination={{
                             position: ['bottomCenter'],
-                            pageSize: 10,
-                            showSizeChanger: true,
+                            pageSize: isMobile ? 5 : 10,
+                            showSizeChanger: !isMobile,
                             pageSizeOptions: ['10', '20', '50', '100'],
-                            showTotal: (total, range) => `${range[0]}-${range[1]} trong số ${total} dòng`,
-                            style: { marginBottom: '16px' },
+                            showTotal: (total, range) =>
+                                isMobile
+                                    ? `${range[0]}-${range[1]}/${total}`
+                                    : `${range[0]}-${range[1]} trong số ${total} dòng`,
+                            className: `${isMobile ? 'mb-2 mt-2' : 'mb-4'}`,
+                            simple: isMobile,
                         }}
-                        scroll={{ x: 1000 }}
-                        style={{
-                            borderRadius: '12px',
-                        }}
+                        scroll={{ x: isMobile ? 600 : 1000 }}
+                        className={`${isMobile ? 'rounded-lg' : 'rounded-xl'}`}
+                        size={isMobile ? 'small' : 'middle'}
                         rowClassName={(record) => {
                             if (record.stock === 0) return 'out-of-stock-row';
                             if (record.stock <= record.lowStockThreshold) return 'low-stock-row';
@@ -166,8 +177,8 @@ export default function StockInfoPage() {
                         }}
                         locale={{
                             emptyText: (
-                                <div style={{ padding: '40px 0' }}>
-                                    <div style={{ color: '#64748b', fontSize: '15px' }}>
+                                <div className={`${isMobile ? 'py-5' : 'py-10'}`}>
+                                    <div className={`text-slate-500 ${isMobile ? 'text-[13px]' : 'text-[15px]'}`}>
                                         Không có dữ liệu tồn kho
                                     </div>
                                 </div>
@@ -188,14 +199,18 @@ export default function StockInfoPage() {
                     <Button
                         key="apply"
                         type="primary"
-                        style={{ background: '#059669' }}
+                        className="bg-emerald-600 hover:bg-emerald-700"
                         onClick={() => setFilterModalOpen(false)}
                     >
                         Áp dụng
                     </Button>,
                 ]}
+                width={isMobile ? '90%' : 520}
+                centered={isMobile}
             >
-                <p style={{ color: '#64748b' }}>Chức năng bộ lọc nâng cao đang được phát triển</p>
+                <p className={`text-slate-500 ${isMobile ? 'text-[13px]' : 'text-sm'}`}>
+                    Chức năng bộ lọc nâng cao đang được phát triển
+                </p>
             </Modal>
 
             <style>{`
@@ -210,6 +225,35 @@ export default function StockInfoPage() {
                 }
                 .out-of-stock-row:hover td {
                     background-color: #fee2e2 !important;
+                }
+
+                @media (max-width: 768px) {
+                    .ant-table-thead > tr > th {
+                        padding: 8px 4px !important;
+                        font-size: 12px !important;
+                    }
+
+                    .ant-table-tbody > tr > td {
+                        padding: 8px 4px !important;
+                        font-size: 12px !important;
+                    }
+
+                    .ant-pagination-item {
+                        min-width: 28px !important;
+                        height: 28px !important;
+                        line-height: 26px !important;
+                        font-size: 12px !important;
+                    }
+
+                    .ant-pagination-prev, .ant-pagination-next {
+                        min-width: 28px !important;
+                        height: 28px !important;
+                        line-height: 26px !important;
+                    }
+
+                    .ant-table-wrapper {
+                        overflow-x: auto;
+                    }
                 }
             `}</style>
         </div>
