@@ -37,9 +37,7 @@ const STATUS_LABELS: Record<string, string> = {
 export default function StatisticsPage() {
     const { stats, loading, error, fetchStatistics } = useOrderStatistics();
     const [period, setPeriod] = useState<"day" | "week" | "month">("week");
-<<<<<<< HEAD
     const [offset, setOffset] = useState<number>(0);
-=======
     const [isPortrait, setIsPortrait] = useState(false);
 
     useEffect(() => {
@@ -58,7 +56,6 @@ export default function StatisticsPage() {
             window.removeEventListener('orientationchange', checkOrientation);
         };
     }, []);
->>>>>>> 4abf88fa9224fe8fa4734de85a04e8cc94a4bffc
 
     useEffect(() => {
         fetchStatistics(period, offset);
