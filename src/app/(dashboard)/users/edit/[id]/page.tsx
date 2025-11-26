@@ -106,7 +106,6 @@ export default function UserEdit() {
   };
 
   return (
-<<<<<<< HEAD
     <Edit saveButtonProps={{ ...saveButtonProps, disabled: uploading }}>
       <Form {...formProps} layout="vertical" onFinish={handleFinish}>
         <Form.Item
@@ -146,31 +145,6 @@ export default function UserEdit() {
             placeholder="Select role"
           />
         </Form.Item>
-
-=======
-    <Edit
-      saveButtonProps={{ ...saveButtonProps, disabled: uploading }}
-      footerButtons={({ defaultButtons }) => (
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          flexDirection: isMobile ? 'column' : 'row',
-          width: isMobile ? '100%' : 'auto',
-        }}>
-          {defaultButtons}
-        </div>
-      )}
-    >
-      <Form
-        {...formProps}
-        layout="vertical"
-        onFinish={handleFinish}
-        style={{
-          maxWidth: isMobile ? '100%' : '800px',
-          margin: '0 auto',
-        }}
-      >
->>>>>>> 4abf88fa9224fe8fa4734de85a04e8cc94a4bffc
         {(previewAvatar || currentAvatar) && (
           <div style={{
             display: 'flex',
