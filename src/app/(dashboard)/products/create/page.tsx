@@ -147,7 +147,7 @@ export default function ProductCreate() {
                 size={isMobile ? "large" : "middle"}
                 min={0}
                 formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={value => value!.replace(/\$\s?|(,*)/g, '')}
+                parser={value => value!.replace(/\$\s?|(,*)/g, '') as any}
                 placeholder="0"
               />
             </Form.Item>
