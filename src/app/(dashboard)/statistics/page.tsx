@@ -5,21 +5,23 @@ import {
     Area,
     AreaChart,
     CartesianGrid,
-    Cell, Legend,
+    Cell,
+    Legend,
     Pie,
     PieChart,
     ResponsiveContainer,
     Tooltip,
-    XAxis, YAxis,
+    XAxis,
+    YAxis,
 } from "recharts";
 import useOrderStatistics from "../../../lib/hooks/useOrderStatistics";
 
 const COLORS = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626", "#8b5cf6", "#0ea5e9"];
 
 const PERIOD_OPTIONS = [
-    { value: "day", label: "Hôm nay" },
-    { value: "week", label: "Tuần này" },
-    { value: "month", label: "Tháng này" },
+    { value: "day" as const, label: "Hôm nay" },
+    { value: "week" as const, label: "Tuần này" },
+    { value: "month" as const, label: "Tháng này" },
 ];
 
 const STATUS_LABELS: Record<string, string> = {
@@ -35,10 +37,11 @@ const STATUS_LABELS: Record<string, string> = {
 export default function StatisticsPage() {
     const { stats, loading, error, fetchStatistics } = useOrderStatistics();
     const [period, setPeriod] = useState<"day" | "week" | "month">("week");
+    const [offset, setOffset] = useState<number>(0);
 
     useEffect(() => {
-        fetchStatistics(period);
-    }, [period]);
+        fetchStatistics(period, offset);
+    }, [period, offset]);
 
     if (loading)
         return (
@@ -73,30 +76,66 @@ export default function StatisticsPage() {
             ? ((stats.completedOrders / stats.totalOrders) * 100).toFixed(1)
             : "0";
 
+    const currentRangeLabel =
+        offset === 0
+            ? "Kỳ hiện tại"
+            : offset === 1
+                ? "Kỳ trước"
+                : `Trước ${offset} kỳ`;
+
     return (
         <main className="min-h-screen bg-gray-50">
             <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-800">Báo cáo thống kê</h1>
                         <p className="text-sm text-gray-500 mt-1">
                             Tổng quan hiệu suất kinh doanh hệ thống
                         </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                            {currentRangeLabel} ({period === "day"
+                                ? "Theo ngày"
+                                : period === "week"
+                                    ? "Theo tuần"
+                                    : "Theo tháng"}
+                            )
+                        </p>
                     </div>
 
-                    <div className="flex gap-2 mt-3 md:mt-0 bg-gray-100 p-1 rounded-xl">
-                        {PERIOD_OPTIONS.map((option) => (
+                    <div className="flex flex-col md:flex-row gap-3 md:items-center">
+                        <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
+                            {PERIOD_OPTIONS.map((option) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => {
+                                        setPeriod(option.value);
+                                        setOffset(0);
+                                    }}
+                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${period === option.value
+                                        ? "bg-white text-blue-600 shadow-sm"
+                                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                        }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-2 justify-end">
                             <button
-                                key={option.value}
-                                onClick={() => setPeriod(option.value as "day" | "week" | "month")}
-                                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${period === option.value
-                                    ? "bg-white text-blue-600 shadow-sm"
-                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                                    }`}
+                                onClick={() => setOffset((prev) => prev + 1)}
+                                className="px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700"
                             >
-                                {option.label}
+                                Kỳ trước
                             </button>
-                        ))}
+                            <button
+                                disabled={offset === 0}
+                                onClick={() => setOffset(0)}
+                                className="px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-gray-700"
+                            >
+                                Kỳ hiện tại
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -197,9 +236,7 @@ export default function StatisticsPage() {
                         title="Đơn trung bình"
                         value={
                             stats.totalOrders > 0
-                                ? `${(stats.totalRevenue / stats.totalOrders).toLocaleString(
-                                    "vi-VN"
-                                )}₫`
+                                ? `${(stats.totalRevenue / stats.totalOrders).toLocaleString("vi-VN")}₫`
                                 : "0₫"
                         }
                         description="Giá trị trung bình mỗi đơn hàng"

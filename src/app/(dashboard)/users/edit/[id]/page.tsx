@@ -125,7 +125,7 @@ export default function UserEdit() {
           <Select
             options={[
               { value: "CUSTOMER", label: "Customer" },
-              { value: "AGENT", label: "Agent" },
+              { value: "STAFF_WAREHOUSE", label: "Staff warehouse" },
               { value: "ADMIN", label: "Admin" },
               { value: "SUPER_ADMIN", label: "Super Admin" },
             ]}

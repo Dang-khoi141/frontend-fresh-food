@@ -13,7 +13,7 @@ interface IUser {
   password?: string;
   phone?: string;
   avatar?: string;
-  role: "CUSTOMER" | "AGENT" | "ADMIN" | "SUPER_ADMIN";
+  role: "CUSTOMER" | "STAFF_WAREHOUSE" | "ADMIN" | "SUPER_ADMIN";
   createdAt: string;
   updatedAt: string;
 }

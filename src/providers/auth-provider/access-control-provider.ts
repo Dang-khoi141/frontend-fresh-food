@@ -38,7 +38,7 @@ export const createAccessControlProvider = (): AccessControlProvider => {
             "settings:*",
           ],
 
-          [UserRole.AGENT]: [
+          [UserRole.STAFF_WAREHOUSE]: [
             "customers:list",
             "customers:show",
             "customers:edit",

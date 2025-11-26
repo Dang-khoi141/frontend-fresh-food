@@ -127,7 +127,7 @@ export const createAuthProvider = (): AuthProvider => {
           const validRoles = [
             UserRole.SUPERADMIN,
             UserRole.ADMIN,
-            UserRole.AGENT,
+            UserRole.STAFF_WAREHOUSE,
             UserRole.CUSTOMER,
           ];
 

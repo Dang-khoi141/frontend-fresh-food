@@ -30,6 +30,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  if (userRole === UserRole.STAFF_WAREHOUSE) {
+    if (!pathname.startsWith("/inventories")) {
+      return NextResponse.redirect(new URL("/inventories", request.url));
+    }
+  }
+
   if (pathname.startsWith("/admin")) {
     if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
       return NextResponse.redirect(new URL("/", request.url));
@@ -126,7 +132,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/inventories")) {
-    if (![UserRole.SUPERADMIN, UserRole.ADMIN].includes(userRole)) {
+    if (
+      ![UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.STAFF_WAREHOUSE].includes(
+        userRole
+      )
+    ) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

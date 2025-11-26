@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       )}&limit=5&countrycodes=vn`,
       {
         headers: {
-          "User-Agent": "FreshFoodApp/1.0 (contact@yourapp.com)",
+          "User-STAFF_WAREHOUSE": "FreshFoodApp/1.0 (contact@yourapp.com)",
           "Accept-Language": "vi",
         },
       }

@@ -121,11 +121,12 @@ class OrderService extends BaseApiService {
   }
 
   async getStatistics(
-    period: "day" | "week" | "month" = "week"
+    period: "day" | "week" | "month" = "week",
+    offset: number = 0
   ): Promise<OrderStatistics> {
     try {
       const res = await this.axiosInstance.get("/orders/statistics", {
-        params: { period },
+        params: { period, offset },
       });
       return res.data?.data ?? res.data;
     } catch (error: any) {

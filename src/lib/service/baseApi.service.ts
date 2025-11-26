@@ -103,7 +103,7 @@ export abstract class BaseApiService {
         const originalRequest = error.config as any;
 
         if (error.response?.status === 403) {
-          throw new SilentError(error, "Forbidden (403)");
+          throw new SilentError(error, "Không có quyền truy cập");
         }
 
         if (!originalRequest || error.response?.status !== 401) {
