@@ -19,6 +19,23 @@ export default function InventoryCheckPage() {
     const [searchText, setSearchText] = useState("");
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
+    const [isPortrait, setIsPortrait] = useState(false);
+
+    useEffect(() => {
+        const checkOrientation = () => {
+            const portrait = window.innerHeight > window.innerWidth && window.innerWidth < 768;
+            setIsPortrait(portrait);
+        };
+
+        checkOrientation();
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+
+        return () => {
+            window.removeEventListener('resize', checkOrientation);
+            window.removeEventListener('orientationchange', checkOrientation);
+        };
+    }, []);
 
     useEffect(() => {
         loadChecks();
@@ -33,43 +50,34 @@ export default function InventoryCheckPage() {
         }
     };
 
+    const sortChecks = (data: any[]) => {
+        return [...data].sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.checkDate || a.updatedAt || 0).getTime();
+            const dateB = new Date(b.createdAt || b.checkDate || b.updatedAt || 0).getTime();
+            return dateB - dateA;
+        });
+    };
+
     useEffect(() => {
         const mappedChecks = checks.map(check => ({
             ...check,
             warehouseName: (check as any).warehouse?.name || check.warehouseName || '-'
         }));
 
-        const sortedChecks = [...mappedChecks].sort((a, b) => {
-            const dateA = new Date((a as any).updatedAt || a.checkDate || 0).getTime();
-            const dateB = new Date((b as any).updatedAt || b.checkDate || 0).getTime();
-            return dateB - dateA;
-        });
-
-        setFilteredData(sortedChecks);
+        setFilteredData(sortChecks(mappedChecks));
     }, [checks]);
 
     const handleSearch = (value: string) => {
         setSearchText(value);
-        if (!value.trim()) {
-            const mappedChecks = checks.map(check => ({
-                ...check,
-                warehouseName: (check as any).warehouse?.name || check.warehouseName || '-'
-            }));
-
-            const sortedChecks = [...mappedChecks].sort((a, b) => {
-                const dateA = new Date((a as any).updatedAt || a.checkDate || 0).getTime();
-                const dateB = new Date((b as any).updatedAt || b.checkDate || 0).getTime();
-                return dateB - dateA;
-            });
-
-            setFilteredData(sortedChecks);
-            return;
-        }
-
         const mappedChecks = checks.map(check => ({
             ...check,
             warehouseName: (check as any).warehouse?.name || check.warehouseName || '-'
         }));
+
+        if (!value.trim()) {
+            setFilteredData(sortChecks(mappedChecks));
+            return;
+        }
 
         const filtered = mappedChecks.filter((c) => {
             const searchLower = value.toLowerCase();
@@ -80,13 +88,7 @@ export default function InventoryCheckPage() {
             );
         });
 
-        const sortedFiltered = [...filtered].sort((a, b) => {
-            const dateA = new Date((a as any).updatedAt || a.checkDate || 0).getTime();
-            const dateB = new Date((b as any).updatedAt || b.checkDate || 0).getTime();
-            return dateB - dateA;
-        });
-
-        setFilteredData(sortedFiltered);
+        setFilteredData(sortChecks(filtered));
     };
 
     const handleExport = () => {
@@ -141,36 +143,24 @@ export default function InventoryCheckPage() {
 
     const expandedRowRender = (record: InventoryCheck) => {
         return (
-            <div style={{ padding: '16px 24px', background: '#f8fafc', borderRadius: '8px' }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '24px',
-                    marginBottom: '24px'
-                }}>
-                    <div>
-                        <div style={{
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            color: '#1e293b',
-                            marginBottom: '12px',
-                            paddingBottom: '8px',
-                            borderBottom: '2px solid #e2e8f0'
-                        }}>
+            <div className="rounded-lg bg-slate-50 p-3 sm:p-4 md:p-6">
+                <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6 xl:grid-cols-3">
+                    <div className="rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0">
+                        <div className="mb-2 border-b border-slate-100 pb-2 text-[13px] font-semibold text-slate-800 sm:border-slate-200">
                             Thông tin tạo phiếu
                         </div>
-                        <Descriptions column={1} size="small">
+                        <Descriptions column={1} size="small" className="[&_.ant-descriptions-item-label]:text-xs [&_.ant-descriptions-item-content]:text-[13px]">
                             <Descriptions.Item
-                                label={<span style={{ color: '#64748b', fontSize: '13px' }}>Nhân viên tạo:</span>}
+                                label={<span className="text-slate-500">Nhân viên tạo</span>}
                             >
-                                <span style={{ color: '#0ea5e9', fontWeight: 500 }}>
+                                <span className="font-medium text-sky-600">
                                     {record.checkedBy || '-'}
                                 </span>
                             </Descriptions.Item>
                             <Descriptions.Item
-                                label={<span style={{ color: '#64748b', fontSize: '13px' }}>Ngày tạo:</span>}
+                                label={<span className="text-slate-500">Ngày tạo</span>}
                             >
-                                <span style={{ fontWeight: 500 }}>
+                                <span className="font-medium text-slate-700">
                                     {record.checkDate
                                         ? new Date(record.checkDate).toLocaleString("vi-VN", {
                                             year: 'numeric',
@@ -186,29 +176,22 @@ export default function InventoryCheckPage() {
                         </Descriptions>
                     </div>
 
-                    <div>
-                        <div style={{
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            color: '#1e293b',
-                            marginBottom: '12px',
-                            paddingBottom: '8px',
-                            borderBottom: '2px solid #e2e8f0'
-                        }}>
+                    <div className="rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0">
+                        <div className="mb-2 border-b border-slate-100 pb-2 text-[13px] font-semibold text-slate-800 sm:border-slate-200">
                             Thông tin cập nhật
                         </div>
-                        <Descriptions column={1} size="small">
+                        <Descriptions column={1} size="small" className="[&_.ant-descriptions-item-label]:text-xs [&_.ant-descriptions-item-content]:text-[13px]">
                             <Descriptions.Item
-                                label={<span style={{ color: '#64748b', fontSize: '13px' }}>Nhân viên cập nhật:</span>}
+                                label={<span className="text-slate-500">Người cập nhật</span>}
                             >
-                                <span style={{ color: '#0ea5e9', fontWeight: 500 }}>
+                                <span className="font-medium text-sky-600">
                                     {(record as any).updatedBy || record.checkedBy || '-'}
                                 </span>
                             </Descriptions.Item>
                             <Descriptions.Item
-                                label={<span style={{ color: '#64748b', fontSize: '13px' }}>Ngày cập nhật:</span>}
+                                label={<span className="text-slate-500">Thời gian</span>}
                             >
-                                <span style={{ fontWeight: 500 }}>
+                                <span className="font-medium text-slate-700">
                                     {(record as any).updatedAt
                                         ? new Date((record as any).updatedAt).toLocaleString("vi-VN", {
                                             year: 'numeric',
@@ -232,29 +215,22 @@ export default function InventoryCheckPage() {
                         </Descriptions>
                     </div>
 
-                    <div>
-                        <div style={{
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            color: '#1e293b',
-                            marginBottom: '12px',
-                            paddingBottom: '8px',
-                            borderBottom: '2px solid #e2e8f0'
-                        }}>
-                            Thông tin cân bằng kho
+                    <div className="rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0">
+                        <div className="mb-2 border-b border-slate-100 pb-2 text-[13px] font-semibold text-slate-800 sm:border-slate-200">
+                            Thông tin cân bằng
                         </div>
-                        <Descriptions column={1} size="small">
+                        <Descriptions column={1} size="small" className="[&_.ant-descriptions-item-label]:text-xs [&_.ant-descriptions-item-content]:text-[13px]">
                             <Descriptions.Item
-                                label={<span style={{ color: '#64748b', fontSize: '13px' }}>Nhân viên cân bằng kho:</span>}
+                                label={<span className="text-slate-500">Người cân bằng</span>}
                             >
-                                <span style={{ color: '#0ea5e9', fontWeight: 500 }}>
+                                <span className="font-medium text-sky-600">
                                     {record.checkedBy || '-'}
                                 </span>
                             </Descriptions.Item>
                             <Descriptions.Item
-                                label={<span style={{ color: '#64748b', fontSize: '13px' }}>Ngày cân bằng kho:</span>}
+                                label={<span className="text-slate-500">Ngày cân bằng</span>}
                             >
-                                <span style={{ fontWeight: 500 }}>
+                                <span className="font-medium text-slate-700">
                                     {record.checkDate
                                         ? new Date(record.checkDate).toLocaleString("vi-VN", {
                                             year: 'numeric',
@@ -272,36 +248,15 @@ export default function InventoryCheckPage() {
                 </div>
 
                 <div>
-                    <div style={{
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: '#1e293b',
-                        marginBottom: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                    }}>
-                        <span>Thông tin sản phẩm</span>
-                        <span style={{ color: '#64748b', fontWeight: 400 }}>
-                            (SL sản phẩm kiểm: {record.details?.length ?? 0})
+                    <div className="mb-3 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-slate-800">
+                        <span>Chi tiết sản phẩm</span>
+                        <span className="font-normal text-slate-500">
+                            ({record.details?.length ?? 0} SP)
                         </span>
-                        <span style={{ margin: '0 4px', color: '#cbd5e1' }}>|</span>
-                        <span style={{ color: '#64748b', fontWeight: 400 }}>
-                            Kho kiểm hàng: {record.warehouseName || 'Kho mặc định'}
+                        <span className="mx-1 hidden text-slate-300 sm:inline">|</span>
+                        <span className="hidden font-normal text-slate-500 sm:inline">
+                            Kho: {record.warehouseName || 'Kho mặc định'}
                         </span>
-                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <label style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                fontSize: '13px',
-                                color: '#64748b',
-                                cursor: 'pointer'
-                            }}>
-                                <input type="checkbox" style={{ cursor: 'pointer' }} />
-                                Chỉ xem những sản phẩm có chênh lệch
-                            </label>
-                        </div>
                     </div>
 
                     <Table
@@ -309,35 +264,26 @@ export default function InventoryCheckPage() {
                         pagination={false}
                         dataSource={record.details}
                         rowKey={(item) => (item as any).id || (item as any).productId || Math.random()}
-                        style={{
-                            background: 'white',
-                            borderRadius: '8px',
-                            overflow: 'hidden'
-                        }}
+                        className="overflow-hidden rounded-lg border border-slate-200 bg-white"
+                        scroll={{ x: 600 }}
                         columns={[
                             {
-                                title: 'Tên sản phẩm',
+                                title: 'Sản phẩm',
                                 key: 'product',
-                                width: '30%',
+                                width: 250,
                                 render: (_, item: any) => {
                                     const product = item.product;
                                     return (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div className="flex items-center gap-3">
                                             {product?.image && (
                                                 <img
                                                     src={product.image}
                                                     alt={product.name}
-                                                    style={{
-                                                        width: '48px',
-                                                        height: '48px',
-                                                        objectFit: 'cover',
-                                                        borderRadius: '8px',
-                                                        border: '1px solid #e2e8f0',
-                                                    }}
+                                                    className="h-10 w-10 flex-shrink-0 rounded-lg border border-slate-200 object-cover"
                                                 />
                                             )}
-                                            <div>
-                                                <div style={{ fontWeight: 500, color: '#1e293b' }}>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="truncate text-sm font-medium text-slate-800">
                                                     {product?.name || item.productName || 'Sản phẩm'}
                                                 </div>
                                             </div>
@@ -346,42 +292,39 @@ export default function InventoryCheckPage() {
                                 }
                             },
                             {
-                                title: 'Tồn trước kiểm',
+                                title: 'Tồn kho',
                                 dataIndex: 'expectedQuantity',
                                 key: 'expectedQuantity',
-                                width: 120,
+                                width: 90,
                                 align: 'center' as const,
                                 render: (val, item: any) => (
-                                    <span style={{ fontWeight: 500 }}>{val ?? item.systemQuantity ?? 0}</span>
+                                    <span className="text-xs font-medium text-slate-600">{val ?? item.systemQuantity ?? 0}</span>
                                 )
                             },
                             {
-                                title: 'SL thực tế',
+                                title: 'Thực tế',
                                 dataIndex: 'actualQuantity',
                                 key: 'actualQuantity',
-                                width: 100,
+                                width: 90,
                                 align: 'center' as const,
                                 render: (val) => (
-                                    <span style={{ fontWeight: 600, color: '#0284c7' }}>{val ?? 0}</span>
+                                    <span className="text-sm font-semibold text-sky-600">{val ?? 0}</span>
                                 )
                             },
                             {
-                                title: 'Chênh lệch',
+                                title: 'Lệch',
                                 dataIndex: 'variance',
                                 key: 'variance',
-                                width: 100,
+                                width: 80,
                                 align: 'center' as const,
                                 render: (val) => {
                                     const variance = val ?? 0;
+                                    let colorClass = "text-slate-400";
+                                    if (variance > 0) colorClass = "text-emerald-600";
+                                    if (variance < 0) colorClass = "text-red-500";
+
                                     return (
-                                        <span style={{
-                                            fontWeight: 600,
-                                            color: variance === 0
-                                                ? "#64748b"
-                                                : variance > 0
-                                                    ? "#059669"
-                                                    : "#ef4444"
-                                        }}>
+                                        <span className={`text-sm font-bold ${colorClass}`}>
                                             {variance > 0 ? `+${variance}` : variance}
                                         </span>
                                     );
@@ -393,7 +336,7 @@ export default function InventoryCheckPage() {
                                 key: 'reason',
                                 width: 120,
                                 render: (text) => (
-                                    <span style={{ color: '#64748b' }}>{text || '---'}</span>
+                                    <span className="truncate text-xs text-slate-500">{text || '-'}</span>
                                 )
                             }
                         ]}
@@ -405,79 +348,65 @@ export default function InventoryCheckPage() {
 
     const columns = [
         {
-            title: "Mã phiếu kiểm kho",
+            title: "Mã phiếu",
             dataIndex: "id",
             key: "id",
-            width: 200,
+            width: 160,
+            fixed: 'left' as const,
             render: (text: string) => (
-                <span style={{ fontWeight: 600, color: '#059669' }}>{text}</span>
+                <span className="font-semibold text-emerald-600">{text}</span>
             ),
         },
         {
-            title: "Kho kiểm hàng",
+            title: "Kho",
             dataIndex: "warehouseName",
             key: "warehouseName",
-            width: 200,
+            width: 180,
             render: (text: string) => (
-                <span style={{ fontWeight: 500 }}>{text || "-"}</span>
+                <span className="font-medium text-slate-700">{text || "-"}</span>
             ),
         },
         {
-            title: "Số lượng sản phẩm",
+            title: "Số lượng",
             key: "productCount",
             align: "center" as const,
-            width: 150,
+            width: 110,
             render: (_: any, record: InventoryCheck) => (
-                <Tag
-                    style={{
-                        background: '#f0f9ff',
-                        color: '#0284c7',
-                        border: 'none',
-                        borderRadius: '6px',
-                        padding: '4px 12px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                    }}
-                >
-                    {record.details?.length ?? 0} sản phẩm
+                <Tag className="m-0 rounded border-none bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-600">
+                    {record.details?.length ?? 0} SP
                 </Tag>
             ),
         },
         {
-            title: "SL thực tế",
+            title: "Thực tế",
             key: "actualQuantity",
             align: "center" as const,
-            width: 120,
+            width: 100,
             render: (_: any, record: InventoryCheck) => {
                 const total = record.details?.reduce(
                     (sum, item) => sum + (item.actualQuantity || 0),
                     0
                 ) ?? 0;
-                return <span style={{ fontWeight: 600 }}>{total}</span>;
+                return <span className="font-semibold text-slate-700">{total}</span>;
             },
         },
         {
-            title: "Chênh lệch",
+            title: "Lệch",
             key: "variance",
             align: "center" as const,
-            width: 120,
+            width: 90,
             render: (_: any, record: InventoryCheck) => {
                 const variance = record.details?.reduce(
                     (sum, item) => sum + (item.variance || 0),
                     0
                 ) ?? 0;
 
+                let colorClass = "text-slate-400";
+                if (variance > 0) colorClass = "text-emerald-600";
+                if (variance < 0) colorClass = "text-red-500";
+
                 return (
-                    <span
-                        style={{
-                            fontWeight: 600,
-                            color: variance === 0
-                                ? "#64748b"
-                                : variance > 0
-                                    ? "#059669"
-                                    : "#ef4444"
-                        }}
-                    >
+                    <span className={`font-bold ${colorClass}`}>
                         {variance > 0 ? `+${variance}` : variance}
                     </span>
                 );
@@ -487,94 +416,106 @@ export default function InventoryCheckPage() {
             title: "Ngày kiểm",
             dataIndex: "checkDate",
             key: "checkDate",
-            width: 150,
+            width: 140,
             render: (d: string) => (
-                <span style={{ color: '#64748b' }}>
+                <span className="text-sm text-slate-500">
                     {d ? new Date(d).toLocaleDateString("vi-VN") : "-"}
                 </span>
             ),
         },
         {
-            title: "Nhân viên kiểm",
+            title: "Người kiểm",
             dataIndex: "checkedBy",
             key: "checkedBy",
-            width: 150,
+            width: 140,
             render: (t: string) => (
-                <span style={{ color: '#64748b' }}>{t || "-"}</span>
+                <span className="text-sm text-slate-500">{t || "-"}</span>
             ),
         },
         {
-            title: "Trạng thái kho",
+            title: "Trạng thái",
             key: "status",
-            width: 150,
+            width: 140,
             align: "center" as const,
             render: () => (
                 <Tag
                     icon={
-                        <div
-                            style={{
-                                width: '6px',
-                                height: '6px',
-                                borderRadius: '50%',
-                                background: '#059669',
-                                display: 'inline-block',
-                                marginRight: '6px',
-                            }}
-                        />
+                        <div className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-600" />
                     }
-                    style={{
-                        background: '#f0fdf4',
-                        color: '#059669',
-                        border: 'none',
-                        borderRadius: '6px',
-                        padding: '4px 12px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                    }}
+                    className="m-0 rounded border-none bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600"
                 >
-                    Đã kiểm kho
+                    Hoàn thành
                 </Tag>
             ),
         },
     ];
 
+    if (isPortrait) {
+        return (
+            <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-900 p-5 text-white">
+                <style>
+                    {`
+                        @keyframes rotatePhone {
+                            0%, 10% { transform: rotate(0deg); }
+                            40%, 60% { transform: rotate(-90deg); }
+                            90%, 100% { transform: rotate(0deg); }
+                        }
+                    `}
+                </style>
+
+                <div
+                    className="relative mb-8 h-[110px] w-[64px] rounded-xl border-[3px] border-amber-500"
+                    style={{ animation: 'rotatePhone 2.5s infinite ease-in-out' }}
+                >
+                    <div className="absolute left-1/2 top-2.5 h-0.5 w-5 -translate-x-1/2 rounded-sm bg-amber-500" />
+
+                    <div className="absolute bottom-2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full border border-amber-500" />
+                </div>
+
+                <h3 className="mb-3 text-center text-lg font-semibold text-slate-50">
+                    Vui lòng xoay ngang thiết bị
+                </h3>
+
+                <p className="max-w-[300px] text-center text-sm leading-relaxed text-slate-400">
+                    Để có trải nghiệm tốt nhất và xem đầy đủ thông tin bảng biểu, vui lòng xoay ngang điện thoại của bạn.
+                </p>
+            </div>
+        );
+    }
+
     return (
-        <div style={{ padding: "24px", background: "#f8fafc", minHeight: "100vh" }}>
-            <div style={{ marginBottom: "20px" }}>
-                <span style={{ color: "#94a3b8", fontSize: "14px" }}>Kho</span>
-                <span style={{ color: "#94a3b8", margin: "0 8px" }}>›</span>
-                <span style={{ color: "#1e293b", fontSize: "14px", fontWeight: 500 }}>
+        <div className="min-h-screen bg-slate-50 p-3 sm:p-4 md:p-6">
+            <div className="mb-4 flex items-center gap-2 sm:mb-5">
+                <span className="text-xs text-slate-400 sm:text-sm">Kho</span>
+                <span className="text-xs text-slate-400 sm:text-sm">›</span>
+                <span className="text-xs font-medium text-slate-800 sm:text-sm">
                     Kiểm kho
                 </span>
             </div>
 
-            <PageHeader
-                title="Quản lý thông tin kiểm kho"
-                onRefresh={loadChecks}
-                onExport={handleExport}
-                onCreateNew={() => router.push("/inventories/warehouse/inventory-check/create")}
-                showExportExcel={false}
-            />
+            <div className="space-y-3 sm:space-y-4">
+                <PageHeader
+                    title="Quản lý kiểm kho"
+                    onRefresh={loadChecks}
+                    onExport={handleExport}
+                    onCreateNew={() => router.push("/inventories/warehouse/inventory-check/create")}
+                    showExportExcel={false}
+                />
 
-            <SearchBar
-                searchText={searchText}
-                onSearchChange={handleSearch}
-                onFilterClick={() => setFilterModalOpen(true)}
-            />
+                <SearchBar
+                    searchText={searchText}
+                    onSearchChange={handleSearch}
+                    onFilterClick={() => setFilterModalOpen(true)}
+                />
+            </div>
 
-            <div
-                style={{
-                    background: "white",
-                    borderRadius: "12px",
-                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.06)",
-                    overflow: "hidden",
-                }}
-            >
+            <div className="mt-3 overflow-hidden rounded-lg bg-white shadow-sm sm:mt-5 sm:rounded-xl">
                 <Spin spinning={loading || loadingProducts}>
                     <Table
                         rowKey="id"
                         columns={columns}
                         dataSource={filteredData}
+                        size="small"
                         expandable={{
                             expandedRowRender,
                             expandedRowKeys,
@@ -589,62 +530,40 @@ export default function InventoryCheckPage() {
                             showSizeChanger: true,
                             pageSizeOptions: ["10", "20", "50", "100"],
                             showTotal: (total, range) =>
-                                `${range[0]}-${range[1]} trong số ${total} dòng`,
-                            style: { marginBottom: "16px" },
+                                <span className="text-xs sm:text-sm">{`${range[0]}-${range[1]} / ${total}`}</span>,
+                            className: "pb-4 !mb-0 px-4",
                         }}
-                        scroll={{ x: 1200 }}
+                        scroll={{ x: 1000 }}
                         locale={{
                             emptyText: (
-                                <div style={{ padding: "60px 0", textAlign: "center" }}>
-                                    <div
-                                        style={{
-                                            display: "inline-flex",
-                                            padding: "20px",
-                                            background: "#f0fdf4",
-                                            borderRadius: "50%",
-                                            marginBottom: "16px",
-                                        }}
-                                    >
+                                <div className="py-10 text-center sm:py-14">
+                                    <div className="mb-3 inline-flex rounded-full bg-emerald-50 p-4 sm:mb-4 sm:p-5">
                                         <svg
-                                            width="48"
-                                            height="48"
+                                            width="40"
+                                            height="40"
                                             viewBox="0 0 24 24"
                                             fill="none"
-                                            stroke="#059669"
+                                            stroke="currentColor"
                                             strokeWidth="2"
+                                            className="text-emerald-600"
                                         >
                                             <path d="M9 11l3 3L22 4" />
                                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                                         </svg>
                                     </div>
-                                    <div
-                                        style={{
-                                            fontSize: "16px",
-                                            fontWeight: 500,
-                                            color: "#1e293b",
-                                            marginBottom: "8px",
-                                        }}
-                                    >
-                                        Bạn chưa có phiếu kiểm kho nào
+                                    <div className="mb-1 text-sm font-medium text-slate-800 sm:mb-2 sm:text-base">
+                                        Chưa có phiếu kiểm kho
                                     </div>
-                                    <div style={{ color: "#64748b", fontSize: "14px", marginBottom: "20px" }}>
+                                    <div className="mb-4 text-xs text-slate-500 sm:mb-5 sm:text-sm">
                                         Hãy tạo phiếu kiểm kho đầu tiên của bạn
                                     </div>
                                     <Button
                                         type="primary"
                                         icon={<Plus size={16} />}
                                         onClick={() => router.push("/inventories/warehouse/inventory-check/create")}
-                                        style={{
-                                            borderRadius: "8px",
-                                            display: "inline-flex",
-                                            alignItems: "center",
-                                            gap: "8px",
-                                            height: "40px",
-                                            background: "#059669",
-                                            border: "none",
-                                        }}
+                                        className="flex h-9 items-center gap-2 rounded-lg bg-emerald-600 text-sm hover:!bg-emerald-700 sm:h-10"
                                     >
-                                        Tạo mới phiếu kiểm kho
+                                        Tạo mới phiếu
                                     </Button>
                                 </div>
                             ),
@@ -664,14 +583,14 @@ export default function InventoryCheckPage() {
                     <Button
                         key="apply"
                         type="primary"
-                        style={{ background: "#059669" }}
+                        className="bg-emerald-600 hover:!bg-emerald-700"
                         onClick={() => setFilterModalOpen(false)}
                     >
                         Áp dụng
                     </Button>,
                 ]}
             >
-                <p style={{ color: "#64748b" }}>
+                <p className="text-slate-500">
                     Chức năng bộ lọc nâng cao đang được phát triển
                 </p>
             </Modal>

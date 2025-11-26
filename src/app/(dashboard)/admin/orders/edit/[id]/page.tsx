@@ -17,7 +17,8 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { useFetchOrder } from "../../../../../../lib/hooks/useFetchOrder";
+import { Order } from "../../../../../../lib/interface/order";
+import { orderService } from "../../../../../../lib/service/order.service";
 
 const ORDER_STATUS_COLORS: Record<string, string> = {
     PENDING: "orange",
@@ -31,15 +32,14 @@ const ORDER_STATUS_COLORS: Record<string, string> = {
 const STATUS_TRANSITIONS_COD: Record<string, string[]> = {
     PENDING: ["CONFIRMED", "CANCELED"],
     CONFIRMED: ["SHIPPED"],
-    SHIPPED: ["PAID"],
-    PAID: ["DELIVERED"],
+    SHIPPED: ["DELIVERED"],
     DELIVERED: [],
     CANCELED: [],
 };
 
 const STATUS_TRANSITIONS_ONLINE: Record<string, string[]> = {
-    PAID: ["SHIPPED", "CANCELED"],
-    SHIPPED: ["DELIVERED"],
+    PENDING: ["PAID", "CANCELED"],
+    PAID: [],
     DELIVERED: [],
     CANCELED: [],
 };
@@ -50,21 +50,59 @@ export default function OrderEdit() {
     const params = useParams();
     const orderId = params?.id as string;
 
-    const { formProps } = useForm({ resource: "orders" });
+    const { formProps } = useForm({
+        resource: "orders",
+        queryOptions: {
+            enabled: false,
+        }
+    });
+
     const [isUpdating, setIsUpdating] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<string>("");
 
-    const { order, loading, error, updateStatus } = useFetchOrder({
-        orderId,
-        autoFetch: true,
-        isAdmin: true,
-    });
+    const [order, setOrder] = useState<Order | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
+    const [isPortrait, setIsPortrait] = useState(false);
 
     useEffect(() => {
-        if (error) {
-            toast.error(error.message || "Error loading order");
-        }
-    }, [error]);
+        const checkOrientation = () => {
+            const portrait = window.innerHeight > window.innerWidth && window.innerWidth < 768;
+            setIsPortrait(portrait);
+        };
+
+        checkOrientation();
+
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+
+        return () => {
+            window.removeEventListener('resize', checkOrientation);
+            window.removeEventListener('orientationchange', checkOrientation);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!orderId) return;
+
+        const fetchOrder = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await orderService.getOrderDetailAdmin(orderId);
+                setOrder(data);
+            } catch (err: any) {
+                console.error("Error loading order:", err);
+                const errorObj = err instanceof Error ? err : new Error(String(err));
+                setError(errorObj);
+                toast.error(err.response?.data?.message || err.message || "Error loading order");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrder();
+    }, [orderId]);
 
     const currentStatus = order?.status || "";
     const paymentMethod = order?.paymentMethod || "";
@@ -80,7 +118,7 @@ export default function OrderEdit() {
     const availableTransitions = useMemo(() => {
         return nextStatuses.map((status) => ({
             label: (
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <div className="flex items-center gap-2">
                     <Tag color={ORDER_STATUS_COLORS[status]}>
                         {status}
                     </Tag>
@@ -103,7 +141,12 @@ export default function OrderEdit() {
             }
 
             setIsUpdating(true);
-            await updateStatus(values.status);
+
+            await orderService.updateOrderStatus(orderId, values.status);
+
+            const updatedOrder = await orderService.getOrderDetailAdmin(orderId);
+            setOrder(updatedOrder);
+
             message.success("Order status updated successfully!");
             setTimeout(() => {
                 router.back();
@@ -118,14 +161,45 @@ export default function OrderEdit() {
         }
     };
 
+    if (isPortrait) {
+        return (
+            <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-900 p-5 text-white">
+                <style>
+                    {`
+                        @keyframes rotatePhone {
+                            0%, 10% { transform: rotate(0deg); }
+                            40%, 60% { transform: rotate(-90deg); }
+                            90%, 100% { transform: rotate(0deg); }
+                        }
+                    `}
+                </style>
+
+                <div
+                    className="relative mb-8 h-[110px] w-[64px] rounded-xl border-[3px] border-amber-500"
+                    style={{ animation: 'rotatePhone 2.5s infinite ease-in-out' }}
+                >
+                    <div className="absolute left-1/2 top-2.5 h-0.5 w-5 -translate-x-1/2 rounded-sm bg-amber-500" />
+                    <div className="absolute bottom-2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full border border-amber-500" />
+                </div>
+
+                <h3 className="mb-3 text-center text-lg font-semibold text-slate-50">
+                    Vui lòng xoay ngang thiết bị
+                </h3>
+
+                <p className="max-w-[300px] text-center text-sm leading-relaxed text-slate-400">
+                    Để có trải nghiệm tốt nhất khi quản lý đơn hàng, vui lòng xoay ngang điện thoại của bạn.
+                </p>
+            </div>
+        );
+    }
+
     if (error) {
         return (
-            <div style={{ padding: "20px" }}>
-                <h3>Error loading order</h3>
-                <p>{error.message}</p>
+            <div className="p-5 flex flex-col items-center justify-center h-[50vh]">
+                <h3 className="text-lg font-semibold text-red-600">Error loading order</h3>
+                <p className="text-gray-600 mb-4">{error.message}</p>
                 <Button
                     type="primary"
-                    style={{ marginTop: "20px" }}
                     onClick={() => router.back()}
                 >
                     Go Back
@@ -143,175 +217,171 @@ export default function OrderEdit() {
 
     return (
         <Spin spinning={loading} tip="Loading order...">
-            <div style={{ padding: "20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+            <div className="p-4 md:p-6 max-w-7xl mx-auto pb-20">
+                <div className="flex items-center gap-3 mb-6">
                     <Button
-                        type="text"
+                        type="default"
+                        shape="circle"
                         icon={<ArrowLeftOutlined />}
                         onClick={() => router.back()}
                     />
-                    <h2 style={{ margin: 0 }}>Update Order Status</h2>
+                    <h2 className="text-xl md:text-2xl font-bold m-0 text-gray-800">Update Order Status</h2>
                 </div>
 
-                <Card title="Current Order Information" style={{ marginBottom: "20px" }}>
-                    <Descriptions column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }} size="small">
-                        <Descriptions.Item label="Order Number">
-                            <Tag color="blue" style={{ fontWeight: "bold" }}>
-                                {order?.orderNumber ?? "-"}
-                            </Tag>
-                        </Descriptions.Item>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 space-y-6">
+                         <Card title="Current Order Information" className="shadow-sm rounded-lg" bordered={false}>
+                            <Descriptions
+                                column={{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }}
+                                size="middle"
+                                layout="vertical"
+                                labelStyle={{ fontWeight: 500, color: '#6b7280' }}
+                                contentStyle={{ fontWeight: 600 }}
+                            >
+                                <Descriptions.Item label="Order Number">
+                                    <Tag color="blue" className="text-base px-2 py-0.5">
+                                        {order?.orderNumber ?? "-"}
+                                    </Tag>
+                                </Descriptions.Item>
 
-                        <Descriptions.Item label="Current Status">
-                            <Tag color={currentStatusColor} style={{ fontSize: "14px" }}>
-                                {currentStatus || "-"}
-                            </Tag>
-                        </Descriptions.Item>
+                                <Descriptions.Item label="Current Status">
+                                    <Tag color={currentStatusColor} className="text-base px-2 py-0.5 uppercase">
+                                        {currentStatus || "-"}
+                                    </Tag>
+                                </Descriptions.Item>
 
-                        <Descriptions.Item label="Customer">
-                            <span style={{ fontSize: "12px" }}>
-                                {order?.user?.email ?? "-"}
-                            </span>
-                        </Descriptions.Item>
+                                <Descriptions.Item label="Customer">
+                                    <span className="text-gray-800">
+                                        {order?.user?.email ?? "-"}
+                                    </span>
+                                </Descriptions.Item>
 
-                        <Descriptions.Item label="Payment Method">
-                            <Tag color={order?.paymentMethod === "COD" ? "blue" : "green"}>
-                                {paymentMethodText}
-                            </Tag>
-                        </Descriptions.Item>
+                                <Descriptions.Item label="Total Amount">
+                                    <span className="text-lg text-blue-600 font-bold">
+                                        {Number(order?.total ?? 0).toLocaleString()}đ
+                                    </span>
+                                </Descriptions.Item>
 
-                        <Descriptions.Item label="Order Total">
-                            <span style={{ fontWeight: "bold", color: "#1890ff" }}>
-                                {Number(order?.total ?? 0).toLocaleString()}đ
-                            </span>
-                        </Descriptions.Item>
+                                <Descriptions.Item label="Payment Method" span={2}>
+                                    <Tag color={order?.paymentMethod === "COD" ? "blue" : "green"}>
+                                        {paymentMethodText}
+                                    </Tag>
+                                </Descriptions.Item>
+                            </Descriptions>
+                        </Card>
 
-                        <Descriptions.Item label="Items Count">
-                            <Tag>{order?.items?.length ?? 0} items</Tag>
-                        </Descriptions.Item>
-                    </Descriptions>
-                </Card>
-
-                {isLocked && (
-                    <Alert
-                        message="Order Locked"
-                        description={`This order has a final status of "${currentStatus}" and cannot be modified.`}
-                        type="warning"
-                        showIcon
-                        style={{ marginBottom: "20px" }}
-                    />
-                )}
-
-                {paymentMethod === "COD" && currentStatus === "PENDING" && (
-                    <Alert
-                        message="Pending Orders (COD)"
-                        description="Pending orders can be confirmed or canceled. After confirmation, mark as shipped when ready for delivery. After delivery and cash payment received, mark as delivered."
-                        type="info"
-                        showIcon
-                        style={{ marginBottom: "20px" }}
-                    />
-                )}
-
-                {paymentMethod === "COD" && currentStatus === "CONFIRMED" && (
-                    <Alert
-                        message="Confirmed Orders (COD)"
-                        description="Order confirmed. Mark as shipped when sending to customer. Payment will be collected upon delivery."
-                        type="info"
-                        showIcon
-                        style={{ marginBottom: "20px" }}
-                    />
-                )}
-
-                {paymentMethod === "COD" && currentStatus === "SHIPPED" && (
-                    <Alert
-                        message="Shipped Orders (COD)"
-                        description="Order in delivery. Once delivered and customer pays with cash, mark as PAID. Then update to DELIVERED."
-                        type="info"
-                        showIcon
-                        style={{ marginBottom: "20px" }}
-                    />
-                )}
-
-                {paymentMethod === "COD" && currentStatus === "PAID" && (
-                    <Alert
-                        message="Paid Orders (COD)"
-                        description="Payment received from customer. Mark as delivered to complete the order."
-                        type="info"
-                        showIcon
-                        style={{ marginBottom: "20px" }}
-                    />
-                )}
-
-                {paymentMethod !== "COD" && currentStatus === "PAID" && (
-                    <Alert
-                        message="Paid Orders (Online Payment)"
-                        description="Payment already received. Mark as shipped when sending to customer."
-                        type="info"
-                        showIcon
-                        style={{ marginBottom: "20px" }}
-                    />
-                )}
-
-                <Card title="Status Transition" style={{ marginBottom: "20px" }}>
-                    <Form
-                        {...formProps}
-                        layout="vertical"
-                        onFinish={handleFinish}
-                    >
-                        <Form.Item
-                            label="Select New Status"
-                            name="status"
-                            initialValue={currentStatus}
-                            rules={[
-                                { required: true, message: "Please select a new status" },
-                            ]}
-                        >
-                            <Select
-                                placeholder="Select new status"
-                                disabled={isLocked}
-                                onChange={setSelectedStatus}
-                                options={[
-                                    {
-                                        label: "Current Status",
-                                        options: [
-                                            {
-                                                label: (
-                                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                        <span>{currentStatus}</span>
-                                                        <Tag color={currentStatusColor} style={{ marginLeft: "8px" }}>
-                                                            Current
-                                                        </Tag>
-                                                    </div>
-                                                ),
-                                                value: currentStatus,
-                                                disabled: true,
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        label: "Available Transitions",
-                                        options: availableTransitions,
-                                    },
-                                ]}
+                         {paymentMethod === "COD" && currentStatus === "PENDING" && (
+                            <Alert
+                                message="Action Required: Pending COD"
+                                description="Review order details. Confirm to proceed or Cancel if invalid."
+                                type="info"
+                                showIcon
+                                className="rounded-lg border-blue-100 bg-blue-50"
                             />
-                        </Form.Item>
+                        )}
 
-                        <Form.Item>
-                            <Space>
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    disabled={isLocked}
-                                    loading={isUpdating}
+                        {paymentMethod === "COD" && currentStatus === "CONFIRMED" && (
+                            <Alert
+                                message="Action Required: Shipping"
+                                description="Mark as SHIPPED when handing over to the carrier."
+                                type="info"
+                                showIcon
+                                className="rounded-lg border-blue-100 bg-blue-50"
+                            />
+                        )}
+
+                        {paymentMethod === "COD" && currentStatus === "SHIPPED" && (
+                            <Alert
+                                message="Action Required: Delivery"
+                                description="Mark as DELIVERED after successful cash collection."
+                                type="info"
+                                showIcon
+                                className="rounded-lg border-blue-100 bg-blue-50"
+                            />
+                        )}
+
+                        {paymentMethod !== "COD" && currentStatus === "PAID" && (
+                            <Alert
+                                message="Order Paid Online"
+                                description="Payment verified. Process for shipping if applicable."
+                                type="success"
+                                showIcon
+                                className="rounded-lg border-green-100 bg-green-50"
+                            />
+                        )}
+                    </div>
+
+                    <div className="lg:col-span-1">
+                        <Card
+                            title="Update Status"
+                            className="shadow-md border-t-4 border-t-blue-500 rounded-lg sticky top-6"
+                        >
+                            <Form
+                                {...formProps}
+                                layout="vertical"
+                                onFinish={handleFinish}
+                            >
+                                <Form.Item
+                                    label="New Status"
+                                    name="status"
+                                    initialValue={currentStatus}
+                                    rules={[
+                                        { required: true, message: "Please select a new status" },
+                                    ]}
                                 >
-                                    Update Status
-                                </Button>
-                                <Button onClick={() => router.back()}>
-                                    Cancel
-                                </Button>
-                            </Space>
-                        </Form.Item>
-                    </Form>
-                </Card>
+                                    <Select
+                                        className="w-full"
+                                        size="large"
+                                        placeholder="Select new status"
+                                        disabled={isLocked}
+                                        onChange={setSelectedStatus}
+                                        options={[
+                                            {
+                                                label: "Current Status",
+                                                options: [
+                                                    {
+                                                        label: (
+                                                            <div className="flex justify-between items-center">
+                                                                <span>{currentStatus}</span>
+                                                                <Tag color={currentStatusColor}>Current</Tag>
+                                                            </div>
+                                                        ),
+                                                        value: currentStatus,
+                                                        disabled: true,
+                                                    },
+                                                ],
+                                            },
+                                            {
+                                                label: "Available Transitions",
+                                                options: availableTransitions,
+                                            },
+                                        ]}
+                                    />
+                                </Form.Item>
+
+                                <div className="flex flex-col gap-3 mt-6">
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        size="large"
+                                        block
+                                        disabled={isLocked}
+                                        loading={isUpdating}
+                                    >
+                                        Update Status
+                                    </Button>
+                                    <Button
+                                        size="large"
+                                        block
+                                        onClick={() => router.back()}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </Form>
+                        </Card>
+                    </div>
+                </div>
             </div>
         </Spin>
     );

@@ -1,15 +1,14 @@
 'use client';
 
 import type { MenuProps } from 'antd';
-import { Button, Dropdown, Form, Input, Modal, Space, Spin, Table, message } from 'antd';
+import { Button, Dropdown, Form, Input, Modal, Space, Spin, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Edit, MoreVertical, Plus, RotateCw, Trash2, Warehouse } from 'lucide-react';
-import { useState } from 'react';
+import { Edit, MoreVertical, Plus, RotateCw, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { Warehouse as WarehouseType } from '../../../../../lib/interface/warehouse';
 import { CreateWarehouseDto } from '../../../../../lib/interface/warehouse';
 import { useFetchWarehouse } from '../../../../../lib/hooks/useFetchWarehouse';
 import toast from 'react-hot-toast';
-
 
 export default function WarehouseManagementPage() {
     const [form] = Form.useForm<CreateWarehouseDto>();
@@ -18,6 +17,7 @@ export default function WarehouseManagementPage() {
     const [deletingWarehouseId, setDeletingWarehouseId] = useState<string | null>(null);
     const [editingWarehouse, setEditingWarehouse] = useState<WarehouseType | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     const {
         warehouses,
@@ -27,6 +27,16 @@ export default function WarehouseManagementPage() {
         updateWarehouse,
         deleteWarehouse,
     } = useFetchWarehouse();
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const handleOpenModal = (warehouse?: WarehouseType) => {
         if (warehouse) {
@@ -77,12 +87,23 @@ export default function WarehouseManagementPage() {
     };
 
     const handleDelete = (id: string) => {
+        if (warehouses.length <= 1) {
+            toast.error('Không thể xóa kho cuối cùng! Hệ thống cần ít nhất 1 kho.');
+            return;
+        }
+
         setDeletingWarehouseId(id);
         setIsDeleteModalOpen(true);
     };
 
     const confirmDelete = async () => {
         if (!deletingWarehouseId) return;
+
+        if (warehouses.length <= 1) {
+            toast.error('Không thể xóa kho cuối cùng!');
+            setIsDeleteModalOpen(false);
+            return;
+        }
 
         try {
             setIsSubmitting(true);
@@ -124,6 +145,7 @@ export default function WarehouseManagementPage() {
                 </Space>
             ),
             danger: true,
+            disabled: warehouses.length <= 1,
             onClick: () => handleDelete(record.id),
         },
     ];
@@ -134,9 +156,8 @@ export default function WarehouseManagementPage() {
             dataIndex: 'name',
             key: 'name',
             render: (text: string) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Warehouse size={16} style={{ color: '#059669' }} />
-                    <span style={{ fontWeight: 500, color: '#1e293b' }}>{text}</span>
+                <div className="flex items-center gap-2">
+                    <span className="font-medium text-slate-800">{text}</span>
                 </div>
             ),
         },
@@ -145,7 +166,7 @@ export default function WarehouseManagementPage() {
             dataIndex: 'address',
             key: 'address',
             render: (text: string) => (
-                <span style={{ color: '#64748b' }}>{text || '-'}</span>
+                <span className="text-slate-500">{text || '-'}</span>
             ),
         },
         {
@@ -160,60 +181,30 @@ export default function WarehouseManagementPage() {
                 >
                     <Button
                         type="text"
-                        icon={<MoreVertical size={18} style={{ color: '#64748b' }} />}
-                        style={{
-                            border: 'none',
-                            padding: '4px',
-                        }}
+                        icon={<MoreVertical size={18} className="text-slate-500" />}
+                        className="border-none p-1"
                     />
                 </Dropdown>
             ),
         },
     ];
 
-    return (
-        <div>
-            <div
-                style={{
-                    background: 'white',
-                    padding: '20px 24px',
-                    borderRadius: '12px',
-                    marginBottom: '20px',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                }}
-            >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h2
-                            style={{
-                                fontSize: '20px',
-                                fontWeight: 600,
-                                color: '#1e293b',
-                                margin: 0,
-                                marginBottom: '4px',
-                            }}
-                        >
-                            Quản lý danh sách kho
-                        </h2>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                            <span style={{ color: '#059669', fontWeight: 500 }}>Kho</span>
-                            <span style={{ color: '#cbd5e1' }}>›</span>
-                            <span style={{ color: '#94a3b8' }}>Danh sách kho</span>
-                        </div>
+    if (isMobile) {
+        return (
+            <div className="p-4 bg-slate-50 min-h-screen">
+                <div className="bg-white p-4 rounded-xl mb-4 shadow-sm">
+                    <h2 className="text-lg font-semibold text-slate-800 m-0 mb-1">
+                        Quản lý danh sách kho
+                    </h2>
+                    <div className="text-xs text-slate-400 mb-4">
+                        Kho › Danh sách kho
                     </div>
-                    <div style={{ display: 'flex', gap: '12px' }}>
+                    <div className="flex gap-2">
                         <Button
                             icon={<RotateCw size={16} />}
                             onClick={() => refetch()}
                             loading={loading}
-                            style={{
-                                borderRadius: '8px',
-                                height: '40px',
-                                border: '1px solid #e2e8f0',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                            }}
+                            className="flex-1 rounded-lg h-10 border border-slate-200"
                         >
                             Làm mới
                         </Button>
@@ -221,16 +212,126 @@ export default function WarehouseManagementPage() {
                             type="primary"
                             icon={<Plus size={18} />}
                             onClick={() => handleOpenModal()}
-                            style={{
-                                background: '#059669',
-                                borderColor: '#059669',
-                                borderRadius: '8px',
-                                height: '40px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                fontWeight: 500,
-                            }}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 rounded-lg h-10"
+                        >
+                            Thêm mới
+                        </Button>
+                    </div>
+                </div>
+
+                <Spin spinning={loading}>
+                    <div className="flex flex-col gap-3">
+                        {warehouses.map((warehouse) => (
+                            <div
+                                key={warehouse.id}
+                                className="bg-white rounded-xl p-4 shadow-sm"
+                            >
+                                <div className="flex justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold text-[15px] text-slate-800">
+                                            {warehouse.name}
+                                        </span>
+                                    </div>
+                                    <Dropdown
+                                        menu={{ items: getActionMenuItems(warehouse) }}
+                                        trigger={['click']}
+                                        placement="bottomRight"
+                                    >
+                                        <Button
+                                            type="text"
+                                            icon={<MoreVertical size={18} className="text-slate-500" />}
+                                            className="p-1"
+                                        />
+                                    </Dropdown>
+                                </div>
+                                <div className="text-[13px] text-slate-500 leading-relaxed">
+                                    {warehouse.address || '-'}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </Spin>
+
+                <Modal
+                    title={editingWarehouse ? 'Chỉnh sửa kho' : 'Thêm kho mới'}
+                    open={isModalOpen}
+                    onOk={handleSubmit}
+                    onCancel={handleCloseModal}
+                    okText={editingWarehouse ? 'Cập nhật' : 'Tạo mới'}
+                    cancelText="Hủy"
+                    confirmLoading={isSubmitting}
+                    width="100%"
+                    centered
+                    className="max-w-[500px] mx-auto"
+                >
+                    <Form form={form} layout="vertical" className="mt-5">
+                        <Form.Item
+                            name="name"
+                            label="Tên kho"
+                            rules={[{ required: true, message: 'Tên kho không được bỏ trống!' }]}
+                        >
+                            <Input placeholder="Nhập tên kho" size="large" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="address"
+                            label="Địa chỉ"
+                            rules={[{ required: true, message: 'Địa chỉ không được bỏ trống!' }]}
+                        >
+                            <Input.TextArea
+                                placeholder="Nhập địa chỉ"
+                                rows={3}
+                                size="large"
+                            />
+                        </Form.Item>
+                    </Form>
+                </Modal>
+
+                <Modal
+                    title="Xác nhận xóa"
+                    open={isDeleteModalOpen}
+                    onOk={confirmDelete}
+                    onCancel={cancelDelete}
+                    okText="Xóa"
+                    cancelText="Hủy"
+                    okButtonProps={{ danger: true }}
+                    confirmLoading={isSubmitting}
+                    centered
+                >
+                    <p>Bạn có chắc chắn muốn xóa kho này?</p>
+                </Modal>
+            </div>
+        );
+    }
+
+    return (
+        <div className="p-6 bg-slate-50 min-h-screen">
+            <div className="bg-white px-6 py-5 rounded-xl mb-5 shadow-sm">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h2 className="text-xl font-semibold text-slate-800 m-0 mb-1">
+                            Quản lý danh sách kho
+                        </h2>
+                        <div className="flex items-center gap-2 text-[13px]">
+                            <span className="text-emerald-600 font-medium">Kho</span>
+                            <span className="text-slate-300">›</span>
+                            <span className="text-slate-400">Danh sách kho</span>
+                        </div>
+                    </div>
+                    <div className="flex gap-3">
+                        <Button
+                            icon={<RotateCw size={16} />}
+                            onClick={() => refetch()}
+                            loading={loading}
+                            className="rounded-lg h-10 border border-slate-200 flex items-center gap-1.5"
+                        >
+                            Làm mới
+                        </Button>
+                        <Button
+                            type="primary"
+                            icon={<Plus size={18} />}
+                            onClick={() => handleOpenModal()}
+                            className="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 rounded-lg h-10 flex items-center gap-1.5 font-medium"
                         >
                             Thêm mới
                         </Button>
@@ -238,14 +339,7 @@ export default function WarehouseManagementPage() {
                 </div>
             </div>
 
-            <div
-                style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                    overflow: 'hidden',
-                }}
-            >
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                 <Spin spinning={loading}>
                     <Table
                         columns={columns}
@@ -255,11 +349,9 @@ export default function WarehouseManagementPage() {
                             position: ['bottomCenter'],
                             pageSize: 10,
                             showSizeChanger: false,
-                            style: { marginBottom: '16px' },
+                            className: 'mb-4',
                         }}
-                        style={{
-                            borderRadius: '12px',
-                        }}
+                        className="rounded-xl"
                     />
                 </Spin>
             </div>
@@ -274,30 +366,19 @@ export default function WarehouseManagementPage() {
                 confirmLoading={isSubmitting}
                 width={600}
             >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    style={{ marginTop: '20px' }}
-                >
+                <Form form={form} layout="vertical" className="mt-5">
                     <Form.Item
                         name="name"
                         label="Tên kho"
-                        rules={[
-                            { required: true, message: 'Tên kho không được bỏ trống!' },
-                        ]}
+                        rules={[{ required: true, message: 'Tên kho không được bỏ trống!' }]}
                     >
-                        <Input
-                            placeholder="Nhập tên kho"
-                            size="large"
-                        />
+                        <Input placeholder="Nhập tên kho" size="large" />
                     </Form.Item>
 
                     <Form.Item
                         name="address"
                         label="Địa chỉ"
-                        rules={[
-                            { required: true, message: 'Địa chỉ không được bỏ trống!' },
-                        ]}
+                        rules={[{ required: true, message: 'Địa chỉ không được bỏ trống!' }]}
                     >
                         <Input.TextArea
                             placeholder="Nhập số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
@@ -319,6 +400,11 @@ export default function WarehouseManagementPage() {
                 confirmLoading={isSubmitting}
             >
                 <p>Bạn có chắc chắn muốn xóa kho này?</p>
+                {warehouses.length <= 1 && (
+                    <p className="text-red-600 font-medium">
+                        ⚠️ Không thể xóa kho cuối cùng!
+                    </p>
+                )}
             </Modal>
         </div>
     );

@@ -33,10 +33,8 @@ export interface CreateIssueDto {
 export interface IssueFormInfoProps {
   warehouses: Warehouse[];
   selectedWarehouse: string;
-  issueDate: any;
   selectedOrder: any;
   onWarehouseChange: (value: string) => void;
-  onDateChange: (date: any) => void;
   onSelectOrder: () => void;
 }
 
