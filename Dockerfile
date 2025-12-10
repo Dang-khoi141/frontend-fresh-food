@@ -1,34 +1,41 @@
 FROM refinedev/node:18 AS base
 
+
+WORKDIR /app/refine
+
+
+# ================= deps =================
 FROM base AS deps
 
 RUN apk add --no-cache libc6-compat
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
 
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+COPY package.json package-lock.json* .npmrc* ./
 
+RUN npm ci
+
+
+# ================= builder =================
 FROM base AS builder
 
-COPY --from=deps /app/refine/node_modules ./node_modules
+WORKDIR /app/refine
 
+COPY --from=deps /app/refine/node_modules ./node_modules
 COPY . .
 
 RUN npm run build
 
+
+# ================= runner =================
 FROM base AS runner
 
-ENV NODE_ENV production
+WORKDIR /app/refine
+
+ENV NODE_ENV=production
 
 COPY --from=builder /app/refine/public ./public
 
-RUN mkdir .next
-RUN chown refine:nodejs .next
+RUN mkdir .next && chown refine:nodejs .next
 
 COPY --from=builder --chown=refine:nodejs /app/refine/.next/standalone ./
 COPY --from=builder --chown=refine:nodejs /app/refine/.next/static ./.next/static
@@ -36,8 +43,7 @@ COPY --from=builder --chown=refine:nodejs /app/refine/.next/static ./.next/stati
 USER refine
 
 EXPOSE 3000
-
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]

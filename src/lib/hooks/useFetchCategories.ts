@@ -13,7 +13,7 @@ export default function useFetchCategories(autoFetch: boolean = true) {
       try {
         setLoading(true);
         const response = await fetch(
-          `/api/categories?includeChildren=${includeChildren}`
+          `${process.env.NEXT_PUBLIC_API_URL}/categories`
         );
 
         if (!response.ok) throw new Error("Không thể tải danh mục sản phẩm!");

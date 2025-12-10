@@ -55,7 +55,7 @@ export default function MapAddressInput({ onAddressChange, address }: Props) {
 
             try {
                 const res = await fetch(
-                    `/api/geocode?q=${encodeURIComponent(text)}`,
+                    `/${process.env.NEXT_PUBLIC_API_URL}/geocode?q=${encodeURIComponent(text)}`,
                     { signal }
                 );
 
