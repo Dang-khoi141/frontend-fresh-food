@@ -1,49 +1,54 @@
-FROM refinedev/node:18 AS base
+# ============ base ============
+FROM node:20-alpine AS base
+WORKDIR /app
 
-
-WORKDIR /app/refine
-
-
-# ================= deps =================
+# ============ deps ============
 FROM base AS deps
-
-RUN apk add --no-cache libc6-compat
-
-
-COPY package.json package-lock.json* .npmrc* ./
-
+# Nếu dùng npm
+COPY package.json package-lock.json* ./
 RUN npm ci
 
+# Nếu dùng yarn, thay bằng:
+# COPY package.json yarn.lock ./
+# RUN yarn install --frozen-lockfile
 
-# ================= builder =================
+# ============ builder ============
 FROM base AS builder
 
-WORKDIR /app/refine
+# copy node_modules từ stage deps
+COPY --from=deps /app/node_modules ./node_modules
 
-COPY --from=deps /app/refine/node_modules ./node_modules
+# copy toàn bộ source
 COPY . .
 
+# copy file env (nếu bạn muốn tách riêng)
+# Nếu file env đã nằm trong COPY . . rồi thì không cần dòng này
+# COPY .env.production ./.env.production
+
+# build Next.js
 RUN npm run build
 
-
-# ================= runner =================
-FROM base AS runner
-
-WORKDIR /app/refine
+# ============ runner ============
+FROM node:20-alpine AS runner
+WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-COPY --from=builder /app/refine/public ./public
+# tạo user non-root (best practice, không bắt buộc)
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
-RUN mkdir .next && chown refine:nodejs .next
+# copy cần thiết để chạy
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/package.json ./package.json
 
-COPY --from=builder --chown=refine:nodejs /app/refine/.next/standalone ./
-COPY --from=builder --chown=refine:nodejs /app/refine/.next/static ./.next/static
+# cài deps production
+RUN npm ci --omit=dev
 
-USER refine
+USER nextjs
 
 EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
